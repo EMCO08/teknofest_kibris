@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}T3 Personel Ataması Ekle - Yemek Otomasyonu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+    
+    .form-row select, .form-row input {
+        flex: 1;
+    }
+    
+    .form-row .btn-remove {
+        flex: 0 0 40px;
+    }
+    
+    #add-row {
+        margin-right: 10px;
+    }
+    
+    .action-buttons {
+        margin-top: 20px;
+    }
+    
+    .existing-atamalar {
+        margin-top: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>T3 Personel Ataması Ekle</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" id="personel-form">
+                    {% csrf_token %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>T3 personel için koordinatörlük ve birim ataması yapın. Birden fazla atama eklemek için "+" butonunu kullanabilirsiniz.
+                    </div>
+                    
+                    <div id="form-rows">
+                        <div class="form-row">
+                            <select name="kisi" class="form-select" required>
+                                <option value="" selected disabled>Personel Seçin</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                            
+                            <select name="koordinatorluk" class="form-select" required>
+                                <option value="" selected disabled>Koordinatörlük Seçin</option>
+                                <option value="Bilişim Koordinatörlüğü">Bilişim Koordinatörlüğü</option>
+                                <option value="Bursiyer Koordinatörlüğü">Bursiyer Koordinatörlüğü</option>
+                                <option value="Deneyap Koordinatörlüğü">Deneyap Koordinatörlüğü</option>
+                                <option value="Eğitim Ar-Ge">Eğitim Ar-Ge</option>
+                                <option value="Fuar Koordinatörlüğü">Fuar Koordinatörlüğü</option>
+                                <option value="Girişim Koordinatörlüğü">Girişim Koordinatörlüğü</option>
+                                <option value="İdari İşler Koordinatörlüğü">İdari İşler Koordinatörlüğü</option>
+                                <option value="Kurumsal İletişim Koordinatörlüğü">Kurumsal İletişim Koordinatörlüğü</option>
+                                <option value="Kurumsal Yapılanma Koordinatörlüğü">Kurumsal Yapılanma Koordinatörlüğü</option>
+                                <option value="Mimari Tasarım Koordinatörlüğü">Mimari Tasarım Koordinatörlüğü</option>
+                                <option value="Saha Koord.">Saha Koord.</option>
+                                <option value="Satış ve Pazarlama Koordinatörlüğü">Satış ve Pazarlama Koordinatörlüğü</option>
+                                <option value="TEKNOFEST Operasyon Koordinatörlüğü">TEKNOFEST Operasyon Koordinatörlüğü</option>
+                                <option value="Ulaşım Koordinatörlüğü">Ulaşım Koordinatörlüğü</option>
+                                <option value="Yarışmalar Koordinatörlüğü">Yarışmalar Koordinatörlüğü</option>
+                                {% for k in koordinatorlukler %}
+                                    {% if k != "Bilişim Koordinatörlüğü" and k != "Bursiyer Koordinatörlüğü" and k != "Deneyap Koordinatörlüğü" and k != "Eğitim Ar-Ge" and k != "Fuar Koordinatörlüğü" and k != "Girişim Koordinatörlüğü" and k != "İdari İşler Koordinatörlüğü" and k != "Kurumsal İletişim Koordinatörlüğü" and k != "Kurumsal Yapılanma Koordinatörlüğü" and k != "Mimari Tasarım Koordinatörlüğü" and k != "Saha Koord." and k != "Satış ve Pazarlama Koordinatörlüğü" and k != "TEKNOFEST Operasyon Koordinatörlüğü" and k != "Ulaşım Koordinatörlüğü" and k != "Yarışmalar Koordinatörlüğü" %}
+                                        <option value="{{ k }}">{{ k }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            
+                            <input type="text" name="birim" class="form-control" placeholder="Birim" required>
+                            
+                            <button type="button" class="btn btn-danger btn-remove" style="display: none;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button type="button" id="add-row" class="btn btn-secondary">
+                            <i class="fas fa-plus me-1"></i>Yeni Satır Ekle
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Mevcut Atamalar -->
+        <div class="card shadow-lg mt-4 existing-atamalar">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>Mevcut T3 Personel Atamaları</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Personel</th>
+                                <th>Koordinatörlük</th>
+                                <th>Birim</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for atama in atamalar %}
+                            <tr>
+                                <td>{{ atama.kisi.get_full_name }}</td>
+                                <td>{{ atama.koordinatorluk }}</td>
+                                <td>{{ atama.birim }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">Henüz atama bulunmamaktadır.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const formRows = document.getElementById('form-rows');
+        const addRowBtn = document.getElementById('add-row');
+        
+        // Yeni satır ekle
+        addRowBtn.addEventListener('click', function() {
+            const lastRow = formRows.lastElementChild;
+            const newRow = lastRow.cloneNode(true);
+            
+            // Input değerlerini temizle
+            newRow.querySelectorAll('input, select').forEach(input => {
+                input.value = '';
+                if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                }
+            });
+            
+            // Silme butonunu göster
+            const removeBtn = newRow.querySelector('.btn-remove');
+            removeBtn.style.display = 'block';
+            
+            // Silme butonu işlevselliği - Yeni eklenen satır için event listener ekle
+            removeBtn.addEventListener('click', function() {
+                if (formRows.children.length > 1) {
+                    this.closest('.form-row').remove();
+                }
+            });
+            
+            // Kişi seçimi değiştiğinde koordinatörlük bilgisini getir
+            const kisiSelect = newRow.querySelector('select[name="kisi"]');
+            kisiSelect.addEventListener('change', function() {
+                getKoordinatorlukForUser(this);
+            });
+            
+            formRows.appendChild(newRow);
+        });
+        
+        // İlk satırdaki silme butonunu gizle
+        const firstRowRemoveBtn = document.querySelector('.form-row .btn-remove');
+        if (firstRowRemoveBtn) {
+            firstRowRemoveBtn.style.display = 'none';
+        }
+        
+        // Form gönderildiğinde input adlarını düzenle
+        document.getElementById('personel-form').addEventListener('submit', function(e) {
+            const rows = formRows.querySelectorAll('.form-row');
+            
+            rows.forEach((row, index) => {
+                const kisiSelect = row.querySelector('select[name="kisi"]');
+                const koordinatorlukSelect = row.querySelector('select[name="koordinatorluk"]');
+                const birimInput = row.querySelector('input[name="birim"]');
+                
+                kisiSelect.name = `kisi`;
+                koordinatorlukSelect.name = `koordinatorluk`;
+                birimInput.name = `birim`;
+            });
+        });
+        
+        // Kişi seçimi değiştiğinde koordinatörlük bilgisini getir
+        function getKoordinatorlukForUser(selectElement) {
+            const userId = selectElement.value;
+            if (!userId) return;
+            
+            // AJAX isteği gönder
+            fetch(`/dashboard/t3personel/get-koordinatorluk/${userId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.koordinatorluk) {
+                        // Koordinatörlük seçimini güncelle
+                        const row = selectElement.closest('.form-row');
+                        const koordinatorlukSelect = row.querySelector('select[name="koordinatorluk"]');
+                        
+                        // Seçenekler arasında koordinatörlük var mı kontrol et
+                        const options = Array.from(koordinatorlukSelect.options);
+                        const option = options.find(opt => opt.value === data.koordinatorluk);
+                        
+                        if (option) {
+                            option.selected = true;
+                        }
+                    }
+                })
+                .catch(error => console.error('Koordinatörlük bilgisi alınamadı:', error));
+        }
+        
+        // Mevcut kişi seçimlerine event listener ekle
+        document.querySelectorAll('.form-row select[name="kisi"]').forEach(select => {
+            select.addEventListener('change', function() {
+                getKoordinatorlukForUser(this);
+            });
+        });
+    });
+</script>
+{% endblock %} 

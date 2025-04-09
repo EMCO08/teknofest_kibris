@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Giriş Yap - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-lg fade-in login-card">
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Giriş Yap</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" class="slide-in">
+                    {% csrf_token %}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                    
+                    <div class="mb-3">
+                        <label for="tc" class="form-label">TC Kimlik Numarası</label>
+                        <input type="text" class="form-control" id="tc" name="tc" required maxlength="11" pattern="[0-9]{11}" title="TC Kimlik Numarası 11 haneli olmalıdır">
+                        <div class="form-text">TC Kimlik Numaranızı 11 haneli olarak giriniz.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Şifre</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // TC Kimlik Numarası doğrulama
+    document.getElementById('tc').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value.length > 11) {
+            this.value = this.value.slice(0, 11);
+        }
+    });
+</script>
+{% endblock %} 

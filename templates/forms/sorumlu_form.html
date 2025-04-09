@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Sorumlu Formu - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Sorumlu Formu</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <h4>Merhaba, {{ user.get_full_name }}</h4>
+                    <p>Lütfen yemek sipariş bilgilerini girin.</p>
+                </div>
+                
+                <form method="post" class="slide-in">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="gun" class="form-label">Gün</label>
+                        <input type="date" class="form-control" id="gun" name="gun" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="personel_yemek_siparis" class="form-label">Personel Yemek Siparişi</label>
+                            <input type="number" class="form-control" id="personel_yemek_siparis" name="personel_yemek_siparis" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="taseron_yemek_siparis" class="form-label">Taşeron Yemek Siparişi</label>
+                            <input type="number" class="form-control" id="taseron_yemek_siparis" name="taseron_yemek_siparis" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Toplam Sipariş</h5>
+                                <p class="card-text h4" id="toplam_siparis">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Bugünün tarihini varsayılan olarak ayarla
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('gun').value = today;
+    });
+    
+    // Toplam sipariş hesaplama
+    function hesaplaToplam() {
+        const personelSiparis = parseInt(document.getElementById('personel_yemek_siparis').value) || 0;
+        const taseronSiparis = parseInt(document.getElementById('taseron_yemek_siparis').value) || 0;
+        const toplam = personelSiparis + taseronSiparis;
+        
+        document.getElementById('toplam_siparis').textContent = toplam;
+    }
+    
+    document.getElementById('personel_yemek_siparis').addEventListener('input', hesaplaToplam);
+    document.getElementById('taseron_yemek_siparis').addEventListener('input', hesaplaToplam);
+</script>
+{% endblock %} 

@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block title %}Gönüllü Sorun Verileri - Yemek Otomasyonu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .modal-image-container {
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    
+    .photo-loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 10;
+    }
+    
+    .photo-preview {
+        max-width: 100px;
+        max-height: 100px;
+        border-radius: 5px;
+        margin-right: 5px;
+        border: 1px solid #ddd;
+        object-fit: cover;
+    }
+    
+    .modal-photo {
+        max-height: 70vh;
+        max-width: 100%;
+        object-fit: contain;
+    }
+    
+    .modal-content {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .modal-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('/static/img/teknofest.jpg');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.05;
+        z-index: -1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg fade-in mb-4">
+    <div class="card-header bg-warning text-dark">
+        <h3 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Gönüllü Sorun Verileri</h3>
+    </div>
+    <div class="card-body">
+        <form method="get" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="baslangic_tarihi" class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control" id="baslangic_tarihi" name="baslangic_tarihi" value="{{ filtreler.baslangic_tarihi }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="bitis_tarihi" class="form-label">Bitiş Tarihi</label>
+                    <input type="date" class="form-control" id="bitis_tarihi" name="bitis_tarihi" value="{{ filtreler.bitis_tarihi }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="alan" class="form-label">Alan</label>
+                    <select class="form-select" id="alan" name="alan">
+                        <option value="">Tümü</option>
+                        {% for a in alanlar %}
+                            <option value="{{ a }}" {% if filtreler.alan == a %}selected{% endif %}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-filter me-1"></i>Filtrele
+                    </button>
+                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}" class="btn btn-success">
+                        <i class="fas fa-download me-1"></i>CSV İndir
+                    </a>
+                </div>
+            </div>
+        </form>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>İsim</th>
+                        <th>Gün</th>
+                        <th>Saat</th>
+                        <th>Alan</th>
+                        <th>Açıklama</th>
+                        <th>Fotoğraf</th>
+                        <th>Tarih</th>
+                        <th>Saat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for veri in veriler %}
+                    <tr>
+                        <td>{{ veri.kisi.get_full_name }}</td>
+                        <td>{{ veri.gun }}</td>
+                        <td>{{ veri.saat }}</td>
+                        <td>{{ veri.alan }}</td>
+                        <td>{{ veri.aciklama }}</td>
+                        <td>
+                            {% if veri.fotograf %}
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ veri.fotograf.url }}" class="photo-preview" alt="Önizleme">
+                                    <button type="button" class="btn btn-sm btn-outline-warning show-photo-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#photoModal" 
+                                            data-photo-url="{{ veri.fotograf.url }}"
+                                            data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }}">
+                                        <i class="fas fa-search-plus me-1"></i>Büyüt
+                                    </button>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-secondary">Fotoğraf Yok</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ veri.submitteddate }}</td>
+                        <td>{{ veri.submittedtime }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">Henüz veri bulunmamaktadır.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Ortak Fotoğraf Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="photoModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="modal-image-container">
+                    <div class="photo-loader" id="photoLoader">
+                        <div class="spinner-border text-warning mb-2" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        <span>Fotoğraf yükleniyor...</span>
+                    </div>
+                    <img src="" alt="Sorun Fotoğrafı" class="modal-photo" id="modalPhoto">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <a href="#" download class="btn btn-warning" id="downloadBtn">
+                    <i class="fas fa-download me-1"></i>İndir
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sayfa yüklendiğinde tüm fotoğrafları önbelleğe al
+        var photoUrls = [];
+        document.querySelectorAll('[data-photo-url]').forEach(function(el) {
+            photoUrls.push(el.getAttribute('data-photo-url'));
+        });
+        
+        // Fotoğrafları arka planda yükle
+        photoUrls.forEach(function(url) {
+            var img = new Image();
+            img.src = url;
+        });
+        
+        // Fotoğraf modalı için
+        var photoModal = document.getElementById('photoModal');
+        var modalPhoto = document.getElementById('modalPhoto');
+        var photoLoader = document.getElementById('photoLoader');
+        var photoModalLabel = document.getElementById('photoModalLabel');
+        var downloadBtn = document.getElementById('downloadBtn');
+        
+        // Fotoğraf butonlarına tıklandığında
+        document.querySelectorAll('.show-photo-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var photoUrl = this.getAttribute('data-photo-url');
+                var photoTitle = this.getAttribute('data-photo-title');
+                
+                // Modal başlığını ayarla
+                photoModalLabel.textContent = photoTitle;
+                
+                // İndirme butonunu ayarla
+                downloadBtn.href = photoUrl;
+                
+                // Yükleme göstergesini göster, fotoğrafı gizle
+                photoLoader.style.display = 'flex';
+                modalPhoto.style.display = 'none';
+                
+                // Fotoğrafı yükle
+                modalPhoto.src = photoUrl;
+                
+                // Fotoğraf yüklendiğinde
+                modalPhoto.onload = function() {
+                    // Kısa bir gecikme ekleyerek yanıp sönme etkisini önle
+                    setTimeout(function() {
+                        photoLoader.style.display = 'none';
+                        modalPhoto.style.display = 'block';
+                    }, 300);
+                };
+            });
+        });
+        
+        // Modal kapandığında
+        photoModal.addEventListener('hidden.bs.modal', function() {
+            modalPhoto.src = '';
+        });
+    });
+</script>
+{% endblock %} 

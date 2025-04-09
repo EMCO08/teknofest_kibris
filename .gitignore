@@ -1,0 +1,19 @@
+# Sanal ortam
+venv/
+myenv/
+
+# Ortam değişkenleri
+.env
+
+# Python derleme çıktıları
+__pycache__/
+*.pyc
+
+# SQLite veritabanı (lokal kullanım için)
+db.sqlite3
+
+# Log dosyaları
+*.log
+
+# VS Code ayarları (opsiyonel)
+.vscode/

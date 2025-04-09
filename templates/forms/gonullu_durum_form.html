@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Durum Bildir - Yemek Otomasyonu{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Mobil görünüm için özel stiller */
+    @media (max-width: 768px) {
+        .card-header {
+            padding: 12px;
+        }
+        
+        .card-header h3 {
+            font-size: 1.5rem;
+        }
+        
+        .card-body {
+            padding: 15px !important;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        .form-label {
+            margin-top: 8px;
+        }
+    }
+    
+    /* Form sayfası için özel stiller */
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, var(--teknofest-red), var(--teknofest-blue)) !important;
+    }
+    
+    .card-header h3 {
+        margin-bottom: 0;
+    }
+    
+    .form-control:focus {
+        border-color: var(--teknofest-blue);
+        box-shadow: 0 0 0 0.25rem rgba(0, 75, 147, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="mb-0"><i class="fas fa-info-circle me-2"></i>Durum Bildir</h3>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" class="slide-in">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="gun" class="form-label">Gün</label>
+                            <input type="date" class="form-control" id="gun" name="gun" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="saat" class="form-label">Saat</label>
+                            <input type="time" class="form-control" id="saat" name="saat" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alan" class="form-label">Alan</label>
+                        <input type="text" class="form-control" id="alan" name="alan" required>
+                        <div class="form-text">Örnek: Yemekhane, Mutfak, Depo, vb.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="aciklama" class="form-label">Açıklama</label>
+                        <textarea class="form-control" id="aciklama" name="aciklama" rows="4" required></textarea>
+                        <div class="form-text">Lütfen durumu detaylı bir şekilde açıklayın.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="fotograf" class="form-label">Fotoğraf (İsteğe Bağlı)</label>
+                        <input type="file" class="form-control" id="fotograf" name="fotograf" accept="image/*">
+                        <div class="form-text">Maksimum 10MB boyutunda fotoğraf yükleyebilirsiniz.</div>
+                    </div>
+                    
+                    <div class="mb-3" id="preview-container" style="display: none;">
+                        <label class="form-label">Önizleme</label>
+                        <div class="text-center">
+                            <img id="preview-image" src="#" alt="Fotoğraf Önizleme" class="img-fluid img-thumbnail" style="max-height: 300px;">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'forms:gonullu_form' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Geri Dön
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Kaydet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Bugünün tarihini varsayılan olarak ayarla
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('gun').value = today;
+        
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('saat').value = `${hours}:${minutes}`;
+    });
+    
+    // Fotoğraf önizleme
+    document.getElementById('fotograf').addEventListener('change', function(e) {
+        const previewContainer = document.getElementById('preview-container');
+        const previewImage = document.getElementById('preview-image');
+        
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+            
+            reader.readAsDataURL(this.files[0]);
+        } else {
+            previewContainer.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %} 

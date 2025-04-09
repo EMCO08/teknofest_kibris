@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-chart-line me-2"></i>Dashboard</h3>
+            </div>
+            <div class="card-body">
+                <h4>Merhaba, {{ user.get_full_name }}</h4>
+                <p>Yemek Otomasyonu sisteminin dashboard sayfasına hoş geldiniz. Aşağıdaki bölümlerden istediğiniz verilere erişebilirsiniz.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_superuser or user.is_staff %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="fas fa-cogs me-2"></i>Sistem Ayarları</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'dashboard:sistem_ayarlari_guncelle' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="veri_guncelleme_son_saat" class="form-label">T3 Personel Veri Güncelleme Son Saati</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="veri_guncelleme_son_saat" name="veri_guncelleme_son_saat" 
+                                           min="0" max="23" value="{{ veri_guncelleme_son_saat|default:14 }}">
+                                    <span class="input-group-text">:</span>
+                                    <input type="number" class="form-control" id="veri_guncelleme_son_dakika" name="veri_guncelleme_son_dakika" 
+                                           min="0" max="59" value="{{ veri_guncelleme_son_dakika|default:0 }}">
+                                </div>
+                                <div class="form-text">T3 personel verilerinin güncellenebileceği son saat</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Ayarları Kaydet
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mt-3">
+                    <div class="card-body bg-info-subtle">
+                        <strong>Mevcut Ayarlar:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>T3 Personel Veri Güncelleme Son Saati: <strong>{{ veri_guncelleme_son_saat|default:14 }}:{{ veri_guncelleme_son_dakika|default:0 }}</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm slide-in h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                <h5 class="card-title">T3 Personel Verileri</h5>
+                <p class="card-text">Son 7 gün: {{ t3_veriler_sayisi }} kayıt</p>
+
+
+
+
+
+                <a href="{% url 'dashboard:t3personel' %}" class="btn btn-primary">
+                    <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm slide-in h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-info-circle fa-3x mb-3 text-success"></i>
+                <h5 class="card-title">Gönüllü Durum Verileri</h5>
+                <p class="card-text">Son 7 gün: {{ gonullu_durum_sayisi }} kayıt</p>
+                <a href="{% url 'dashboard:gonullu_durum' %}" class="btn btn-success">
+                    <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm slide-in h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                <h5 class="card-title">Gönüllü Sorun Verileri</h5>
+                <p class="card-text">Son 7 gün: {{ gonullu_sorun_sayisi }} kayıt</p>
+                <a href="{% url 'dashboard:gonullu_sorun' %}" class="btn btn-warning">
+                    <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm slide-in h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clipboard-check fa-3x mb-3 text-info"></i>
+                <h5 class="card-title">Sorumlu Verileri</h5>
+                <p class="card-text">Son 7 gün: {{ sorumlu_veriler_sayisi }} kayıt</p>
+                <a href="{% url 'dashboard:sorumlu' %}" class="btn btn-info">
+                    <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Son 7 Günlük Özet</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Toplam Personel Siparişi</h5>
+                                <p class="card-text display-4">{{ toplam_personel_siparis }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Toplam Taşeron Siparişi</h5>
+                                <p class="card-text display-4">{{ toplam_taseron_siparis }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Toplam T3 Siparişi</h5>
+                                <p class="card-text display-4">{{ toplam_t3_siparis }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_superuser or user.is_staff %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Yönetim İşlemleri</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-plus fa-3x mb-3 text-primary"></i>
+                                <h5 class="card-title">T3 Personel Ataması</h5>
+                                <p class="card-text">T3 personel için koordinatörlük ve birim ataması yapın.</p>
+                                <a href="{% url 'dashboard:t3personel_atama_ekle' %}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-right me-1"></i>Atama Ekle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Diğer yönetim kartları buraya eklenebilir -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

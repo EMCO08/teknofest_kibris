@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Ana Sayfa - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <div class="card shadow-lg fade-in">
+            <div class="card-body p-5">
+                <h1 class="display-4 mb-4">Yemek Otomasyonu Sistemine Hoş Geldiniz</h1>
+                <p class="lead">Bu sistem, yemek siparişlerinin ve durumlarının takibi için geliştirilmiştir.</p>
+                
+                <div class="mt-5">
+                    {% if user.is_authenticated %}
+                        <h3>Merhaba, {{ user.get_full_name }}</h3>
+                        <p>Rolünüz: {{ user.get_role_display }}</p>
+                        
+                        <div class="row mt-4 justify-content-center">
+                            {% if user.role == 'gonullu' %}
+                                <div class="col-md-6">
+                                    <a href="{% url 'forms:gonullu_form' %}" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-clipboard-list me-2"></i>Gönüllü Formuna Git
+                                    </a>
+                                </div>
+                            {% elif user.role == 't3personel' %}
+                                <div class="col-md-6">
+                                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-clipboard-list me-2"></i>T3 Personel Formuna Git
+                                    </a>
+                                </div>
+                            {% elif user.role == 'sorumlu' %}
+                                <div class="col-md-6">
+                                    <a href="{% url 'forms:sorumlu_form' %}" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-clipboard-list me-2"></i>Sorumlu Formuna Git
+                                    </a>
+                                </div>
+                            {% elif user.role == 'izleyici' or user.role == 'admin' %}
+                                <div class="col-md-6">
+                                    <a href="{% url 'dashboard:home' %}" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-chart-line me-2"></i>Dashboard'a Git
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
