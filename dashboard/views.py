@@ -133,7 +133,7 @@ def t3personel_dashboard(request):
 
         headers = ['TC', 'İsim', 'Soyisim', 'Koordinatörlük', 'Birim',
 
-                'Öğle Yemeği', 'Akşam Yemeği', 'Toplam', 'Tarih', 'Saat']
+                'Sipariş Sayısı', 'Tarih', 'Saat']
 
         ws.append(headers)
 
@@ -142,8 +142,6 @@ def t3personel_dashboard(request):
         # Veriler
 
         for veri in veriler:
-
-            toplam = veri.ogle_yemek_sayisi + veri.aksam_yemek_sayisi
 
             ws.append([
 
@@ -157,11 +155,7 @@ def t3personel_dashboard(request):
 
                 veri.birim,
 
-                veri.ogle_yemek_sayisi,
-
-                veri.aksam_yemek_sayisi,
-
-                toplam,
+                veri.siparis_sayisi,
 
                 veri.submitteddate.strftime('%Y-%m-%d'),
 
