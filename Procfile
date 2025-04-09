@@ -1,0 +1,1 @@
+web: gunicorn yemek_otomasyonu.wsgi --log-file - 
