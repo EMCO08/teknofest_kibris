@@ -29,7 +29,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-psxt%k4m)nt49ry)p*u&5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['teknofest-otomasyon.com', 'www.teknofest-otomasyon.com', 'projeaktarma-21b1f323ef3f.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['teknofest-otomasyon.com', 'www.teknofest-otomasyon.com', 'projeaktarma-21b1f323ef3f.herokuapp.com', 'devkibris-97e4fa5f192d.herokuapp.com', 'localhost', '127.0.0.1']
 
 
 # Application definition

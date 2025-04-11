@@ -131,8 +131,8 @@ def t3personel_form(request):
                     kisi=user,
                     koordinatorluk=atama.koordinatorluk,
                     birim=atama.birim,
-                    ogle_yemek_sayisi=int(ogle_sayisi),
-                    aksam_yemek_sayisi=int(aksam_sayisi)
+                    ogle_yemegi=int(ogle_sayisi),
+                    aksam_yemegi=int(aksam_sayisi)
                 )
 
         log_user_action(request, 'T3 Personel Formu Gönderildi', 'T3 Personel Form')

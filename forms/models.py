@@ -19,18 +19,21 @@ class T3PersonelVeriler(models.Model):
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='t3_veriler')
     koordinatorluk = models.CharField(max_length=100)
     birim = models.CharField(max_length=100)
-    siparis_sayisi = models.PositiveIntegerField()
+
+    ogle_yemegi = models.PositiveIntegerField()
+    aksam_yemegi = models.PositiveIntegerField()
 
     submitteddate = models.DateField(auto_now_add=True)
     submittedtime = models.TimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.kisi.get_full_name()} - {self.koordinatorluk} - {self.birim} - {self.siparis_sayisi}"
+        return f"{self.kisi.get_full_name()} - {self.koordinatorluk} - {self.birim} - Öğle: {self.ogle_yemegi} - Akşam: {self.aksam_yemegi}"
 
     class Meta:
         verbose_name = 'T3 Personel Verisi'
         verbose_name_plural = 'T3 Personel Verileri'
         db_table = 't3personel_veriler'
+
 
 class GonulluDurumVeriler(models.Model):
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='gonullu_durum_veriler')
