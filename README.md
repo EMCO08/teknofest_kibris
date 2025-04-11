@@ -9,7 +9,7 @@ Bu proje, belirli rollere sahip kullanıcıların izin verilen formlarda veri gi
 - **Frontend:** HTML, CSS, JavaScript, Bootstrap
 - **Diğer:** Django REST Framework, Redis, Celery
 
-## Kurulum
+## Kurulum:
 
 ### Gereksinimler
 
