@@ -28,6 +28,7 @@
                                     <th>Birim</th>
                                     <th>Öğle Yemeği</th>
                                     <th>Akşam Yemeği</th>
+                                    <th>Lunchbox</th>
                                     <th>Gönderim Zamanı</th>
                                 </tr>
                             </thead>
@@ -38,6 +39,7 @@
                                     <td>{{ kayit.birim }}</td>
                                     <td>{{ kayit.ogle_yemegi }}</td>
                                     <td>{{ kayit.aksam_yemegi }}</td>
+                                    <td>{{ kayit.lunchbox }}</td>
                                     <td>{{ kayit.submittedtime }}</td>
                                 </tr>
                                 {% endfor %}
@@ -78,6 +80,10 @@
                                     <div class="mb-3">
                                         <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
                                         <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
+                                        <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" min="0" required>
                                     </div>
                                 </div>
                             </div>

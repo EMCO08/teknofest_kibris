@@ -22,6 +22,7 @@ class T3PersonelVeriler(models.Model):
 
     ogle_yemegi = models.PositiveIntegerField()
     aksam_yemegi = models.PositiveIntegerField()
+    lunchbox = models.PositiveIntegerField(default=0)
 
     submitteddate = models.DateField(auto_now_add=True)
     submittedtime = models.TimeField(auto_now_add=True)
