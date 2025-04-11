@@ -16,7 +16,7 @@ class T3PersonelAtamaAdmin(admin.ModelAdmin):
 
 @admin.register(T3PersonelVeriler)
 class T3PersonelVerilerAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'koordinatorluk', 'birim', 'siparis_sayisi', 'submitteddate', 'submittedtime')
+    list_display = ('kisi', 'koordinatorluk', 'birim', 'ogle_yemegi', 'aksam_yemegi', 'submitteddate', 'submittedtime')
     list_filter = ('koordinatorluk', 'birim', 'submitteddate')
     search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'koordinatorluk', 'birim')
     readonly_fields = ('submitteddate', 'submittedtime')

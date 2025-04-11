@@ -26,8 +26,8 @@
                                 <tr>
                                     <th>Koordinatörlük</th>
                                     <th>Birim</th>
-                                    <th>Sipariş Sayısı</th>
-
+                                    <th>Öğle Yemeği</th>
+                                    <th>Akşam Yemeği</th>
                                     <th>Gönderim Zamanı</th>
                                 </tr>
                             </thead>
@@ -36,8 +36,8 @@
                                 <tr>
                                     <td>{{ kayit.koordinatorluk }}</td>
                                     <td>{{ kayit.birim }}</td>
-                                    <td>{{ kayit.siparis_sayisi }}</td>
-
+                                    <td>{{ kayit.ogle_yemegi }}</td>
+                                    <td>{{ kayit.aksam_yemegi }}</td>
                                     <td>{{ kayit.submittedtime }}</td>
                                 </tr>
                                 {% endfor %}
@@ -72,8 +72,12 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="mb-3">
-                                        <label for="siparis_{{ atama.id }}" class="form-label">Sipariş Sayısı</label>
-                                        <input type="number" class="form-control" id="siparis_{{ atama.id }}" name="siparis_{{ atama.id }}" min="0" required>
+                                        <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
+                                        <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" min="0" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
+                                        <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" min="0" required>
                                     </div>
                                 </div>
                             </div>
