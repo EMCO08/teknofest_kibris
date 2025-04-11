@@ -21,8 +21,6 @@ from django.shortcuts import get_object_or_404
 import openpyxl
 from openpyxl.utils import get_column_letter
 from io import BytesIO
-from django.db.models import Sum, F
-
 
 @login_required
 @role_required(['izleyici', 'admin'])
@@ -36,6 +34,19 @@ def dashboard_home(request):
     t3_veriler_sayisi = T3PersonelVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     gonullu_durum_sayisi = GonulluDurumVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
     gonullu_sorun_sayisi = GonulluSorunVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
     sorumlu_veriler_sayisi = SorumluVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
@@ -44,13 +55,8 @@ def dashboard_home(request):
     # Toplam sipariş sayıları
     toplam_personel_siparis = SorumluVeriler.objects.filter(submitteddate__gte=son_7_gun).aggregate(Sum('personel_yemek_siparis'))['personel_yemek_siparis__sum'] or 0
     toplam_taseron_siparis = SorumluVeriler.objects.filter(submitteddate__gte=son_7_gun).aggregate(Sum('taseron_yemek_siparis'))['taseron_yemek_siparis__sum'] or 0
-    
+    toplam_t3_siparis = T3PersonelVeriler.objects.filter(submitteddate__gte=son_7_gun).aggregate(Sum('siparis_sayisi'))['siparis_sayisi__sum'] or 0
 
-    toplam_t3_siparis = (
-        T3PersonelVeriler.objects
-        .filter(submitteddate__gte=son_7_gun)
-        .aggregate(toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi')))['toplam'] or 0
-    )
 
 
 
@@ -149,9 +155,7 @@ def t3personel_dashboard(request):
 
                 veri.birim,
 
-                veri.ogle_yemegi,
-
-                veri.aksam_yemegi,
+                veri.siparis_sayisi,
 
                 veri.submitteddate.strftime('%Y-%m-%d'),
 
