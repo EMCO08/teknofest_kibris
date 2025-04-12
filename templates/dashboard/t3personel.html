@@ -41,7 +41,7 @@
                         <i class="fas fa-filter me-1"></i>Filtrele
                     </button>
                     <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.koordinatorluk %}&koordinatorluk={{ filtreler.koordinatorluk }}{% endif %}{% if filtreler.birim %}&birim={{ filtreler.birim }}{% endif %}" class="btn btn-success">
-                        <i class="fas fa-download me-1"></i>CSV İndir
+                        <i class="fas fa-download me-1"></i>Excel İndir
                     </a>
                 </div>
             </div>
@@ -56,8 +56,7 @@
                         <th>Birim</th>
                         <th>Öğle Yemeği</th>
                         <th>Akşam Yemeği</th>
-
-
+                        <th>Lunchbox</th>
                         <th>Tarih</th>
                         <th>Saat</th>
                     </tr>
@@ -70,14 +69,13 @@
                         <td>{{ veri.birim }}</td>
                         <td>{{ veri.ogle_yemegi }}</td>
                         <td>{{ veri.aksam_yemegi }}</td>
-
-
+                        <td>{{ veri.lunchbox }}</td>
                         <td>{{ veri.submitteddate }}</td>
                         <td>{{ veri.submittedtime }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center">Henüz veri bulunmamaktadır.</td>
+                        <td colspan="8" class="text-center">Henüz veri bulunmamaktadır.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

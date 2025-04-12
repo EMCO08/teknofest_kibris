@@ -49,7 +49,7 @@ def dashboard_home(request):
     toplam_t3_siparis = (
         T3PersonelVeriler.objects
         .filter(submitteddate__gte=son_7_gun)
-        .aggregate(toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi')))['toplam'] or 0
+        .aggregate(toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox')))['toplam'] or 0
     )
 
 
@@ -127,7 +127,7 @@ def t3personel_dashboard(request):
 
         headers = ['TC', 'İsim', 'Soyisim', 'Koordinatörlük', 'Birim',
 
-                'Sipariş Sayısı', 'Tarih', 'Saat']
+                'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Toplam', 'Tarih', 'Saat']
 
         ws.append(headers)
 
@@ -136,6 +136,8 @@ def t3personel_dashboard(request):
         # Veriler
 
         for veri in veriler:
+
+            toplam = veri.ogle_yemegi + veri.aksam_yemegi + veri.lunchbox
 
             ws.append([
 
@@ -152,6 +154,10 @@ def t3personel_dashboard(request):
                 veri.ogle_yemegi,
 
                 veri.aksam_yemegi,
+
+                veri.lunchbox,
+
+                toplam,
 
                 veri.submitteddate.strftime('%Y-%m-%d'),
 
