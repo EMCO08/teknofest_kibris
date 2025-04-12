@@ -110,7 +110,7 @@ def t3personel_form(request):
     guncelleme_modu = request.session.get('t3personel_guncelleme_modu', False)
     
     # Daha önce aynı gün veri gönderilmişse onları çek
-    bugunku_kayitlar = T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun)
+    bugunku_kayitlar = None if guncelleme_modu else T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun)
 
     if not atamalar.exists():
         messages.warning(request, 'Henüz size atanmış koordinatörlük ve birim bulunmamaktadır.')
