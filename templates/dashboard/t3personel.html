@@ -61,25 +61,27 @@
                         <th>Öğle Yemeği</th>
                         <th>Akşam Yemeği</th>
                         <th>Lunchbox</th>
+                        <th>Coffee Break</th>
                         <th>Tarih</th>
                         <th>Saat</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for veri in veriler %}
-                    <tr data-ogle="{{ veri.ogle_yemegi }}" data-aksam="{{ veri.aksam_yemegi }}" data-lunchbox="{{ veri.lunchbox }}">
+                    <tr data-ogle="{{ veri.ogle_yemegi }}" data-aksam="{{ veri.aksam_yemegi }}" data-lunchbox="{{ veri.lunchbox }}" data-coffee="{{ veri.coffee_break }}">
                         <td>{{ veri.kisi.get_full_name }}</td>
                         <td>{{ veri.koordinatorluk }}</td>
                         <td>{{ veri.birim }}</td>
                         <td>{{ veri.ogle_yemegi }}</td>
                         <td>{{ veri.aksam_yemegi }}</td>
                         <td>{{ veri.lunchbox }}</td>
+                        <td>{{ veri.coffee_break }}</td>
                         <td>{{ veri.submitteddate }}</td>
                         <td>{{ veri.submittedtime }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center">Henüz veri bulunmamaktadır.</td>
+                        <td colspan="9" class="text-center">Henüz veri bulunmamaktadır.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -102,8 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const ogle = parseInt(row.dataset.ogle);
                 const aksam = parseInt(row.dataset.aksam);
                 const lunchbox = parseInt(row.dataset.lunchbox);
+                const coffee = parseInt(row.dataset.coffee);
                 
-                if (this.checked && ogle === 0 && aksam === 0 && lunchbox === 0) {
+                if (this.checked && ogle === 0 && aksam === 0 && lunchbox === 0 && coffee === 0) {
                     row.style.display = 'none';
                 } else {
                     row.style.display = '';

@@ -1,106 +1,85 @@
 {% extends 'base.html' %}
 
-{% block title %}T3 Personel Formu - Yemek Otomasyonu{% endblock %}
+{% block title %}T3 Personel Sipariş Formu - Yemek Otomasyonu{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-lg fade-in">
-            <div class="card-header bg-primary text-white text-center">
-                <h3 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>T3 Personel Formu</h3>
-            </div>
-            <div class="card-body p-4">
-                <div class="text-center mb-4">
-                    <h4>Merhaba, {{ user.get_full_name }}</h4>
-                    <p>Lütfen sorumlu olduğunuz birimler için sipariş sayılarını girin.</p>
-                </div>
-
-                {% if bugunku_kayitlar %}
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">Bugün Gönderdiğiniz Veriler</h5>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Koordinatörlük</th>
-                                    <th>Birim</th>
-                                    <th>Öğle Yemeği</th>
-                                    <th>Akşam Yemeği</th>
-                                    <th>Lunchbox</th>
-                                    <th>Gönderim Zamanı</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for kayit in bugunku_kayitlar %}
-                                <tr>
-                                    <td>{{ kayit.koordinatorluk }}</td>
-                                    <td>{{ kayit.birim }}</td>
-                                    <td>{{ kayit.ogle_yemegi }}</td>
-                                    <td>{{ kayit.aksam_yemegi }}</td>
-                                    <td>{{ kayit.lunchbox }}</td>
-                                    <td>{{ kayit.submittedtime }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-
-                        {% if saat_uygun %}
-                        <div class="d-flex justify-content-end mt-3">
-                            <form method="post" action="{% url 'forms:t3personel_form_guncelle' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-warning">
-                                    <i class="fas fa-edit me-1"></i>Veri Güncelle
-                                </button>
-                            </form>
-                        </div>
-                        {% else %}
-                        <div class="alert alert-warning mt-3">
-                            <i class="fas fa-clock me-1"></i> Veri güncelleme için son saat 14:00'tır. Şu an güncelleme yapamazsınız.
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if atamalar and not bugunku_kayitlar %}
-                    <form method="post" class="slide-in">
-                        {% csrf_token %}
-                        {% for atama in atamalar %}
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
-                                        <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" min="0" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
-                                        <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" min="0" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
-                                        <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" min="0" required>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Kaydet
-                            </button>
-                        </div>
-                    </form>
-                {% elif not atamalar %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen yöneticinizle iletişime geçin.
-                    </div>
-                {% endif %}
-            </div>
+<div class="card shadow-lg fade-in">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0"><i class="fas fa-utensils me-2"></i>T3 Personel Sipariş Formu</h3>
+    </div>
+    <div class="card-body">
+        {% if not saat_uygun %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Veri girişi için son saat 14:00'dır. Şu an veri girişi yapamazsınız.
         </div>
+        {% endif %}
+
+        {% if guncelleme_modu %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Veri güncelleme modundasınız. Lütfen yeni değerleri girin.
+        </div>
+        {% endif %}
+
+        {% if bugunku_kayitlar %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Bugün için daha önce veri girişi yapılmış. Güncelleme yapmak için "Güncelle" butonuna tıklayın.
+            <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-sm ms-2">
+                <i class="fas fa-sync me-1"></i>Güncelle
+            </a>
+        </div>
+        {% endif %}
+
+        {% if not atamalar.exists %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
+        </div>
+        {% else %}
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            {% for atama in atamalar %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
+                            <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
+                                   min="0" value="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
+                            <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
+                                   min="0" value="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
+                            <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
+                                   min="0" value="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
+                            <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
+                                   min="0" value="0" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
+                    <i class="fas fa-save me-1"></i>Kaydet
+                </button>
+            </div>
+        </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
