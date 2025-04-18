@@ -37,6 +37,10 @@
                     </select>
                 </div>
                 <div class="col-12 d-flex justify-content-end">
+                    <div class="form-check me-3">
+                        <input class="form-check-input" type="checkbox" id="filtrele_0" name="filtrele_0">
+                        <label class="form-check-label" for="filtrele_0">0 verilerini filtrele</label>
+                    </div>
                     <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter me-1"></i>Filtrele
                     </button>
@@ -48,7 +52,7 @@
         </form>
 
         <div class="table-responsive">
-            <table class="table table-striped table-hover">
+            <table class="table table-striped table-hover" id="t3personel_table">
                 <thead class="table-dark">
                     <tr>
                         <th>İsim</th>
@@ -63,7 +67,7 @@
                 </thead>
                 <tbody>
                     {% for veri in veriler %}
-                    <tr>
+                    <tr data-ogle="{{ veri.ogle_yemegi }}" data-aksam="{{ veri.aksam_yemegi }}" data-lunchbox="{{ veri.lunchbox }}">
                         <td>{{ veri.kisi.get_full_name }}</td>
                         <td>{{ veri.koordinatorluk }}</td>
                         <td>{{ veri.birim }}</td>
@@ -83,4 +87,30 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtreleCheckbox = document.getElementById('filtrele_0');
+    const table = document.getElementById('t3personel_table');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    filtreleCheckbox.addEventListener('change', function() {
+        for (let row of rows) {
+            if (row.cells.length > 1) { // Boş satır değilse
+                const ogle = parseInt(row.dataset.ogle);
+                const aksam = parseInt(row.dataset.aksam);
+                const lunchbox = parseInt(row.dataset.lunchbox);
+                
+                if (this.checked && ogle === 0 && aksam === 0 && lunchbox === 0) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}
