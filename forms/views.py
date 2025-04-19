@@ -103,8 +103,8 @@ def t3personel_form(request):
     bugun = timezone.now().date()
     simdi = timezone.now().time()
     
-    # Saat 14:00'dan önce mi kontrol et
-    saat_uygun = simdi < time(22, 0)
+    # Saat 12:00'dan önce mi kontrol et
+    saat_uygun = simdi < time(12, 0)
 
     # Güncelleme modu kontrolü
     guncelleme_modu = request.session.get('t3personel_guncelleme_modu', False)
@@ -159,9 +159,9 @@ def t3personel_form_guncelle(request):
     """T3 personel verilerini güncelleme modu"""
     simdi = timezone.now().time()
     
-    # Saat 14:00'dan önce mi kontrol et
-    if simdi >= time(22, 0):
-        messages.error(request, 'Veri güncelleme için son saat 14:00\'tır. Şu an güncelleme yapamazsınız.')
+    # Saat 12:00'dan önce mi kontrol et
+    if simdi >= time(12, 0):
+        messages.error(request, 'Veri güncelleme için son saat 12:00\'dır. Şu an güncelleme yapamazsınız.')
         return redirect('forms:t3personel_form')
     
     # Güncelleme modunu aç
