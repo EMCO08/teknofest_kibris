@@ -22,63 +22,63 @@
         </div>
         {% endif %}
 
-        {% if bugunku_kayitlar %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            Bugün için daha önce veri girişi yapılmış. Güncelleme yapmak için "Güncelle" butonuna tıklayın.
-            <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-sm ms-2">
-                <i class="fas fa-sync me-1"></i>Güncelle
-            </a>
-        </div>
-        {% endif %}
-
         {% if not atamalar.exists %}
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle me-2"></i>
             Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
         </div>
         {% else %}
-        <form method="post" class="needs-validation" novalidate>
-            {% csrf_token %}
-            
-            {% for atama in atamalar %}
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
-                            <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
-                                   min="0" value="0" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
-                            <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
-                                   min="0" value="0" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
-                            <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
-                                   min="0" value="0" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
-                            <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
-                                   min="0" value="0" required>
+            {% if bugunku_kayitlar and not guncelleme_modu %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Bugün için daha önce veri girişi yapılmış. Güncelleme yapmak için "Güncelle" butonuna tıklayın.
+                <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-sm ms-2">
+                    <i class="fas fa-sync me-1"></i>Güncelle
+                </a>
+            </div>
+            {% else %}
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                {% for atama in atamalar %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
+                                <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
+                                       min="0" value="0" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
+                                <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
+                                       min="0" value="0" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
+                                <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
+                                       min="0" value="0" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
+                                <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
+                                       min="0" value="0" required>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
 
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
-                    <i class="fas fa-save me-1"></i>Kaydet
-                </button>
-            </div>
-        </form>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
+                        <i class="fas fa-save me-1"></i>Kaydet
+                    </button>
+                </div>
+            </form>
+            {% endif %}
         {% endif %}
     </div>
 </div>
