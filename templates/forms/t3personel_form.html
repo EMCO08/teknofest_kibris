@@ -6,20 +6,13 @@
 {% block content %}
 <div class="card shadow-lg fade-in">
     <div class="card-header bg-primary text-white">
-        <h3 class="mb-0"><i class="fas fa-utensils me-2"></i>T3 Personel Sipariş Formuxxx</h3>
+        <h3 class="mb-0"><i class="fas fa-utensils me-2"></i>T3 Personel Sipariş Formu</h3>
     </div>
     <div class="card-body">
         {% if not saat_uygun %}
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle me-2"></i>
             Veri girişi için son saat {{ son_saat|stringformat:"02d" }}:{{ son_dakika|stringformat:"02d" }}'dır. Şu an veri girişi yapamazsınız.
-        </div>
-        {% endif %}
-
-        {% if guncelleme_modu %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            Veri güncelleme modundasınız. Lütfen yeni değerleri girin.
         </div>
         {% endif %}
 
@@ -30,14 +23,14 @@
         </div>
         {% else %}
             {% if not form_goster and bugunku_kayitlar.exists %}
-            <!-- Veri Görüntüleme Modu -->
+            <!-- Veri Görüntüleme Modu (Matrix Tablo) -->
             <div class="alert alert-success mb-4">
                 <i class="fas fa-check-circle me-2"></i>
                 Bugün gönderdiğiniz verileri görmektesiniz.
             </div>
             
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
+                <table class="table table-striped table-hover table-bordered matrix-table">
                     <thead class="table-dark">
                         <tr>
                             <th>Koordinatörlük</th>
@@ -70,11 +63,21 @@
             </div>
             {% else %}
             <!-- Form Görüntüleme Modu -->
+            <div class="alert alert-info mb-4">
+                {% if guncelleme_modu %}
+                <i class="fas fa-info-circle me-2"></i>
+                Veri düzenleme modundasınız. Değişikliklerinizi yapabilirsiniz.
+                {% else %}
+                <i class="fas fa-clock me-2"></i>
+                Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
+                {% endif %}
+            </div>
+            
             <form method="post" class="needs-validation" novalidate>
                 {% csrf_token %}
                 
                 <div class="table-responsive">
-                    <table class="table table-striped table-hover">
+                    <table class="table table-striped table-hover table-bordered">
                         <thead class="table-dark">
                             <tr>
                                 <th>Koordinatörlük</th>
@@ -129,6 +132,21 @@
     </div>
 </div>
 
+<style>
+.matrix-table {
+    border: 2px solid #dee2e6;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.matrix-table th, .matrix-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+.matrix-table th {
+    background-color: #4e73df;
+    color: white;
+}
+</style>
+
 <script>
 // Sayfa yüklendiğinde saat kontrolünü yap
 document.addEventListener('DOMContentLoaded', function() {
@@ -155,4 +173,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
 {% endblock %}
