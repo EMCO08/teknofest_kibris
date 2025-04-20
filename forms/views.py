@@ -102,7 +102,9 @@ def t3personel_form(request):
     user = request.user
     atamalar = T3PersonelAtama.objects.filter(kisi=user)
     bugun = timezone.now().date()
-    simdi = timezone.now().time()
+    
+    # Türkiye saatini al (+3)
+    simdi = timezone.localtime(timezone.now()).time()
     
     # Sistem ayarlarından son saat ve dakikayı al
     try:
@@ -172,7 +174,8 @@ def t3personel_form(request):
 @role_required(['t3personel'])
 def t3personel_form_guncelle(request):
     """T3 personel verilerini güncelleme modu"""
-    simdi = timezone.now().time()
+    # Türkiye saatini al (+3)
+    simdi = timezone.localtime(timezone.now()).time()
     
     # Sistem ayarlarından son saat ve dakikayı al
     try:

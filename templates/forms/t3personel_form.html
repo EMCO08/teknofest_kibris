@@ -59,19 +59,19 @@
                                 <td>{{ atama.birim }}</td>
                                 <td>
                                     <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
-                                           min="0" value="0" required>
+                                           min="0" value="0" required {% if not saat_uygun %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
-                                           min="0" value="0" required>
+                                           min="0" value="0" required {% if not saat_uygun %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
-                                           min="0" value="0" required>
+                                           min="0" value="0" required {% if not saat_uygun %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
-                                           min="0" value="0" required>
+                                           min="0" value="0" required {% if not saat_uygun %}disabled{% endif %}>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -89,4 +89,24 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+// Sayfa yüklendiğinde saat kontrolünü yap
+document.addEventListener('DOMContentLoaded', function() {
+    // Sunucudan gelen değeri al
+    var saatUygun = "{{ saat_uygun }}" === "True";
+    var submitButton = document.querySelector('button[type="submit"]');
+    
+    if (submitButton) {
+        submitButton.disabled = !saatUygun;
+    }
+    
+    // Form alanlarının etkinliğini ayarla
+    var inputs = document.querySelectorAll('input[type="number"]');
+    for (var i = 0; i < inputs.length; i++) {
+        inputs[i].disabled = !saatUygun;
+    }
+});
+</script>
+
 {% endblock %}
