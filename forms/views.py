@@ -12,6 +12,7 @@ from .models import (
     SistemAyarlari
 )
 from accounts.views import log_user_action
+from django.http import JsonResponse
 
 def role_required(roles):
     """Belirli rollere sahip kullanıcıların erişimini kontrol eden dekoratör"""
@@ -134,6 +135,7 @@ def t3personel_form(request):
             messages.error(request, f'Veri girişi için son saat {son_saat:02d}:{son_dakika:02d}\'dır. Şu an veri girişi yapamazsınız.')
             return redirect('forms:t3personel_form')
 
+        # Eğer güncelleme modu aktifse önce eski kayıtları sil
         if guncelleme_modu:
             T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun).delete()
             request.session['t3personel_guncelleme_modu'] = False
@@ -162,6 +164,35 @@ def t3personel_form(request):
         log_user_action(request, 'T3 Personel Formu Gönderildi', 'T3 Personel Form')
         messages.success(request, 'Sipariş bilgileriniz başarıyla kaydedildi.')
         return redirect('forms:t3personel_form')
+
+    # AJAX veri güncelleme isteği kontrolü
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and request.method == 'POST':
+        try:
+            veri_id = request.POST.get('veri_id')
+            alan = request.POST.get('alan')
+            deger = request.POST.get('deger')
+            
+            if not saat_uygun:
+                return JsonResponse({'durum': 'hata', 'mesaj': f'Veri güncelleme için son saat {son_saat:02d}:{son_dakika:02d}\'dır.'})
+            
+            veri = T3PersonelVeriler.objects.get(id=veri_id, kisi=user, submitteddate=bugun)
+            
+            # Hangi alanın güncelleneceğini kontrol et
+            if alan == 'ogle_yemegi' and deger.isdigit():
+                veri.ogle_yemegi = int(deger)
+            elif alan == 'aksam_yemegi' and deger.isdigit():
+                veri.aksam_yemegi = int(deger)
+            elif alan == 'lunchbox' and deger.isdigit():
+                veri.lunchbox = int(deger)
+            elif alan == 'coffee_break' and deger.isdigit():
+                veri.coffee_break = int(deger)
+            else:
+                return JsonResponse({'durum': 'hata', 'mesaj': 'Geçersiz veri veya alan'})
+            
+            veri.save()
+            return JsonResponse({'durum': 'basarili'})
+        except Exception as e:
+            return JsonResponse({'durum': 'hata', 'mesaj': str(e)})
 
     # Form alanları için eski değerleri hazırla
     eski_veriler = {}

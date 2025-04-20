@@ -30,10 +30,10 @@
         </div>
         {% else %}
             {% if not form_goster and bugunku_kayitlar.exists %}
-            <!-- Veri Görüntüleme Modu -->
+            <!-- Veri Görüntüleme ve Düzenleme Modu -->
             <div class="alert alert-success mb-4">
                 <i class="fas fa-check-circle me-2"></i>
-                Gönderdiğiniz veriler aşağıda gösterilmektedir. Değiştirmek isterseniz "Güncelle" butonuna tıklayabilirsiniz.
+                Bugün girdiğiniz veriler aşağıda gösterilmektedir. Değerlere tıklayarak doğrudan düzenleme yapabilirsiniz.
             </div>
             
             <div class="table-responsive">
@@ -50,13 +50,25 @@
                     </thead>
                     <tbody>
                         {% for veri in bugunku_kayitlar %}
-                        <tr>
+                        <tr data-id="{{ veri.id }}">
                             <td>{{ veri.koordinatorluk }}</td>
                             <td>{{ veri.birim }}</td>
-                            <td>{{ veri.ogle_yemegi }}</td>
-                            <td>{{ veri.aksam_yemegi }}</td>
-                            <td>{{ veri.lunchbox }}</td>
-                            <td>{{ veri.coffee_break }}</td>
+                            <td class="editable" data-field="ogle_yemegi">
+                                <span class="value">{{ veri.ogle_yemegi }}</span>
+                                <input type="number" class="form-control edit-input d-none" min="0" value="{{ veri.ogle_yemegi }}" {% if not saat_uygun %}disabled{% endif %}>
+                            </td>
+                            <td class="editable" data-field="aksam_yemegi">
+                                <span class="value">{{ veri.aksam_yemegi }}</span>
+                                <input type="number" class="form-control edit-input d-none" min="0" value="{{ veri.aksam_yemegi }}" {% if not saat_uygun %}disabled{% endif %}>
+                            </td>
+                            <td class="editable" data-field="lunchbox">
+                                <span class="value">{{ veri.lunchbox }}</span>
+                                <input type="number" class="form-control edit-input d-none" min="0" value="{{ veri.lunchbox }}" {% if not saat_uygun %}disabled{% endif %}>
+                            </td>
+                            <td class="editable" data-field="coffee_break">
+                                <span class="value">{{ veri.coffee_break }}</span>
+                                <input type="number" class="form-control edit-input d-none" min="0" value="{{ veri.coffee_break }}" {% if not saat_uygun %}disabled{% endif %}>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -64,8 +76,8 @@
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning" {% if not saat_uygun %}disabled{% endif %}>
-                    <i class="fas fa-edit me-1"></i>Güncelle
+                <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning me-2" {% if not saat_uygun %}disabled{% endif %}>
+                    <i class="fas fa-edit me-1"></i>Yeni Giriş Yap
                 </a>
             </div>
             {% else %}
@@ -153,7 +165,122 @@ document.addEventListener('DOMContentLoaded', function() {
     for (var i = 0; i < inputs.length; i++) {
         inputs[i].disabled = !saatUygun;
     }
+
+    // Matrix tablosunda düzenlenebilir alanlar için tıklama olaylarını ayarla
+    if (saatUygun) {
+        setupEditableFields();
+    }
 });
+
+// Düzenlenebilir alanlar için fonksiyonlar
+function setupEditableFields() {
+    const editableCells = document.querySelectorAll('.editable');
+    
+    editableCells.forEach(cell => {
+        // Değere tıklandığında düzenleme moduna geç
+        const valueSpan = cell.querySelector('.value');
+        const editInput = cell.querySelector('.edit-input');
+        
+        valueSpan.addEventListener('click', function() {
+            valueSpan.classList.add('d-none');
+            editInput.classList.remove('d-none');
+            editInput.focus();
+            editInput.select();
+        });
+        
+        // Enter'a basıldığında veya odak kaybolduğunda değeri güncelle
+        editInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                updateValue(cell, valueSpan, editInput);
+            }
+        });
+        
+        editInput.addEventListener('blur', function() {
+            updateValue(cell, valueSpan, editInput);
+        });
+    });
+}
+
+function updateValue(cell, valueSpan, editInput) {
+    const newValue = editInput.value;
+    
+    if (newValue !== valueSpan.textContent && !isNaN(newValue) && parseInt(newValue) >= 0) {
+        const row = cell.closest('tr');
+        const veriId = row.dataset.id;
+        const fieldName = cell.dataset.field;
+        
+        // AJAX ile değeri güncelle
+        sendAjaxUpdate(veriId, fieldName, newValue, function(success) {
+            if (success) {
+                valueSpan.textContent = newValue;
+                editInput.classList.add('d-none');
+                valueSpan.classList.remove('d-none');
+                
+                // Başarılı güncelleme efekti
+                cell.classList.add('bg-success', 'bg-opacity-25');
+                setTimeout(() => {
+                    cell.classList.remove('bg-success', 'bg-opacity-25');
+                }, 1000);
+            }
+        });
+    } else {
+        // Geçersiz değer, eski değere geri dön
+        editInput.value = valueSpan.textContent;
+        editInput.classList.add('d-none');
+        valueSpan.classList.remove('d-none');
+    }
+}
+
+function sendAjaxUpdate(veriId, fieldName, value, callback) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken
+        },
+        body: `veri_id=${veriId}&alan=${fieldName}&deger=${value}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.durum === 'basarili') {
+            callback(true);
+        } else {
+            alert('Hata: ' + data.mesaj);
+            callback(false);
+        }
+    })
+    .catch(error => {
+        console.error('Güncelleme hatası:', error);
+        alert('Güncelleme sırasında bir hata oluştu.');
+        callback(false);
+    });
+}
 </script>
 
+<style>
+.editable .value {
+    cursor: pointer;
+    display: inline-block;
+    padding: 6px 0;
+    min-width: 40px;
+    text-align: center;
+}
+
+.editable .value:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.editable {
+    position: relative;
+}
+
+.edit-input {
+    width: 80px;
+    margin: 0 auto;
+}
+</style>
 {% endblock %}
