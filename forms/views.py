@@ -121,7 +121,10 @@ def t3personel_form(request):
     guncelleme_modu = request.session.get('t3personel_guncelleme_modu', False)
     
     # Daha önce aynı gün veri gönderilmişse onları çek
-    bugunku_kayitlar = None if guncelleme_modu else T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun)
+    bugunku_kayitlar = T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun)
+    
+    # Form gösterim modu (True: form göster, False: tablo göster)
+    form_goster = guncelleme_modu or not bugunku_kayitlar.exists()
 
     if not atamalar.exists():
         messages.warning(request, 'Henüz size atanmış koordinatörlük ve birim bulunmamaktadır.')
@@ -160,13 +163,28 @@ def t3personel_form(request):
         messages.success(request, 'Sipariş bilgileriniz başarıyla kaydedildi.')
         return redirect('forms:t3personel_form')
 
+    # Form alanları için eski değerleri hazırla
+    eski_veriler = {}
+    if bugunku_kayitlar.exists() and guncelleme_modu:
+        for veri in bugunku_kayitlar:
+            atama = T3PersonelAtama.objects.filter(kisi=user, koordinatorluk=veri.koordinatorluk, birim=veri.birim).first()
+            if atama:
+                eski_veriler[atama.id] = {
+                    'ogle': veri.ogle_yemegi,
+                    'aksam': veri.aksam_yemegi,
+                    'lunchbox': veri.lunchbox,
+                    'coffee': veri.coffee_break
+                }
+
     context = {
         'atamalar': atamalar,
         'bugunku_kayitlar': bugunku_kayitlar,
         'saat_uygun': saat_uygun,
         'guncelleme_modu': guncelleme_modu,
         'son_saat': son_saat,
-        'son_dakika': son_dakika
+        'son_dakika': son_dakika,
+        'form_goster': form_goster,
+        'eski_veriler': eski_veriler
     }
     return render(request, 'forms/t3personel_form.html', context)
 
