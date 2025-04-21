@@ -120,7 +120,19 @@ def t3personel_form(request):
     # Güncelleme modu kontrolü
     guncelleme_modu = request.session.get('t3personel_guncelleme_modu', False)
     
-    # Daha önce aynı gün veri gönderilmişse onları çek - Sorguyu basitleştirelim
+    # İlk açılışta sadece buton gösterme modu
+    buton_goster = request.session.get('t3personel_form_buton_goster', True)
+    
+    # Form başarıyla gönderildi mesajı
+    form_gonderildi = request.session.get('t3personel_form_gonderildi', False)
+    
+    # Butona tıklandığında
+    if request.GET.get('goster') == 'form':
+        buton_goster = False
+        request.session['t3personel_form_buton_goster'] = False
+        return redirect('forms:t3personel_form')
+    
+    # Daha önce aynı gün veri gönderilmişse onları çek
     bugunku_kayitlar = T3PersonelVeriler.objects.filter(
         kisi=user,
         submitteddate=bugun
@@ -132,7 +144,6 @@ def t3personel_form(request):
     form_goster = guncelleme_modu or not has_entries
     
     # Session'daki güncelleme modunu POST dışında (GET istekleri için) temizleyelim
-    # Bu sayede sayfayı yenileyince form moduna tekrar geçmesini engelleyebiliriz
     if request.method != 'POST' and not guncelleme_modu and has_entries:
         # Eğer güncelleme modunda değilsek ve bugün kayıtlar varsa, 
         # session'ı temizleyelim (güvenlik için)
@@ -175,6 +186,10 @@ def t3personel_form(request):
                 )
         
         log_user_action(request, 'T3 Personel Formu Gönderildi', 'T3 Personel Form')
+        # Form gönderildikten sonra başarı mesajını session'a kaydet
+        request.session['t3personel_form_gonderildi'] = True
+        # Buton görüntüleme moduna dön
+        request.session['t3personel_form_buton_goster'] = True
         messages.success(request, 'Sipariş bilgileriniz başarıyla kaydedildi.')
         return redirect('forms:t3personel_form')
 
@@ -199,8 +214,15 @@ def t3personel_form(request):
         'son_saat': son_saat,
         'son_dakika': son_dakika,
         'form_goster': form_goster,
-        'eski_veriler': eski_veriler
+        'eski_veriler': eski_veriler,
+        'buton_goster': buton_goster,
+        'form_gonderildi': form_gonderildi
     }
+    
+    # Form başarıyla gönderildi mesajını temizle
+    if form_gonderildi:
+        request.session['t3personel_form_gonderildi'] = False
+    
     return render(request, 'forms/t3personel_form.html', context)
 
 @login_required

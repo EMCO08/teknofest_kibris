@@ -15,115 +15,130 @@
             Veri girişi için son saat {{ son_saat|stringformat:"02d" }}:{{ son_dakika|stringformat:"02d" }}'dır. Şu an veri girişi yapamazsınız.
         </div>
         {% endif %}
-
-        {% if guncelleme_modu %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            Bugünkü verileri düzenlemektesiniz.
+        
+        {% if form_gonderildi %}
+        <!-- Başarı Mesajı -->
+        <div id="success-message" class="text-center my-5 py-5">
+            <div class="display-1 text-success mb-3">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
         </div>
-        {% endif %}
-
-        {% if not atamalar.exists %}
-        <div class="alert alert-warning">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
+        {% elif buton_goster %}
+        <!-- Buton Görünümü -->
+        <div class="text-center my-5 py-5">
+            <a href="?goster=form" class="btn btn-primary btn-lg px-5 py-3">
+                <i class="fas fa-clipboard-list me-2"></i>T3 Personel Formu
+            </a>
         </div>
         {% else %}
-            {% if not form_goster and bugunku_kayitlar.exists %}
-            <!-- Veri Görüntüleme Modu (Matrix Tablo) -->
-            <div class="alert alert-success mb-4">
-                <i class="fas fa-check-circle me-2"></i>
-                Bugün gönderdiğiniz verileri görmektesiniz.
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Koordinatörlük</th>
-                            <th>Birim</th>
-                            <th>Öğle Yemeği</th>
-                            <th>Akşam Yemeği</th>
-                            <th>Lunchbox</th>
-                            <th>Coffee Break</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for veri in bugunku_kayitlar %}
-                        <tr>
-                            <td>{{ veri.koordinatorluk }}</td>
-                            <td>{{ veri.birim }}</td>
-                            <td>{{ veri.ogle_yemegi }}</td>
-                            <td>{{ veri.aksam_yemegi }}</td>
-                            <td>{{ veri.lunchbox }}</td>
-                            <td>{{ veri.coffee_break }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                {% if saat_uygun %}
-                <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning">
-                    <i class="fas fa-edit me-1"></i>Güncelle
-                </a>
-                {% endif %}
+            {% if not atamalar.exists %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
             </div>
             {% else %}
-            <!-- Form Görüntüleme Modu -->
-            {% if not guncelleme_modu %}
-            <div class="alert alert-info mb-4">
-                <i class="fas fa-clock me-2"></i>
-                Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
-            </div>
-            {% endif %}
-            
-            <form method="post" class="needs-validation" novalidate>
-                {% csrf_token %}
+                {% if not form_goster and bugunku_kayitlar.exists %}
+                <!-- Veri Görüntüleme Modu (Matrix Tablo) -->
+                <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Bugün gönderdiğiniz verileri görmektesiniz.
+                </div>
                 
-                {% for atama in atamalar %}
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
-                                <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
-                                       min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'ogle' }}{% else %}0{% endif %}" 
-                                       required {% if not saat_uygun %}disabled{% endif %}>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
-                                <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
-                                       min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'aksam' }}{% else %}0{% endif %}" 
-                                       required {% if not saat_uygun %}disabled{% endif %}>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
-                                <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
-                                       min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'lunchbox' }}{% else %}0{% endif %}" 
-                                       required {% if not saat_uygun %}disabled{% endif %}>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
-                                <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
-                                       min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'coffee' }}{% else %}0{% endif %}" 
-                                       required {% if not saat_uygun %}disabled{% endif %}>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Koordinatörlük</th>
+                                <th>Birim</th>
+                                <th>Öğle Yemeği</th>
+                                <th>Akşam Yemeği</th>
+                                <th>Lunchbox</th>
+                                <th>Coffee Break</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for veri in bugunku_kayitlar %}
+                            <tr>
+                                <td>{{ veri.koordinatorluk }}</td>
+                                <td>{{ veri.birim }}</td>
+                                <td>{{ veri.ogle_yemegi }}</td>
+                                <td>{{ veri.aksam_yemegi }}</td>
+                                <td>{{ veri.lunchbox }}</td>
+                                <td>{{ veri.coffee_break }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    {% if saat_uygun %}
+                    <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Güncelle
+                    </a>
+                    {% endif %}
+                </div>
+                {% else %}
+                <!-- Form Görüntüleme Modu -->
+                {% if guncelleme_modu %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Bugünkü verileri düzenlemektesiniz.
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-clock me-2"></i>
+                    Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
+                </div>
+                {% endif %}
+                
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    {% for atama in atamalar %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
+                                    <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
+                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'ogle' }}{% else %}0{% endif %}" 
+                                            required {% if not saat_uygun %}disabled{% endif %}>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
+                                    <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
+                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'aksam' }}{% else %}0{% endif %}" 
+                                            required {% if not saat_uygun %}disabled{% endif %}>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
+                                    <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
+                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'lunchbox' }}{% else %}0{% endif %}" 
+                                            required {% if not saat_uygun %}disabled{% endif %}>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
+                                    <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
+                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'coffee' }}{% else %}0{% endif %}" 
+                                            required {% if not saat_uygun %}disabled{% endif %}>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                    <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
-                        <i class="fas fa-save me-1"></i>{% if guncelleme_modu %}Güncelle{% else %}Kaydet{% endif %}
-                    </button>
-                </div>
-            </form>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
+                            <i class="fas fa-save me-1"></i>{% if guncelleme_modu %}Güncelle{% else %}Gönder{% endif %}
+                        </button>
+                    </div>
+                </form>
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>
@@ -132,6 +147,14 @@
 <script>
 // Sayfa yüklendiğinde saat kontrolünü yap
 document.addEventListener('DOMContentLoaded', function() {
+    // Başarı mesajı varsa 2 saniye sonra yönlendir
+    var successMessage = document.getElementById('success-message');
+    if (successMessage) {
+        setTimeout(function() {
+            window.location.reload();
+        }, 2000);
+    }
+    
     // Sunucudan gelen değeri al
     var saatUygun = "{{ saat_uygun }}" === "True";
     var submitButton = document.querySelector('button[type="submit"]');
