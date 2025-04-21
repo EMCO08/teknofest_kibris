@@ -46,10 +46,10 @@
                         <tr>
                             <td>{{ veri.koordinatorluk }}</td>
                             <td>{{ veri.birim }}</td>
-                            <td>{{ veri.ogle_yemegi }}</td>
-                            <td>{{ veri.aksam_yemegi }}</td>
-                            <td>{{ veri.lunchbox }}</td>
-                            <td>{{ veri.coffee_break }}</td>
+                            <td class="data-cell">{{ veri.ogle_yemegi }}</td>
+                            <td class="data-cell">{{ veri.aksam_yemegi }}</td>
+                            <td class="data-cell">{{ veri.lunchbox }}</td>
+                            <td class="data-cell">{{ veri.coffee_break }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -57,7 +57,7 @@
             </div>
 
             <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning" {% if not saat_uygun %}disabled{% endif %}>
+                <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-lg" {% if not saat_uygun %}disabled{% endif %}>
                     <i class="fas fa-edit me-1"></i>Verileri Düzenle
                 </a>
             </div>
@@ -122,7 +122,7 @@
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-                    <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
+                    <button type="submit" class="btn btn-danger btn-lg" {% if not saat_uygun %}disabled{% endif %}>
                         <i class="fas fa-save me-1"></i>{% if guncelleme_modu %}Değişiklikleri Kaydet{% else %}Kaydet{% endif %}
                     </button>
                 </div>
@@ -142,8 +142,17 @@
     vertical-align: middle;
 }
 .matrix-table th {
-    background-color: #4e73df;
+    background-color: #343a40;
     color: white;
+}
+.matrix-table .data-cell {
+    font-weight: bold;
+    font-size: 1.1em;
+    background-color: #f8f9fa;
+}
+.btn-lg {
+    padding: 10px 20px;
+    font-size: 1.1rem;
 }
 </style>
 

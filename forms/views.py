@@ -111,7 +111,7 @@ def t3personel_form(request):
         son_saat = int(SistemAyarlari.objects.get(anahtar='veri_guncelleme_son_saat').deger)
         son_dakika = int(SistemAyarlari.objects.get(anahtar='veri_guncelleme_son_dakika').deger)
     except (SistemAyarlari.DoesNotExist, ValueError):
-        son_saat = 12
+        son_saat = 16  # Varsayılan değeri 16:00 yapalım (ekran görüntüsüne göre)
         son_dakika = 0
     
     # Belirlenen saatten önce mi kontrol et
@@ -120,11 +120,24 @@ def t3personel_form(request):
     # Güncelleme modu kontrolü
     guncelleme_modu = request.session.get('t3personel_guncelleme_modu', False)
     
-    # Daha önce aynı gün veri gönderilmişse onları çek
-    bugunku_kayitlar = T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun)
+    # Daha önce aynı gün veri gönderilmişse onları çek - Sorguyu basitleştirelim
+    bugunku_kayitlar = T3PersonelVeriler.objects.filter(
+        kisi=user,
+        submitteddate=bugun
+    )
     
-    # Form gösterim modu (True: form göster, False: tablo göster)
-    form_goster = guncelleme_modu or not bugunku_kayitlar.exists()
+    # Form gösterim modu - mantığı netleştirelim
+    has_entries = bugunku_kayitlar.exists()
+    # Eğer güncelleme modundaysak form göster, değilse ve bugün kayıt varsa tablo göster
+    form_goster = guncelleme_modu or not has_entries
+    
+    # Session'daki güncelleme modunu POST dışında (GET istekleri için) temizleyelim
+    # Bu sayede sayfayı yenileyince form moduna tekrar geçmesini engelleyebiliriz
+    if request.method != 'POST' and not guncelleme_modu and has_entries:
+        # Eğer güncelleme modunda değilsek ve bugün kayıtlar varsa, 
+        # session'ı temizleyelim (güvenlik için)
+        if 't3personel_guncelleme_modu' in request.session:
+            del request.session['t3personel_guncelleme_modu']
 
     if not atamalar.exists():
         messages.warning(request, 'Henüz size atanmış koordinatörlük ve birim bulunmamaktadır.')
@@ -135,7 +148,9 @@ def t3personel_form(request):
             return redirect('forms:t3personel_form')
 
         if guncelleme_modu:
+            # Güncelleme modundaysa mevcut kayıtları sil
             T3PersonelVeriler.objects.filter(kisi=user, submitteddate=bugun).delete()
+            # Güncelleme modunu kapat
             request.session['t3personel_guncelleme_modu'] = False
             
         for atama in atamalar:
@@ -158,7 +173,7 @@ def t3personel_form(request):
                     lunchbox=int(lunchbox_sayisi),
                     coffee_break=int(coffee_sayisi)
                 )
-
+        
         log_user_action(request, 'T3 Personel Formu Gönderildi', 'T3 Personel Form')
         messages.success(request, 'Sipariş bilgileriniz başarıyla kaydedildi.')
         return redirect('forms:t3personel_form')
