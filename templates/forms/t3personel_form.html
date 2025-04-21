@@ -39,42 +39,58 @@
             </div>
             {% else %}
                 {% if not form_goster and bugunku_kayitlar.exists %}
-                <!-- Veri Görüntüleme Modu (Matrix Tablo) -->
+                <!-- Veri Görüntüleme Modu (Dikey Görünüm) -->
                 <div class="alert alert-success mb-4">
                     <i class="fas fa-check-circle me-2"></i>
                     Bugün gönderdiğiniz verileri görmektesiniz.
                 </div>
                 
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Koordinatörlük</th>
-                                <th>Birim</th>
-                                <th>Öğle Yemeği</th>
-                                <th>Akşam Yemeği</th>
-                                <th>Lunchbox</th>
-                                <th>Coffee Break</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for veri in bugunku_kayitlar %}
-                            <tr>
-                                <td>{{ veri.koordinatorluk }}</td>
-                                <td>{{ veri.birim }}</td>
-                                <td>{{ veri.ogle_yemegi }}</td>
-                                <td>{{ veri.aksam_yemegi }}</td>
-                                <td>{{ veri.lunchbox }}</td>
-                                <td>{{ veri.coffee_break }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <!-- Dikey kartlarda verileri göster -->
+                <div class="row">
+                    {% for veri in bugunku_kayitlar %}
+                    <div class="col-md-12 mb-3">
+                        <div class="card border-light h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">{{ veri.koordinatorluk }} - {{ veri.birim }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <div class="data-item">
+                                            <span class="data-label">Öğle Yemeği:</span>
+                                            <span class="data-value">{{ veri.ogle_yemegi }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="data-item">
+                                            <span class="data-label">Akşam Yemeği:</span>
+                                            <span class="data-value">{{ veri.aksam_yemegi }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="data-item">
+                                            <span class="data-label">Lunchbox:</span>
+                                            <span class="data-value">{{ veri.lunchbox }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="data-item">
+                                            <span class="data-label">Coffee Break:</span>
+                                            <span class="data-value">{{ veri.coffee_break }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
                     {% if saat_uygun %}
-                    <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning">
+                    <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-lg px-5">
                         <i class="fas fa-edit me-1"></i>Güncelle
                     </a>
                     {% endif %}
@@ -144,10 +160,29 @@
     </div>
 </div>
 
+<style>
+.data-item {
+    padding: 8px 15px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    margin-bottom: 10px;
+}
+.data-label {
+    font-weight: bold;
+    color: #495057;
+}
+.data-value {
+    font-size: 1.2em;
+    margin-left: 8px;
+    font-weight: 500;
+    color: #000;
+}
+</style>
+
 <script>
 // Sayfa yüklendiğinde saat kontrolünü yap
 document.addEventListener('DOMContentLoaded', function() {
-    // Başarı mesajı varsa 2 saniye sonra yönlendir
+    // Başarı mesajı varsa 2 saniye sonra buton sayfasına yönlendir
     var successMessage = document.getElementById('success-message');
     if (successMessage) {
         setTimeout(function() {
