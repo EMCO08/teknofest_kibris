@@ -14,11 +14,6 @@
             <i class="fas fa-exclamation-triangle me-2"></i>
             Veri girişi için son saat {{ son_saat|stringformat:"02d" }}:{{ son_dakika|stringformat:"02d" }}'dır. Şu an veri girişi yapamazsınız.
         </div>
-        <div class="text-center mb-4">
-            <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
-                <i class="fas fa-home me-1"></i>Anasayfaya Git
-            </a>
-        </div>
         {% endif %}
         
         {% if form_gonderildi %}
@@ -28,6 +23,11 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
+            <div class="mt-4">
+                <a href="{% url 'forms:t3personel_form' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>Anasayfaya Git
+                </a>
+            </div>
         </div>
         {% elif buton_goster %}
         <!-- Buton Görünümü -->
@@ -42,22 +42,12 @@
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
             </div>
-            <div class="text-center mb-4">
-                <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
-                    <i class="fas fa-home me-1"></i>Anasayfaya Git
-                </a>
-            </div>
             {% else %}
                 {% if not form_goster and bugunku_kayitlar.exists %}
                 <!-- Veri Görüntüleme Modu (Dikey Görünüm) -->
                 <div class="alert alert-success mb-4">
                     <i class="fas fa-check-circle me-2"></i>
                     Bugün gönderdiğiniz verileri görmektesiniz.
-                </div>
-                <div class="text-center mb-4">
-                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
-                        <i class="fas fa-home me-1"></i>Anasayfaya Git
-                    </a>
                 </div>
                 
                 <!-- Dikey kartlarda verileri göster -->
@@ -119,20 +109,10 @@
                     <i class="fas fa-info-circle me-2"></i>
                     Bugünkü verileri düzenlemektesiniz.
                 </div>
-                <div class="text-center mb-4">
-                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
-                        <i class="fas fa-home me-1"></i>Anasayfaya Git
-                    </a>
-                </div>
                 {% else %}
                 <div class="alert alert-info mb-4">
                     <i class="fas fa-clock me-2"></i>
                     Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
-                </div>
-                <div class="text-center mb-4">
-                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
-                        <i class="fas fa-home me-1"></i>Anasayfaya Git
-                    </a>
                 </div>
                 {% endif %}
                 
