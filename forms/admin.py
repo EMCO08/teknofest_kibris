@@ -10,13 +10,13 @@ from .models import (
 
 @admin.register(T3PersonelAtama)
 class T3PersonelAtamaAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'koordinatorluk', 'birim')
-    list_filter = ('koordinatorluk', 'birim')
+    list_display = ('kisi', 'koordinatorluk', 'birim', 'coffee_break')
+    list_filter = ('koordinatorluk', 'birim', 'coffee_break')
     search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'koordinatorluk', 'birim')
 
 @admin.register(T3PersonelVeriler)
 class T3PersonelVerilerAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'koordinatorluk', 'birim', 'ogle_yemegi', 'aksam_yemegi', 'lunchbox', 'submitteddate', 'submittedtime')
+    list_display = ('kisi', 'koordinatorluk', 'birim', 'ogle_yemegi', 'aksam_yemegi', 'lunchbox', 'coffee_break', 'submitteddate', 'submittedtime')
     list_filter = ('koordinatorluk', 'birim', 'submitteddate')
     search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'koordinatorluk', 'birim')
     readonly_fields = ('submitteddate', 'submittedtime')

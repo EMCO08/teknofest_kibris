@@ -5,6 +5,7 @@ class T3PersonelAtama(models.Model):
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='atamalar')
     koordinatorluk = models.CharField(max_length=100)
     birim = models.CharField(max_length=100)
+    coffee_break = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.kisi.get_full_name()} - {self.koordinatorluk} - {self.birim}"

@@ -460,7 +460,8 @@ def t3personel_atama_ekle(request):
         kisi_ids = request.POST.getlist('kisi')
         koordinatorlukler = request.POST.getlist('koordinatorluk')
         birimler = request.POST.getlist('birim')
-
+        coffee_breaks = request.POST.getlist('coffee_break')
+        
         # Her bir satır için işlem yap
         basarili_kayit = 0
         hata_kayit = 0
@@ -471,6 +472,7 @@ def t3personel_atama_ekle(request):
                     kisi = get_object_or_404(User, id=kisi_ids[i])
                     koordinatorluk = koordinatorlukler[i]
                     birim = birimler[i]
+                    coffee_break = True if f'{i}' in coffee_breaks else False
 
                     # Boş değer kontrolü
                     if not koordinatorluk or not birim:
@@ -486,7 +488,8 @@ def t3personel_atama_ekle(request):
                     T3PersonelAtama.objects.create(
                         kisi=kisi,
                         koordinatorluk=koordinatorluk,
-                        birim=birim
+                        birim=birim,
+                        coffee_break=coffee_break
                     )
                     basarili_kayit += 1
                 except Exception as e:

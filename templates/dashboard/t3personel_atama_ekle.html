@@ -82,6 +82,13 @@
                             
                             <input type="text" name="birim" class="form-control" placeholder="Birim" required>
                             
+                            <div class="form-check ms-2">
+                                <input class="form-check-input" type="checkbox" name="coffee_break" id="coffee_break">
+                                <label class="form-check-label" for="coffee_break">
+                                    Coffee Break
+                                </label>
+                            </div>
+                            
                             <button type="button" class="btn btn-danger btn-remove" style="display: none;"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
@@ -111,6 +118,7 @@
                                 <th>Personel</th>
                                 <th>Koordinatörlük</th>
                                 <th>Birim</th>
+                                <th>Coffee Break</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,6 +127,13 @@
                                 <td>{{ atama.kisi.get_full_name }}</td>
                                 <td>{{ atama.koordinatorluk }}</td>
                                 <td>{{ atama.birim }}</td>
+                                <td>
+                                    {% if atama.coffee_break %}
+                                        <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                    {% else %}
+                                        <span class="badge bg-danger"><i class="fas fa-times"></i></span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>

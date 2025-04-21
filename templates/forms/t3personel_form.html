@@ -75,12 +75,14 @@
                                             <span class="data-value">{{ veri.lunchbox }}</span>
                                         </div>
                                     </div>
+                                    {% if veri.coffee_break > 0 %}
                                     <div class="col-md-6">
                                         <div class="data-item">
                                             <span class="data-label">Coffee Break:</span>
                                             <span class="data-value">{{ veri.coffee_break }}</span>
                                         </div>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -137,12 +139,14 @@
                                             min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'lunchbox' }}{% else %}0{% endif %}" 
                                             required {% if not saat_uygun %}disabled{% endif %}>
                                 </div>
+                                {% if atama.coffee_break %}
                                 <div class="col-md-3">
                                     <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
                                     <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
                                             min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'coffee' }}{% else %}0{% endif %}" 
                                             required {% if not saat_uygun %}disabled{% endif %}>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
