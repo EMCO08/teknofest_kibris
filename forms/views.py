@@ -178,9 +178,13 @@ def t3personel_form(request):
             ogle_sayisi = request.POST.get(ogle_key)
             aksam_sayisi = request.POST.get(aksam_key)
             lunchbox_sayisi = request.POST.get(lunchbox_key)
-            coffee_sayisi = request.POST.get(coffee_key)
+            coffee_sayisi = request.POST.get(coffee_key, '0')  # Varsayılan değer olarak '0' atayalım
 
-            if ogle_sayisi and aksam_sayisi and lunchbox_sayisi and coffee_sayisi and ogle_sayisi.isdigit() and aksam_sayisi.isdigit() and lunchbox_sayisi.isdigit() and coffee_sayisi.isdigit():
+            # Öğle, akşam ve lunchbox değerlerinin geçerli olması yeterli
+            if ogle_sayisi and aksam_sayisi and lunchbox_sayisi and ogle_sayisi.isdigit() and aksam_sayisi.isdigit() and lunchbox_sayisi.isdigit():
+                # coffee_sayisi boş değilse ve bir sayı ise onu kullan, değilse 0 olarak kabul et
+                coffee_break_value = int(coffee_sayisi) if coffee_sayisi and coffee_sayisi.isdigit() else 0
+                
                 T3PersonelVeriler.objects.create(
                     kisi=user,
                     koordinatorluk=atama.koordinatorluk,
@@ -188,7 +192,7 @@ def t3personel_form(request):
                     ogle_yemegi=int(ogle_sayisi),
                     aksam_yemegi=int(aksam_sayisi),
                     lunchbox=int(lunchbox_sayisi),
-                    coffee_break=int(coffee_sayisi)
+                    coffee_break=coffee_break_value
                 )
         
         log_user_action(request, 'T3 Personel Formu Gönderildi', 'T3 Personel Form')
