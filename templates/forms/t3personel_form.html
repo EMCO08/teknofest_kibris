@@ -3,51 +3,49 @@
 
 {% block title %}T3 Personel Sipariş Formu - Yemek Otomasyonu{% endblock %}
 
-{% block extra_head %}
-<!-- Başarı mesajı varsa 2 saniye sonra otomatik yönlendirme -->
-{% if form_gonderildi %}
-<meta http-equiv="refresh" content="2;url={% url 'forms:t3personel_form' %}">
-{% endif %}
-{% endblock %}
-
 {% block content %}
 <div class="card shadow-lg fade-in">
     <div class="card-header bg-primary text-white">
         <h3 class="mb-0"><i class="fas fa-utensils me-2"></i>T3 Personel Sipariş Formu</h3>
     </div>
     <div class="card-body">
-        {% if form_gonderildi %}
-        <!-- Başarı Mesajı - Ekran görüntüsündeki gibi stilize edilmiş -->
-        <div id="success-message" class="text-center py-5 my-5">
-            <div class="success-icon mb-4">
-                <i class="fas fa-check"></i>
-            </div>
-            <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
-            
-            <!-- Sayfa 2 saniye sonra otomatik olarak yönlendirilecek -->
-            <div class="mt-3 text-muted small">
-                <span id="redirect-seconds">2</span> saniye sonra ana sayfaya yönlendirileceksiniz...
-            </div>
-        </div>
-        {% elif not saat_uygun %}
+        {% if not saat_uygun %}
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-triangle me-2"></i>
             Veri girişi için son saat {{ son_saat|stringformat:"02d" }}:{{ son_dakika|stringformat:"02d" }}'dır. Şu an veri girişi yapamazsınız.
         </div>
+        <div class="text-center mb-4">
+            <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
+                <i class="fas fa-home me-1"></i>Anasayfaya Git
+            </a>
+        </div>
         {% endif %}
         
-        {% if buton_goster and not form_gonderildi %}
+        {% if form_gonderildi %}
+        <!-- Başarı Mesajı -->
+        <div id="success-message" class="text-center my-5 py-5">
+            <div class="display-1 text-success mb-3">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
+        </div>
+        {% elif buton_goster %}
         <!-- Buton Görünümü -->
         <div class="text-center my-5 py-5">
             <a href="?goster=form" class="btn btn-primary btn-lg px-5 py-3">
                 <i class="fas fa-clipboard-list me-2"></i>T3 Personel Formu
             </a>
         </div>
-        {% elif not form_gonderildi %}
+        {% else %}
             {% if not atamalar.exists %}
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
+            </div>
+            <div class="text-center mb-4">
+                <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
+                    <i class="fas fa-home me-1"></i>Anasayfaya Git
+                </a>
             </div>
             {% else %}
                 {% if not form_goster and bugunku_kayitlar.exists %}
@@ -55,6 +53,11 @@
                 <div class="alert alert-success mb-4">
                     <i class="fas fa-check-circle me-2"></i>
                     Bugün gönderdiğiniz verileri görmektesiniz.
+                </div>
+                <div class="text-center mb-4">
+                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
+                        <i class="fas fa-home me-1"></i>Anasayfaya Git
+                    </a>
                 </div>
                 
                 <!-- Dikey kartlarda verileri göster -->
@@ -116,10 +119,20 @@
                     <i class="fas fa-info-circle me-2"></i>
                     Bugünkü verileri düzenlemektesiniz.
                 </div>
+                <div class="text-center mb-4">
+                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
+                        <i class="fas fa-home me-1"></i>Anasayfaya Git
+                    </a>
+                </div>
                 {% else %}
                 <div class="alert alert-info mb-4">
                     <i class="fas fa-clock me-2"></i>
                     Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
+                </div>
+                <div class="text-center mb-4">
+                    <a href="{% url 'forms:t3personel_form' %}" class="btn btn-secondary">
+                        <i class="fas fa-home me-1"></i>Anasayfaya Git
+                    </a>
                 </div>
                 {% endif %}
                 
@@ -193,40 +206,19 @@
     font-weight: 500;
     color: #000;
 }
-.success-icon {
-    width: 70px;
-    height: 70px;
-    background-color: #28a745;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 15px;
-}
-.success-icon i {
-    color: white;
-    font-size: 40px;
-}
 </style>
 
 <script>
-// Sayfa yüklendiğinde
+// Sayfa yüklendiğinde saat kontrolünü yap
 document.addEventListener('DOMContentLoaded', function() {
-    // Saniye sayacı (eğer başarı sayfasındaysak)
-    var redirectSeconds = document.getElementById('redirect-seconds');
-    if (redirectSeconds) {
-        var seconds = 2;
-        var countInterval = setInterval(function() {
-            seconds--;
-            redirectSeconds.textContent = seconds;
-            if (seconds <= 0) {
-                clearInterval(countInterval);
-                // JavaScript ile de yönlendirme deneyelim
-                window.location.href = "{% url 'forms:t3personel_form' %}";
-            }
-        }, 1000);
+    // Başarı mesajı varsa 2 saniye sonra buton sayfasına yönlendir
+    var successMessage = document.getElementById('success-message');
+    if (successMessage) {
+        setTimeout(function() {
+            window.location.href = "{% url 'forms:t3personel_form' %}";
+        }, 2000);
     }
-
+    
     // Yemek Otomasyonu başlığına tıklandığında
     var logoLinks = document.querySelectorAll('.navbar-brand');
     if (logoLinks.length > 0) {
