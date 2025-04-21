@@ -151,8 +151,22 @@ document.addEventListener('DOMContentLoaded', function() {
     var successMessage = document.getElementById('success-message');
     if (successMessage) {
         setTimeout(function() {
-            window.location.reload();
+            window.location.href = "{% url 'forms:t3personel_form' %}";
         }, 2000);
+    }
+    
+    // Yemek Otomasyonu başlığına tıklandığında
+    var logoLinks = document.querySelectorAll('.navbar-brand');
+    if (logoLinks.length > 0) {
+        for (var i = 0; i < logoLinks.length; i++) {
+            logoLinks[i].addEventListener('click', function(e) {
+                // Sadece düzenleme sayfasında ise bu yönlendirmeyi yap
+                if (!("{{ buton_goster }}" === "True") && ("{{ guncelleme_modu }}" === "True" || "{{ form_goster }}" === "True")) {
+                    e.preventDefault();
+                    window.location.href = "{% url 'forms:t3personel_form' %}?return_to_button=true";
+                }
+            });
+        }
     }
     
     // Sunucudan gelen değeri al

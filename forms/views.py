@@ -126,6 +126,12 @@ def t3personel_form(request):
     # Form başarıyla gönderildi mesajı
     form_gonderildi = request.session.get('t3personel_form_gonderildi', False)
     
+    # Logo/Başlığa tıklandığında buton sayfasına dön
+    if request.GET.get('return_to_button') == 'true':
+        request.session['t3personel_form_buton_goster'] = True
+        request.session['t3personel_guncelleme_modu'] = False
+        return redirect('forms:t3personel_form')
+    
     # Butona tıklandığında
     if request.GET.get('goster') == 'form':
         buton_goster = False
