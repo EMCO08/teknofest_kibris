@@ -3,6 +3,13 @@
 
 {% block title %}T3 Personel Sipariş Formu - Yemek Otomasyonu{% endblock %}
 
+{% block extra_head %}
+<!-- Başarı mesajı varsa 2 saniye sonra otomatik yönlendirme -->
+{% if form_gonderildi %}
+<meta http-equiv="refresh" content="2;url={% url 'forms:t3personel_form' %}">
+{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="card shadow-lg fade-in">
     <div class="card-header bg-primary text-white">
@@ -17,16 +24,10 @@
             </div>
             <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
             
-            <!-- Gizli sayaç - Hemen yönlendirme için kullanılacak -->
-            <script>
-                // Sayfa yüklenir yüklenmez başlat
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Tam olarak 2 saniye sonra yönlendir
-                    setTimeout(function() {
-                        window.location.href = "{% url 'forms:t3personel_form' %}";
-                    }, 2000);
-                });
-            </script>
+            <!-- Sayfa 2 saniye sonra otomatik olarak yönlendirilecek -->
+            <div class="mt-3 text-muted small">
+                <span id="redirect-seconds">2</span> saniye sonra ana sayfaya yönlendirileceksiniz...
+            </div>
         </div>
         {% elif not saat_uygun %}
         <div class="alert alert-warning">
@@ -209,8 +210,23 @@
 </style>
 
 <script>
-// Sayfa yüklendiğinde saat kontrolünü yap
+// Sayfa yüklendiğinde
 document.addEventListener('DOMContentLoaded', function() {
+    // Saniye sayacı (eğer başarı sayfasındaysak)
+    var redirectSeconds = document.getElementById('redirect-seconds');
+    if (redirectSeconds) {
+        var seconds = 2;
+        var countInterval = setInterval(function() {
+            seconds--;
+            redirectSeconds.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(countInterval);
+                // JavaScript ile de yönlendirme deneyelim
+                window.location.href = "{% url 'forms:t3personel_form' %}";
+            }
+        }, 1000);
+    }
+
     // Yemek Otomasyonu başlığına tıklandığında
     var logoLinks = document.querySelectorAll('.navbar-brand');
     if (logoLinks.length > 0) {
