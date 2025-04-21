@@ -16,151 +16,162 @@
         </div>
         {% endif %}
         
-        {% if form_gonderildi %}
-        <!-- Başarı Mesajı -->
-        <div id="success-message" class="text-center my-5 py-5">
-            <div class="display-1 text-success mb-3">
-                <i class="fas fa-check-circle"></i>
+        <div id="content-area">
+            {% if form_gonderildi %}
+            <!-- Başarı Mesajı -->
+            <div id="success-message" class="text-center my-5 py-5">
+                <div class="display-1 text-success mb-3">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
             </div>
-            <h2 class="text-success">Verileriniz başarıyla gönderildi!</h2>
-        </div>
-        {% elif buton_goster %}
-        <!-- Buton Görünümü -->
-        <div class="text-center my-5 py-5">
-            <a href="?goster=form" class="btn btn-primary btn-lg px-5 py-3">
-                <i class="fas fa-clipboard-list me-2"></i>T3 Personel Formu
-            </a>
-        </div>
-        {% else %}
-            {% if not atamalar.exists %}
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
+            {% elif buton_goster %}
+            <!-- Buton Görünümü -->
+            <div id="button-container" class="text-center my-5 py-5">
+                <a href="?goster=form" class="btn btn-primary btn-lg px-5 py-3">
+                    <i class="fas fa-clipboard-list me-2"></i>T3 Personel Formu
+                </a>
             </div>
             {% else %}
-                {% if not form_goster and bugunku_kayitlar.exists %}
-                <!-- Veri Görüntüleme Modu (Dikey Görünüm) -->
-                <div class="alert alert-success mb-4">
-                    <i class="fas fa-check-circle me-2"></i>
-                    Bugün gönderdiğiniz verileri görmektesiniz.
+                {% if not atamalar.exists %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Henüz size atanmış koordinatörlük ve birim bulunmamaktadır. Lütfen sistem yöneticisi ile iletişime geçin.
                 </div>
-                
-                <!-- Dikey kartlarda verileri göster -->
-                <div class="row">
-                    {% for veri in bugunku_kayitlar %}
-                    <div class="col-md-12 mb-3">
-                        <div class="card border-light h-100">
-                            <div class="card-header bg-light">
-                                <h5 class="mb-0">{{ veri.koordinatorluk }} - {{ veri.birim }}</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-md-6">
-                                        <div class="data-item">
-                                            <span class="data-label">Öğle Yemeği:</span>
-                                            <span class="data-value">{{ veri.ogle_yemegi }}</span>
+                {% else %}
+                    {% if not form_goster and bugunku_kayitlar.exists %}
+                    <!-- Veri Görüntüleme Modu (Dikey Görünüm) -->
+                    <div class="alert alert-success mb-4">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Bugün gönderdiğiniz verileri görmektesiniz.
+                    </div>
+                    
+                    <!-- Dikey kartlarda verileri göster -->
+                    <div class="row">
+                        {% for veri in bugunku_kayitlar %}
+                        <div class="col-md-12 mb-3">
+                            <div class="card border-light h-100">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">{{ veri.koordinatorluk }} - {{ veri.birim }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-2">
+                                        <div class="col-md-6">
+                                            <div class="data-item">
+                                                <span class="data-label">Öğle Yemeği:</span>
+                                                <span class="data-value">{{ veri.ogle_yemegi }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="data-item">
+                                                <span class="data-label">Akşam Yemeği:</span>
+                                                <span class="data-value">{{ veri.aksam_yemegi }}</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="data-item">
-                                            <span class="data-label">Akşam Yemeği:</span>
-                                            <span class="data-value">{{ veri.aksam_yemegi }}</span>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="data-item">
+                                                <span class="data-label">Lunchbox:</span>
+                                                <span class="data-value">{{ veri.lunchbox }}</span>
+                                            </div>
                                         </div>
+                                        {% if veri.coffee_break > 0 %}
+                                        <div class="col-md-6">
+                                            <div class="data-item">
+                                                <span class="data-label">Coffee Break:</span>
+                                                <span class="data-value">{{ veri.coffee_break }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="data-item">
-                                            <span class="data-label">Lunchbox:</span>
-                                            <span class="data-value">{{ veri.lunchbox }}</span>
-                                        </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        {% if saat_uygun %}
+                        <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-lg px-5">
+                            <i class="fas fa-edit me-1"></i>Güncelle
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <!-- Form Görüntüleme Modu -->
+                    {% if guncelleme_modu %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Bugünkü verileri düzenlemektesiniz.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-clock me-2"></i>
+                        Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% for atama in atamalar %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
+                                        <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
+                                                min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'ogle' }}{% else %}0{% endif %}" 
+                                                required {% if not saat_uygun %}disabled{% endif %}>
                                     </div>
-                                    {% if veri.coffee_break > 0 %}
-                                    <div class="col-md-6">
-                                        <div class="data-item">
-                                            <span class="data-label">Coffee Break:</span>
-                                            <span class="data-value">{{ veri.coffee_break }}</span>
-                                        </div>
+                                    <div class="col-md-3">
+                                        <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
+                                        <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
+                                                min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'aksam' }}{% else %}0{% endif %}" 
+                                                required {% if not saat_uygun %}disabled{% endif %}>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
+                                        <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
+                                                min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'lunchbox' }}{% else %}0{% endif %}" 
+                                                required {% if not saat_uygun %}disabled{% endif %}>
+                                    </div>
+                                    {% if atama.coffee_break %}
+                                    <div class="col-md-3">
+                                        <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
+                                        <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
+                                                min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'coffee' }}{% else %}0{% endif %}" 
+                                                required {% if not saat_uygun %}disabled{% endif %}>
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
+                        {% endfor %}
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
-                    {% if saat_uygun %}
-                    <a href="{% url 'forms:t3personel_form_guncelle' %}" class="btn btn-warning btn-lg px-5">
-                        <i class="fas fa-edit me-1"></i>Güncelle
-                    </a>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
+                                <i class="fas fa-save me-1"></i>{% if guncelleme_modu %}Güncelle{% else %}Gönder{% endif %}
+                            </button>
+                        </div>
+                    </form>
                     {% endif %}
-                </div>
-                {% else %}
-                <!-- Form Görüntüleme Modu -->
-                {% if guncelleme_modu %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Bugünkü verileri düzenlemektesiniz.
-                </div>
-                {% else %}
-                <div class="alert alert-info mb-4">
-                    <i class="fas fa-clock me-2"></i>
-                    Bugün {{ son_saat }}:00'e kadar veriler girilmelidir.
-                </div>
-                {% endif %}
-                
-                <form method="post" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    
-                    {% for atama in atamalar %}
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">{{ atama.koordinatorluk }} - {{ atama.birim }}</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <label for="ogle_{{ atama.id }}" class="form-label">Öğle Yemeği</label>
-                                    <input type="number" class="form-control" id="ogle_{{ atama.id }}" name="ogle_{{ atama.id }}" 
-                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'ogle' }}{% else %}0{% endif %}" 
-                                            required {% if not saat_uygun %}disabled{% endif %}>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="aksam_{{ atama.id }}" class="form-label">Akşam Yemeği</label>
-                                    <input type="number" class="form-control" id="aksam_{{ atama.id }}" name="aksam_{{ atama.id }}" 
-                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'aksam' }}{% else %}0{% endif %}" 
-                                            required {% if not saat_uygun %}disabled{% endif %}>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="lunchbox_{{ atama.id }}" class="form-label">Lunchbox</label>
-                                    <input type="number" class="form-control" id="lunchbox_{{ atama.id }}" name="lunchbox_{{ atama.id }}" 
-                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'lunchbox' }}{% else %}0{% endif %}" 
-                                            required {% if not saat_uygun %}disabled{% endif %}>
-                                </div>
-                                {% if atama.coffee_break %}
-                                <div class="col-md-3">
-                                    <label for="coffee_{{ atama.id }}" class="form-label">Coffee Break</label>
-                                    <input type="number" class="form-control" id="coffee_{{ atama.id }}" name="coffee_{{ atama.id }}" 
-                                            min="0" value="{% if eski_veriler and atama.id in eski_veriler %}{{ eski_veriler|get_dict_item:atama.id|get_dict_item:'coffee' }}{% else %}0{% endif %}" 
-                                            required {% if not saat_uygun %}disabled{% endif %}>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
-                            <i class="fas fa-save me-1"></i>{% if guncelleme_modu %}Güncelle{% else %}Gönder{% endif %}
-                        </button>
-                    </div>
-                </form>
                 {% endif %}
             {% endif %}
-        {% endif %}
+        </div>
+
+        <!-- Gizli buton taslağı, success message sonrası gösterilecek -->
+        <div id="hidden-button-template" class="d-none">
+            <div class="text-center my-5 py-5">
+                <a href="?goster=form" class="btn btn-primary btn-lg px-5 py-3">
+                    <i class="fas fa-clipboard-list me-2"></i>T3 Personel Formu
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -181,16 +192,38 @@
     font-weight: 500;
     color: #000;
 }
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
 </style>
 
 <script>
 // Sayfa yüklendiğinde saat kontrolünü yap
 document.addEventListener('DOMContentLoaded', function() {
-    // Başarı mesajı varsa 2 saniye sonra buton sayfasına yönlendir
+    // Başarı mesajı varsa 2 saniye sonra butona dönüştür
     var successMessage = document.getElementById('success-message');
+    var contentArea = document.getElementById('content-area');
+    var hiddenButtonTemplate = document.getElementById('hidden-button-template');
+    
     if (successMessage) {
+        // Tam olarak 2 saniye sonra butona geçiş
         setTimeout(function() {
-            window.location.href = "{% url 'forms:t3personel_form' %}";
+            // Başarı mesajını kaldır
+            successMessage.style.display = 'none';
+            
+            // Buton taslağını içeriğe koy
+            contentArea.innerHTML = hiddenButtonTemplate.innerHTML;
+            
+            // URL'yi geçmiş olarak sil
+            if (history.pushState) {
+                var newURL = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.pushState({path: newURL}, '', newURL);
+            }
         }, 2000);
     }
     
