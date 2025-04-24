@@ -58,7 +58,13 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="gun" class="form-label">Gün</label>
-                            <input type="date" class="form-control" id="gun" name="gun" required>
+                            <select class="form-control" id="gun" name="gun" required>
+                                <option value="" disabled selected>Seçiniz</option>
+                                <option value="1. Gün">1. Gün</option>
+                                <option value="2. Gün">2. Gün</option>
+                                <option value="3. Gün">3. Gün</option>
+                                <option value="4. Gün">4. Gün</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label for="saat" class="form-label">Saat</label>
@@ -68,8 +74,28 @@
                     
                     <div class="mb-3">
                         <label for="alan" class="form-label">Alan</label>
-                        <input type="text" class="form-control" id="alan" name="alan" required>
-                        <div class="form-text">Örnek: Yemekhane, Mutfak, Depo, vb.</div>
+                        <select class="form-control" id="alan" name="alan" required>
+                            <option value="" disabled selected>Seçiniz</option>
+                            <option value="Bilişim Koordinatörlüğü">Bilişim Koordinatörlüğü</option>
+                            <option value="Bursiyer Koordinatörülüğü">Bursiyer Koordinatörülüğü</option>
+                            <option value="demoKx">demoKx</option>
+                            <option value="Deneyap Kart Koordinatörlüğü">Deneyap Kart Koordinatörlüğü</option>
+                            <option value="Deneyap Koordinatörlüğü">Deneyap Koordinatörlüğü</option>
+                            <option value="Eğitim Ar-Ge">Eğitim Ar-Ge</option>
+                            <option value="Fuar Koordinatörlüğü">Fuar Koordinatörlüğü</option>
+                            <option value="Girişim Koordinatörlüğü">Girişim Koordinatörlüğü</option>
+                            <option value="İdari İşler Koordinatörlüğü">İdari İşler Koordinatörlüğü</option>
+                            <option value="İnsan Kaynakları">İnsan Kaynakları</option>
+                            <option value="Kurumsal İletişim Koordinatörlüğü">Kurumsal İletişim Koordinatörlüğü</option>
+                            <option value="Mimari Tasarım Koordinatörlüğü">Mimari Tasarım Koordinatörlüğü</option>
+                            <option value="Operasyon Koordinatörlüğü">Operasyon Koordinatörlüğü</option>
+                            <option value="Saha Koord.">Saha Koord.</option>
+                            <option value="Satış ve Pazarlama Koordinatörlüğü">Satış ve Pazarlama Koordinatörlüğü</option>
+                            <option value="testKoordinatorluk">testKoordinatorluk</option>
+                            <option value="Ulaşım Koordinatörlüğü">Ulaşım Koordinatörlüğü</option>
+                            <option value="Yarışmalar Koordinatörlüğü">Yarışmalar Koordinatörlüğü</option>
+                        </select>
+                        <div class="form-text">Lütfen alan seçiniz.</div>
                     </div>
                     
                     <div class="mb-3">
@@ -108,11 +134,8 @@
 
 {% block extra_js %}
 <script>
-    // Bugünün tarihini varsayılan olarak ayarla
+    // Sadece mevcut saati varsayılan olarak ayarla
     document.addEventListener('DOMContentLoaded', function() {
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('gun').value = today;
-        
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
