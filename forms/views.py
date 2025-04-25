@@ -151,9 +151,17 @@ def t3personel_form(request):
         submitteddate=bugun
     )
     
-    # Form gösterim modu - mantığı netleştirelim
+    # Kullanıcı daha önce bugün veri girdiyse
     has_entries = bugunku_kayitlar.exists()
-    # Eğer güncelleme modundaysak form göster, değilse ve bugün kayıt varsa tablo göster
+    
+    # Eğer kullanıcı daha önce bugün veri girdiyse ve güncelleme modunda değilse,
+    # otomatik olarak güncelleme moduna geçiş yapalım
+    if has_entries and not guncelleme_modu and not buton_goster:
+        guncelleme_modu = True
+        request.session['t3personel_guncelleme_modu'] = True
+    
+    # Form gösterim modu - mantığı netleştirelim
+    # Eğer kullanıcı daha önce bugün veri girdiyse form_goster = True olacak ama güncelleme modunda olacak
     form_goster = guncelleme_modu or not has_entries
     
     # Session'daki güncelleme modunu POST dışında (GET istekleri için) temizleyelim
@@ -169,6 +177,13 @@ def t3personel_form(request):
     if request.method == 'POST':
         if not saat_uygun:
             messages.error(request, f'Veri girişi için son saat {son_saat:02d}:{son_dakika:02d}\'dır. Şu an veri girişi yapamazsınız.')
+            return redirect('forms:t3personel_form')
+
+        # Güncelleme modunda değilse ve zaten bugün kayıt varsa
+        if not guncelleme_modu and has_entries:
+            messages.warning(request, 'Bugün zaten veri girişi yaptınız. Sadece mevcut verilerinizi güncelleyebilirsiniz.')
+            # Formu güncelleme modunda göstermek için session'ı ayarla
+            request.session['t3personel_guncelleme_modu'] = True
             return redirect('forms:t3personel_form')
 
         if guncelleme_modu:
@@ -212,7 +227,7 @@ def t3personel_form(request):
 
     # Form alanları için eski değerleri hazırla
     eski_veriler = {}
-    if bugunku_kayitlar.exists() and guncelleme_modu:
+    if bugunku_kayitlar.exists():  # Güncelleme modu olmasa bile, eğer kayıt varsa eski verileri yükle
         for veri in bugunku_kayitlar:
             atama = T3PersonelAtama.objects.filter(kisi=user, koordinatorluk=veri.koordinatorluk, birim=veri.birim).first()
             if atama:
@@ -227,7 +242,7 @@ def t3personel_form(request):
         'atamalar': atamalar,
         'bugunku_kayitlar': bugunku_kayitlar,
         'saat_uygun': saat_uygun,
-        'guncelleme_modu': guncelleme_modu,
+        'guncelleme_modu': guncelleme_modu or has_entries,  # Eğer kayıt varsa güncelleme modunda gibi davran
         'son_saat': son_saat,
         'son_dakika': son_dakika,
         'form_goster': form_goster,
@@ -254,17 +269,21 @@ def t3personel_form_guncelle(request):
         son_saat = int(SistemAyarlari.objects.get(anahtar='veri_guncelleme_son_saat').deger)
         son_dakika = int(SistemAyarlari.objects.get(anahtar='veri_guncelleme_son_dakika').deger)
     except (SistemAyarlari.DoesNotExist, ValueError):
-        son_saat = 12
+        son_saat = 16  # Varsayılan değeri 16:00 yapalım
         son_dakika = 0
     
     # Belirlenen saatten önce mi kontrol et
-    if simdi >= time(son_saat, son_dakika):
-        messages.error(request, f'Veri güncelleme için son saat {son_saat:02d}:{son_dakika:02d}\'dır. Şu an güncelleme yapamazsınız.')
+    saat_uygun = simdi < time(son_saat, son_dakika)
+    
+    # Eğer son saatten sonra gelindiyse güncelleme yapılamaz
+    if not saat_uygun:
+        messages.error(request, f'Veri güncellemesi için son saat {son_saat:02d}:{son_dakika:02d}\'dır. Şu an güncelleme yapamazsınız.')
         return redirect('forms:t3personel_form')
     
-    # Güncelleme modunu aç
+    # Güncelleme modunu aktifleştir
     request.session['t3personel_guncelleme_modu'] = True
-    messages.info(request, 'Veri güncelleme modundasınız. Lütfen yeni değerleri girin.')
+    request.session['t3personel_form_buton_goster'] = False
+    
     return redirect('forms:t3personel_form')
 
 @login_required

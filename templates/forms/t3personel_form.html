@@ -104,10 +104,10 @@
                 </div>
                 {% else %}
                 <!-- Form Görüntüleme Modu -->
-                {% if guncelleme_modu %}
+                {% if guncelleme_modu and bugunku_kayitlar.exists %}
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Bugünkü verileri düzenlemektesiniz.
+                    Bugün daha önce veri girişi yaptınız. Sadece mevcut verilerinizi güncelleyebilirsiniz.
                 </div>
                 {% else %}
                 <div class="alert alert-info mb-4">
@@ -159,7 +159,7 @@
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <button type="submit" class="btn btn-primary" {% if not saat_uygun %}disabled{% endif %}>
-                            <i class="fas fa-save me-1"></i>{% if guncelleme_modu %}Güncelle{% else %}Gönder{% endif %}
+                            <i class="fas fa-save me-1"></i>{% if guncelleme_modu and bugunku_kayitlar.exists %}Güncelle{% else %}Gönder{% endif %}
                         </button>
                     </div>
                 </form>
