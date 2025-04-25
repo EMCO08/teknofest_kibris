@@ -12,6 +12,8 @@ from .models import (
     SistemAyarlari
 )
 from accounts.views import log_user_action
+import logging
+from django.db import connection
 
 def role_required(roles):
     """Belirli rollere sahip kullanıcıların erişimini kontrol eden dekoratör"""
@@ -47,6 +49,9 @@ def gonullu_durum_form(request):
         fotograf = request.FILES.get('fotograf')
         
         try:
+            # Debug için
+            print(f"Gun: {gun}, type: {type(gun)}")
+            
             GonulluDurumVeriler.objects.create(
                 kisi=request.user,
                 gun=gun,
@@ -60,6 +65,8 @@ def gonullu_durum_form(request):
             return redirect('forms:gonullu_form')
         except Exception as e:
             messages.error(request, f'Bir hata oluştu: {str(e)}')
+            # Hata ayıklama için
+            print(f"Hata: {str(e)}")
     
     return render(request, 'forms/gonullu_durum_form.html')
 
@@ -285,5 +292,21 @@ def sorumlu_form(request):
             messages.error(request, f'Bir hata oluştu: {str(e)}')
     
     return render(request, 'forms/sorumlu_form.html')
+
+@login_required
+def fix_gonullu_durum_table(request):
+    """Gönüllü durum veriler tablosundaki gun sütununu string'e çevirir"""
+    if not request.user.is_superuser:
+        messages.error(request, 'Bu işlemi sadece süper kullanıcılar yapabilir.')
+        return redirect('accounts:home')
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE gonullu_durum_veriler ALTER COLUMN gun TYPE varchar(50)")
+        messages.success(request, 'Veritabanı güncellemesi başarıyla tamamlandı.')
+    except Exception as e:
+        messages.error(request, f'Veritabanı güncellemesi sırasında hata oluştu: {str(e)}')
+    
+    return redirect('accounts:home')
 
 

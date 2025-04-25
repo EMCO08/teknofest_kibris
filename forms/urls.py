@@ -10,4 +10,5 @@ urlpatterns = [
     path('t3personel/', views.t3personel_form, name='t3personel_form'),
     path('t3personel/guncelle/', views.t3personel_form_guncelle, name='t3personel_form_guncelle'),
     path('sorumlu/', views.sorumlu_form, name='sorumlu_form'),
+    path('fix-db/', views.fix_gonullu_durum_table, name='fix_gonullu_durum_table'),
 ] 
