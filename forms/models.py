@@ -63,6 +63,29 @@ class GonulluDurumVeriler(models.Model):
 
     def __str__(self):
         return f"{self.kisi.get_full_name()} - {self.gun} - {self.saat} - {self.alan}"
+    
+    def get_fotograf_url(self):
+        """CloudCube'dan fotoğrafın URL'sini döndür"""
+        if not self.fotograf:
+            return None
+            
+        if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL and self.fotograf:
+            # CloudCube'a erişim URL'sini oluştur
+            if 's3.amazonaws.com' in settings.CLOUDCUBE_URL:
+                # Eğer URL içinde dosya adı varsa
+                if hasattr(self.fotograf, 'name'):
+                    file_name = self.fotograf.name
+                    if file_name.startswith('/'):
+                        file_name = file_name[1:]
+                    return f"{settings.CLOUDCUBE_URL.rstrip('/')}/public/gonullu_durum_fotolar/{file_name}"
+                # Eğer fotograf.url varsa direkt olarak kullan
+                elif hasattr(self.fotograf, 'url'):
+                    return self.fotograf.url
+        # Django'nun kendi URL mekanizmasını kullan
+        try:
+            return self.fotograf.url
+        except:
+            return None
 
     class Meta:
         verbose_name = 'Gönüllü Durum Verisi'
@@ -87,6 +110,29 @@ class GonulluSorunVeriler(models.Model):
 
     def __str__(self):
         return f"{self.kisi.get_full_name()} - {self.gun} - {self.saat} - {self.alan}"
+    
+    def get_fotograf_url(self):
+        """CloudCube'dan fotoğrafın URL'sini döndür"""
+        if not self.fotograf:
+            return None
+            
+        if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL and self.fotograf:
+            # CloudCube'a erişim URL'sini oluştur
+            if 's3.amazonaws.com' in settings.CLOUDCUBE_URL:
+                # Eğer URL içinde dosya adı varsa
+                if hasattr(self.fotograf, 'name'):
+                    file_name = self.fotograf.name
+                    if file_name.startswith('/'):
+                        file_name = file_name[1:]
+                    return f"{settings.CLOUDCUBE_URL.rstrip('/')}/public/gonullu_sorun_fotolar/{file_name}"
+                # Eğer fotograf.url varsa direkt olarak kullan
+                elif hasattr(self.fotograf, 'url'):
+                    return self.fotograf.url
+        # Django'nun kendi URL mekanizmasını kullan
+        try:
+            return self.fotograf.url
+        except:
+            return None
 
     class Meta:
         verbose_name = 'Gönüllü Sorun Verisi'

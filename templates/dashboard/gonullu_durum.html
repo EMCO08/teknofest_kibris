@@ -123,11 +123,11 @@
                         <td>
                             {% if veri.fotograf %}
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ veri.fotograf.url }}" class="photo-preview" alt="Önizleme">
+                                    <img src="{{ veri.get_fotograf_url }}" class="photo-preview" alt="Önizleme">
                                     <button type="button" class="btn btn-sm btn-outline-primary show-photo-btn" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#photoModal" 
-                                            data-photo-url="{{ veri.fotograf.url }}"
+                                            data-photo-url="{{ veri.get_fotograf_url }}"
                                             data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }}">
                                         <i class="fas fa-search-plus me-1"></i>Büyüt
                                     </button>
