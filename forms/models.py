@@ -1,5 +1,10 @@
 from django.db import models
 from django.conf import settings
+import os
+from django.utils import timezone
+
+# CloudCube storage'ı import et
+from .storage import CloudCubeStorage, GonulluDurumStorage, GonulluSorunStorage
 
 class T3PersonelAtama(models.Model):
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='atamalar')
@@ -44,7 +49,15 @@ class GonulluDurumVeriler(models.Model):
     saat = models.TimeField()
     alan = models.CharField(max_length=100)
     aciklama = models.TextField()
-    fotograf = models.ImageField(upload_to='gonullu_durum_fotolar/', blank=True, null=True)
+    
+    # CloudCube'a yükleme için storage parametresini kullan
+    fotograf = models.ImageField(
+        upload_to='', 
+        blank=True, 
+        null=True, 
+        storage=GonulluDurumStorage() if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL else None
+    )
+    
     submitteddate = models.DateField(auto_now_add=True)
     submittedtime = models.TimeField(auto_now_add=True)
 
@@ -62,7 +75,13 @@ class GonulluSorunVeriler(models.Model):
     saat = models.TimeField()
     alan = models.CharField(max_length=100)
     aciklama = models.TextField()
-    fotograf = models.ImageField(upload_to='gonullu_sorun_fotolar/', blank=True, null=True)
+    # CloudCube'a yükleme için storage parametresini kullan
+    fotograf = models.ImageField(
+        upload_to='', 
+        blank=True, 
+        null=True, 
+        storage=GonulluSorunStorage() if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL else None
+    )
     submitteddate = models.DateField(auto_now_add=True)
     submittedtime = models.TimeField(auto_now_add=True)
 

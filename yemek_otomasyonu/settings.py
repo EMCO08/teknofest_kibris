@@ -15,6 +15,8 @@ import os
 from decouple import config
 from datetime import timedelta
 import dj_database_url
+# Cloudcube S3 Ayarları (S3'e yükleme için gerekli ayarlar)
+import re
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
     'accounts',
     'forms',
     'dashboard',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -175,3 +178,30 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Istanbul'
+
+
+CLOUDCUBE_URL = os.environ.get('CLOUDCUBE_URL')
+
+if CLOUDCUBE_URL:
+    match = re.match(r'https:\/\/(.*?)\.s3\.amazonaws\.com\/(.*)', CLOUDCUBE_URL)
+    AWS_STORAGE_BUCKET_NAME = match.group(1)  # Örn: cloud-cube-eu
+    CLOUDCUBE_CUBE_NAME = match.group(2)      # Örn: mycube
+
+    AWS_ACCESS_KEY_ID = os.environ.get('CLOUDCUBE_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('CLOUDCUBE_SECRET_ACCESS_KEY')
+    AWS_S3_REGION_NAME = 'eu-west-1'  # bucket adına göre seç: cloud-cube-eu → eu-west-1
+
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{CLOUDCUBE_CUBE_NAME}'
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+
+    # Kullanıcı yüklemeleri için varsayılan storage backend
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    # Dosyalar cloudcube/public/ klasörüne gider
+    AWS_LOCATION = f'{CLOUDCUBE_CUBE_NAME}/public'
+
+# Eğer Cloudcube bağlı değilse local media kullanılsın
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
