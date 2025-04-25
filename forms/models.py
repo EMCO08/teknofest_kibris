@@ -94,7 +94,7 @@ class GonulluDurumVeriler(models.Model):
 
 class GonulluSorunVeriler(models.Model):
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='gonullu_sorun_veriler')
-    gun = models.DateField()
+    gun = models.CharField(max_length=50)
     saat = models.TimeField()
     alan = models.CharField(max_length=100)
     aciklama = models.TextField()
