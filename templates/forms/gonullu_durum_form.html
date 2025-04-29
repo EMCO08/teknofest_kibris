@@ -200,19 +200,20 @@
         const minutes = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('saat').value = `${hours}:${minutes}`;
         
-        // Catering durumu değişiklik dinleyicisi
+        // Catering durumu için daha doğrudan bir yaklaşım
         const cateringVar = document.getElementById('catering_var');
         const cateringYok = document.getElementById('catering_yok');
         const cateringUrunleriContainer = document.getElementById('catering_urunleri_container');
         const cateringUrunleriInput = document.getElementById('catering_urunleri_input');
         
-        cateringVar.addEventListener('change', function() {
+        // onclick kullanarak daha doğrudan tetikleme
+        cateringVar.onclick = function() {
             if (this.checked) {
                 cateringUrunleriContainer.style.display = 'block';
             }
-        });
+        };
         
-        cateringYok.addEventListener('change', function() {
+        cateringYok.onclick = function() {
             if (this.checked) {
                 cateringUrunleriContainer.style.display = 'none';
                 // Catering ürünleri seçimini temizle
@@ -221,16 +222,21 @@
                 });
                 cateringUrunleriInput.value = '';
             }
-        });
+        };
+        
+        // Sayfa yüklendiğinde kontrol et
+        if (cateringVar.checked) {
+            cateringUrunleriContainer.style.display = 'block';
+        }
         
         // Catering ürünleri seçim işlemleri
         const cateringItems = document.querySelectorAll('.catering-item');
         
         cateringItems.forEach(item => {
-            item.addEventListener('click', function() {
+            item.onclick = function() {
                 this.classList.toggle('selected');
                 updateCateringUrunleri();
-            });
+            };
         });
         
         function updateCateringUrunleri() {
