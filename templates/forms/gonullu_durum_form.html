@@ -193,8 +193,17 @@
 
 {% block extra_js %}
 <script>
+    // Test alert - sayfanın yüklendiğini göstermek için
+    alert("Form sayfası yüklendi!");
+    
+    // Console'a yazdırma
+    console.log("FORM SAYFASI YÜKLENDİ - TEST");
+    
     // Sadece mevcut saati varsayılan olarak ayarla
     document.addEventListener('DOMContentLoaded', function() {
+        // Console'a yazdırma - DOM yüklendiğinde
+        console.log("DOM CONTENT LOADED!");
+        
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -206,26 +215,32 @@
         const cateringUrunleriContainer = document.getElementById('catering_urunleri_container');
         const cateringUrunleriInput = document.getElementById('catering_urunleri_input');
         
-        // onclick kullanarak daha doğrudan tetikleme
+        // Debug için konsola yazdırma
+        console.log("Catering Var element:", cateringVar);
+        console.log("Catering Yok element:", cateringYok);
+        console.log("Container element:", cateringUrunleriContainer);
+        
+        // Direkt olarak alert ile gösterme
         cateringVar.onclick = function() {
-            if (this.checked) {
-                cateringUrunleriContainer.style.display = 'block';
-            }
+            console.log("Catering Var tıklandı! Checked:", this.checked);
+            alert("Catering Var tıklandı!");
+            cateringUrunleriContainer.style.display = 'block';
         };
         
         cateringYok.onclick = function() {
-            if (this.checked) {
-                cateringUrunleriContainer.style.display = 'none';
-                // Catering ürünleri seçimini temizle
-                document.querySelectorAll('.catering-item').forEach(item => {
-                    item.classList.remove('selected');
-                });
-                cateringUrunleriInput.value = '';
-            }
+            console.log("Catering Yok tıklandı! Checked:", this.checked);
+            alert("Catering Yok tıklandı!");
+            cateringUrunleriContainer.style.display = 'none';
+            // Catering ürünleri seçimini temizle
+            document.querySelectorAll('.catering-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            cateringUrunleriInput.value = '';
         };
         
         // Sayfa yüklendiğinde kontrol et
         if (cateringVar.checked) {
+            console.log("Catering Var başlangıçta seçili!");
             cateringUrunleriContainer.style.display = 'block';
         }
         
