@@ -11,18 +11,14 @@
         .btn { width: 100%; margin-top: 5px; }
         .form-label { margin-top: 8px; }
     }
-
     .card-header.bg-primary {
         background: linear-gradient(135deg, var(--teknofest-red), var(--teknofest-blue)) !important;
     }
-
     .card-header h3 { margin-bottom: 0; }
-
     .form-control:focus {
         border-color: var(--teknofest-blue);
         box-shadow: 0 0 0 0.25rem rgba(0, 75, 147, 0.25);
     }
-
     .catering-item {
         display: inline-block;
         margin: 5px;
@@ -33,12 +29,10 @@
         transition: background-color 0.3s;
         border: 1px solid #ddd;
     }
-
     .catering-item.selected {
         background-color: #28a745;
         color: white;
     }
-
     .catering-container {
         display: flex;
         flex-wrap: wrap;
@@ -96,7 +90,6 @@
                             <option value="Teknofest KKTC Araştırma Yarışması">Teknofest KKTC Araştırma Yarışması</option>
                             <option value="Bilim Pavyonu">Bilim Pavyonu</option>
                         </select>
-                        <div class="form-text">Lütfen alan seçiniz.</div>
                     </div>
 
                     <div class="mb-3">
@@ -116,16 +109,25 @@
                     <div class="mb-3" id="catering_urunleri_container" style="display: none;">
                         <label class="form-label">Catering Ürünleri</label>
                         <div class="catering-container">
-                            {% for item in [
-                                'Peynirli Su Böreği', 'Mercimek Köftesi', 'Tatlı Kurabiye',
-                                'Tuzlu Kurabiye', 'Islak Kek Tartolet', 'Mini Tiramisu',
-                                'Mini Brownie', 'Mini Simit Pizza', 'Zeytinyağlı Yaprak Sarma',
-                                'Kanape Çeşitleri', 'Mini Soğuk Sandviç', 'Meyve Çeşitleri',
-                                'Kuru Yemiş', 'Kahve Çeşitleri', 'Çay', 'Bitki Çayı',
-                                'Cam Şişe Su', 'Meşrubat Çeşitleri', 'Portakal Suyu/Limonata'
-                            ] %}
-                                <div class="catering-item" data-value="{{ item|slugify }}">{{ item }}</div>
-                            {% endfor %}
+                            <div class="catering-item" data-value="peynirli-su-boregi">Peynirli Su Böreği</div>
+                            <div class="catering-item" data-value="mercimek-koftesi">Mercimek Köftesi</div>
+                            <div class="catering-item" data-value="tatli-kurabiye">Tatlı Kurabiye</div>
+                            <div class="catering-item" data-value="tuzlu-kurabiye">Tuzlu Kurabiye</div>
+                            <div class="catering-item" data-value="islak-kek-tartolet">Islak Kek Tartolet</div>
+                            <div class="catering-item" data-value="mini-tiramisu">Mini Tiramisu</div>
+                            <div class="catering-item" data-value="mini-brownie">Mini Brownie</div>
+                            <div class="catering-item" data-value="mini-simit-pizza">Mini Simit Pizza</div>
+                            <div class="catering-item" data-value="zeytinyagli-yaprak-sarma">Zeytinyağlı Yaprak Sarma</div>
+                            <div class="catering-item" data-value="kanape-cesitleri">Kanape Çeşitleri</div>
+                            <div class="catering-item" data-value="mini-soguk-sandvic">Mini Soğuk Sandviç</div>
+                            <div class="catering-item" data-value="meyve-cesitleri">Meyve Çeşitleri</div>
+                            <div class="catering-item" data-value="kuru-yemis">Kuru Yemiş</div>
+                            <div class="catering-item" data-value="kahve-cesitleri">Kahve Çeşitleri</div>
+                            <div class="catering-item" data-value="cay">Çay</div>
+                            <div class="catering-item" data-value="bitki-cayi">Bitki Çayı</div>
+                            <div class="catering-item" data-value="cam-sise-su">Cam Şişe Su</div>
+                            <div class="catering-item" data-value="mesrubat-cesitleri">Meşrubat Çeşitleri</div>
+                            <div class="catering-item" data-value="portakal-suyu-limonata">Portakal Suyu/Limonata</div>
                         </div>
                         <input type="hidden" name="catering_urunleri" id="catering_urunleri_input">
                     </div>
@@ -133,7 +135,6 @@
                     <div class="mb-3">
                         <label for="fotograf" class="form-label">Fotoğraf (İsteğe Bağlı)</label>
                         <input type="file" class="form-control" id="fotograf" name="fotograf" accept="image/*">
-                        <div class="form-text">Maksimum 10MB boyutunda fotoğraf yükleyebilirsiniz.</div>
                     </div>
 
                     <div class="mb-3" id="preview-container" style="display: none;">
