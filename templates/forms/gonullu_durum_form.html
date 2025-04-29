@@ -209,75 +209,69 @@
         const minutes = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('saat').value = `${hours}:${minutes}`;
         
-        // Catering durumu için daha doğrudan bir yaklaşım
+        // Catering durumu için basit kontroller
         const cateringVar = document.getElementById('catering_var');
         const cateringYok = document.getElementById('catering_yok');
-        const cateringUrunleriContainer = document.getElementById('catering_urunleri_container');
-        const cateringUrunleriInput = document.getElementById('catering_urunleri_input');
+        const cateringContainer = document.getElementById('catering_urunleri_container');
+        const cateringInput = document.getElementById('catering_urunleri_input');
         
-        // Debug için konsola yazdırma
-        console.log("Catering Var element:", cateringVar);
-        console.log("Catering Yok element:", cateringYok);
-        console.log("Container element:", cateringUrunleriContainer);
-        
-        // Direkt olarak alert ile gösterme
+        // Catering var/yok seçimi
         cateringVar.onclick = function() {
-            console.log("Catering Var tıklandı! Checked:", this.checked);
-            alert("Catering Var tıklandı!");
-            cateringUrunleriContainer.style.display = 'block';
+            cateringContainer.style.display = 'block';
         };
         
         cateringYok.onclick = function() {
-            console.log("Catering Yok tıklandı! Checked:", this.checked);
-            alert("Catering Yok tıklandı!");
-            cateringUrunleriContainer.style.display = 'none';
-            // Catering ürünleri seçimini temizle
-            document.querySelectorAll('.catering-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            cateringUrunleriInput.value = '';
+            cateringContainer.style.display = 'none';
         };
         
         // Sayfa yüklendiğinde kontrol et
         if (cateringVar.checked) {
-            console.log("Catering Var başlangıçta seçili!");
-            cateringUrunleriContainer.style.display = 'block';
+            cateringContainer.style.display = 'block';
         }
         
-        // Catering ürünleri seçim işlemleri
-        const cateringItems = document.querySelectorAll('.catering-item');
+        // Catering ürünleri için basit seçim işlevi
+        const items = document.querySelectorAll('.catering-item');
+        const selectedItems = [];
         
-        cateringItems.forEach(item => {
-            item.onclick = function() {
+        // Her ürüne tıklama olayı ekle
+        items.forEach(function(item) {
+            // Gerçek tıklama olayı
+            item.addEventListener('click', function() {
+                // Toggle selected class
                 this.classList.toggle('selected');
-                updateCateringUrunleri();
-            };
+                
+                // Seçili ürünleri topla
+                updateSelectedItems();
+            });
         });
         
-        function updateCateringUrunleri() {
-            const selectedItems = document.querySelectorAll('.catering-item.selected');
-            const selectedValues = Array.from(selectedItems).map(item => item.dataset.value);
-            cateringUrunleriInput.value = JSON.stringify(selectedValues);
+        // Seçili ürünleri güncelle
+        function updateSelectedItems() {
+            const selected = document.querySelectorAll('.catering-item.selected');
+            const values = Array.from(selected).map(item => item.getAttribute('data-value'));
+            cateringInput.value = JSON.stringify(values);
         }
     });
     
     // Fotoğraf önizleme
-    document.getElementById('fotograf').addEventListener('change', function(e) {
-        const previewContainer = document.getElementById('preview-container');
-        const previewImage = document.getElementById('preview-image');
-        
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('fotograf').addEventListener('change', function(e) {
+            const previewContainer = document.getElementById('preview-container');
+            const previewImage = document.getElementById('preview-image');
             
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                previewContainer.style.display = 'block';
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            } else {
+                previewContainer.style.display = 'none';
             }
-            
-            reader.readAsDataURL(this.files[0]);
-        } else {
-            previewContainer.style.display = 'none';
-        }
+        });
     });
 </script>
 {% endblock %} 
