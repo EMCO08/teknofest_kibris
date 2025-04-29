@@ -279,6 +279,8 @@ def gonullu_sorun_dashboard(request):
     baslangic_tarihi = request.GET.get('baslangic_tarihi')
     bitis_tarihi = request.GET.get('bitis_tarihi')
     alan = request.GET.get('alan')
+    sorun_tipi = request.GET.get('sorun_tipi')
+    sorun_seviyesi = request.GET.get('sorun_seviyesi')
 
     # Temel sorgu
     veriler = GonulluSorunVeriler.objects.all().order_by('-submitteddate', '-submittedtime')
@@ -290,6 +292,10 @@ def gonullu_sorun_dashboard(request):
         veriler = veriler.filter(submitteddate__lte=bitis_tarihi)
     if alan:
         veriler = veriler.filter(alan__icontains=alan)
+    if sorun_tipi:
+        veriler = veriler.filter(sorun_tipi=sorun_tipi)
+    if sorun_seviyesi:
+        veriler = veriler.filter(sorun_seviyesi=sorun_seviyesi)
 
     # CSV indirme
     if 'csv' in request.GET:
@@ -297,7 +303,7 @@ def gonullu_sorun_dashboard(request):
         response['Content-Disposition'] = 'attachment; filename="gonullu_sorun_veriler.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['TC', 'İsim', 'Soyisim', 'Gün', 'Saat', 'Alan', 'Açıklama', 'Tarih', 'Saat'])
+        writer.writerow(['TC', 'İsim', 'Soyisim', 'Gün', 'Saat', 'Alan', 'Sorun Tipi', 'Sorun Seviyesi', 'Açıklama', 'Tarih', 'Saat'])
 
         for veri in veriler:
             writer.writerow([
@@ -307,6 +313,8 @@ def gonullu_sorun_dashboard(request):
                 veri.gun,
                 veri.saat,
                 veri.alan,
+                veri.sorun_tipi,
+                veri.sorun_seviyesi,
                 veri.aciklama,
                 veri.submitteddate,
                 veri.submittedtime
@@ -316,14 +324,22 @@ def gonullu_sorun_dashboard(request):
 
     # Alan listesini al
     alanlar = GonulluSorunVeriler.objects.values_list('alan', flat=True).distinct()
+    
+    # Sorun tipleri ve seviyeleri için choices'ları al
+    sorun_tipleri = [choice[0] for choice in GonulluSorunVeriler.SORUN_TIPI_CHOICES]
+    sorun_seviyeleri = [choice[0] for choice in GonulluSorunVeriler.SORUN_SEVIYESI_CHOICES]
 
     context = {
         'veriler': veriler,
         'alanlar': alanlar,
+        'sorun_tipleri': sorun_tipleri,
+        'sorun_seviyeleri': sorun_seviyeleri,
         'filtreler': {
             'baslangic_tarihi': baslangic_tarihi,
             'bitis_tarihi': bitis_tarihi,
             'alan': alan,
+            'sorun_tipi': sorun_tipi,
+            'sorun_seviyesi': sorun_seviyesi
         }
     }
 

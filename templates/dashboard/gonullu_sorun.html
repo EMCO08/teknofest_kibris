@@ -70,15 +70,15 @@
     <div class="card-body">
         <form method="get" class="mb-4">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="baslangic_tarihi" class="form-label">Başlangıç Tarihi</label>
                     <input type="date" class="form-control" id="baslangic_tarihi" name="baslangic_tarihi" value="{{ filtreler.baslangic_tarihi }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="bitis_tarihi" class="form-label">Bitiş Tarihi</label>
                     <input type="date" class="form-control" id="bitis_tarihi" name="bitis_tarihi" value="{{ filtreler.bitis_tarihi }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <label for="alan" class="form-label">Alan</label>
                     <select class="form-select" id="alan" name="alan">
                         <option value="">Tümü</option>
@@ -87,11 +87,29 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <label for="sorun_tipi" class="form-label">Sorun Tipi</label>
+                    <select class="form-select" id="sorun_tipi" name="sorun_tipi">
+                        <option value="">Tümü</option>
+                        {% for tip in sorun_tipleri %}
+                            <option value="{{ tip }}" {% if filtreler.sorun_tipi == tip %}selected{% endif %}>{{ tip }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="sorun_seviyesi" class="form-label">Sorun Seviyesi</label>
+                    <select class="form-select" id="sorun_seviyesi" name="sorun_seviyesi">
+                        <option value="">Tümü</option>
+                        {% for seviye in sorun_seviyeleri %}
+                            <option value="{{ seviye }}" {% if filtreler.sorun_seviyesi == seviye %}selected{% endif %}>{{ seviye }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 <div class="col-12 d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter me-1"></i>Filtrele
                     </button>
-                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}" class="btn btn-success">
+                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}" class="btn btn-success">
                         <i class="fas fa-download me-1"></i>CSV İndir
                     </a>
                 </div>
@@ -106,6 +124,8 @@
                         <th>Gün</th>
                         <th>Saat</th>
                         <th>Alan</th>
+                        <th>Sorun Tipi</th>
+                        <th>Sorun Seviyesi</th>
                         <th>Açıklama</th>
                         <th>Fotoğraf</th>
                         <th>Tarih</th>
@@ -119,6 +139,16 @@
                         <td>{{ veri.gun }}</td>
                         <td>{{ veri.saat }}</td>
                         <td>{{ veri.alan }}</td>
+                        <td>
+                            <span class="badge {% if veri.sorun_tipi == 'İnsan Sağlığı' %}bg-danger{% elif veri.sorun_tipi == 'Hijyen' %}bg-warning text-dark{% elif veri.sorun_tipi == 'Ürün Kalitesi' %}bg-info{% else %}bg-primary{% endif %}">
+                                {{ veri.sorun_tipi }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if veri.sorun_seviyesi == 'Acil' %}bg-danger{% elif veri.sorun_seviyesi == 'Orta' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                {{ veri.sorun_seviyesi }}
+                            </span>
+                        </td>
                         <td>{{ veri.aciklama }}</td>
                         <td>
                             {% if veri.fotograf %}
@@ -141,7 +171,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center">Henüz veri bulunmamaktadır.</td>
+                        <td colspan="10" class="text-center">Henüz veri bulunmamaktadır.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

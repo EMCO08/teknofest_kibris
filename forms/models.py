@@ -94,12 +94,26 @@ class GonulluDurumVeriler(models.Model):
         db_table = 'gonullu_durum_veriler'
 
 class GonulluSorunVeriler(models.Model):
+    SORUN_TIPI_CHOICES = [
+        ('Hijyen', 'Hijyen'),
+        ('Ürün Kalitesi', 'Ürün Kalitesi'),
+        ('İnsan Sağlığı', 'İnsan Sağlığı'),
+        ('Hizmet Kalitesi', 'Hizmet Kalitesi'),
+    ]
+    
+    SORUN_SEVIYESI_CHOICES = [
+        ('Düşük', 'Düşük'),
+        ('Orta', 'Orta'),
+        ('Acil', 'Acil'),
+    ]
+
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='gonullu_sorun_veriler')
     gun = models.CharField(max_length=50)
     saat = models.TimeField()
     alan = models.CharField(max_length=100)
+    sorun_tipi = models.CharField(max_length=50, choices=SORUN_TIPI_CHOICES, default='Hizmet Kalitesi')
+    sorun_seviyesi = models.CharField(max_length=20, choices=SORUN_SEVIYESI_CHOICES, default='Düşük')
     aciklama = models.TextField()
-    # CloudCube'a yükleme için storage parametresini kullan
     fotograf = models.ImageField(
         upload_to='', 
         blank=True, 
@@ -110,7 +124,7 @@ class GonulluSorunVeriler(models.Model):
     submittedtime = models.TimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.kisi.get_full_name()} - {self.gun} - {self.saat} - {self.alan}"
+        return f"{self.kisi.get_full_name()} - {self.gun} - {self.saat} - {self.alan} - {self.sorun_tipi} ({self.sorun_seviyesi})"
     
     def get_fotograf_url(self):
         """CloudCube'dan fotoğrafın URL'sini döndür"""

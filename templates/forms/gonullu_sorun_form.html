@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Sorun Bildir - Yemek Otomasyonu{% endblock %}
 
@@ -72,30 +73,48 @@
                         </div>
                     </div>
                     
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="sorun_tipi" class="form-label">Sorun Tipi</label>
+                            <select class="form-control" id="sorun_tipi" name="sorun_tipi" required>
+                                <option value="" disabled selected>Seçiniz</option>
+                                <option value="Hijyen">Hijyen</option>
+                                <option value="Ürün Kalitesi">Ürün Kalitesi</option>
+                                <option value="İnsan Sağlığı">İnsan Sağlığı</option>
+                                <option value="Hizmet Kalitesi">Hizmet Kalitesi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sorun_seviyesi" class="form-label">Sorun Seviyesi</label>
+                            <select class="form-control" id="sorun_seviyesi" name="sorun_seviyesi" required>
+                                <option value="" disabled selected>Seçiniz</option>
+                                <option value="Düşük">Düşük</option>
+                                <option value="Orta">Orta</option>
+                                <option value="Acil">Acil</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div class="mb-3">
                         <label for="alan" class="form-label">Alan</label>
                         <select class="form-control" id="alan" name="alan" required>
                             <option value="" disabled selected>Seçiniz</option>
-                            <option value="Bilişim Koordinatörlüğü">Bilişim Koordinatörlüğü</option>
-                            <option value="Bursiyer Koordinatörülüğü">Bursiyer Koordinatörülüğü</option>
-                            <option value="demoKx">demoKx</option>
-                            <option value="Deneyap Kart Koordinatörlüğü">Deneyap Kart Koordinatörlüğü</option>
-                            <option value="Deneyap Koordinatörlüğü">Deneyap Koordinatörlüğü</option>
-                            <option value="Eğitim Ar-Ge">Eğitim Ar-Ge</option>
-                            <option value="Fuar Koordinatörlüğü">Fuar Koordinatörlüğü</option>
-                            <option value="Girişim Koordinatörlüğü">Girişim Koordinatörlüğü</option>
-                            <option value="İdari İşler Koordinatörlüğü">İdari İşler Koordinatörlüğü</option>
-                            <option value="İnsan Kaynakları">İnsan Kaynakları</option>
-                            <option value="Kurumsal İletişim Koordinatörlüğü">Kurumsal İletişim Koordinatörlüğü</option>
-                            <option value="Mimari Tasarım Koordinatörlüğü">Mimari Tasarım Koordinatörlüğü</option>
-                            <option value="Operasyon Koordinatörlüğü">Operasyon Koordinatörlüğü</option>
-                            <option value="Saha Koord.">Saha Koord.</option>
-                            <option value="Satış ve Pazarlama Koordinatörlüğü">Satış ve Pazarlama Koordinatörlüğü</option>
-                            <option value="testKoordinatorluk">testKoordinatorluk</option>
-                            <option value="Ulaşım Koordinatörlüğü">Ulaşım Koordinatörlüğü</option>
-                            <option value="Yarışmalar Koordinatörlüğü">Yarışmalar Koordinatörlüğü</option>
+                            <option value="Selçuk Bey VIP">Selçuk Bey VIP</option>
+                            <option value="VIP Salon">VIP Salon</option>
+                            <option value="Yönetim Ofisi / Kriz Masası">Yönetim Ofisi / Kriz Masası</option>
+                            <option value="Vakıf Standı Yönetici Odası">Vakıf Standı Yönetici Odası</option>
+                            <option value="Dinamik Alan">Dinamik Alan</option>
+                            <option value="TSK">TSK</option>
+                            <option value="Gönüllü - Bursiyer">Gönüllü - Bursiyer</option>
+                            <option value="Basın">Basın</option>
+                            <option value="TRT Kulis Ana Sahne / Muhabir">TRT Kulis Ana Sahne / Muhabir</option>
+                            <option value="Arter / To Do / Kurumsal Ofis / Heysemist">Arter / To Do / Kurumsal Ofis / Heysemist</option>
+                            <option value="Pilot Event">Pilot Event</option>
+                            <option value="T3 Ofis">T3 Ofis</option>
+                            <option value="Teknofest Robolig Yarışması">Teknofest Robolig Yarışması</option>
+                            <option value="Teknofest KKTC Araştırma Yarışması">Teknofest KKTC Araştırma Yarışması</option>
+                            <option value="Bilim Pavyonu">Bilim Pavyonu</option>
                         </select>
-                        <div class="form-text">Lütfen alan seçiniz.</div>
                     </div>
                     
                     <div class="mb-3">
@@ -133,32 +152,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Sadece mevcut saati varsayılan olarak ayarla
-    document.addEventListener('DOMContentLoaded', function() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('saat').value = `${hours}:${minutes}`;
-    });
-    
-    // Fotoğraf önizleme
-    document.getElementById('fotograf').addEventListener('change', function(e) {
-        const previewContainer = document.getElementById('preview-container');
-        const previewImage = document.getElementById('preview-image');
-        
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                previewContainer.style.display = 'block';
-            }
-            
-            reader.readAsDataURL(this.files[0]);
-        } else {
-            previewContainer.style.display = 'none';
-        }
-    });
-</script>
+<script src="{% static 'js/gonullu_sorun_form.js' %}"></script>
 {% endblock %} 
