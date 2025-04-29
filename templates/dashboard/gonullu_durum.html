@@ -147,6 +147,37 @@
                 </tbody>
             </table>
         </div>
+
+        {% if veriler.paginator.num_pages > 1 %}
+        <nav aria-label="Sayfalama" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if veriler.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">&laquo; İlk</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">Önceki</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        Sayfa {{ veriler.number }} / {{ veriler.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if veriler.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">Sonraki</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">Son &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
     </div>
 </div>
 

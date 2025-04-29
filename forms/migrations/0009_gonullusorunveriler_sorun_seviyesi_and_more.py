@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='gonullusorunveriler',
             name='sorun_seviyesi',
-            field=models.CharField(choices=[('Düşük', 'Düşük'), ('Orta', 'Orta'), ('Acil', 'Acil')], default='Düşük', max_length=20),
+            field=models.CharField(choices=[('Düşük', 'Düşük'), ('Orta', 'Orta'), ('Acil', 'Acil')], default='Düşük', max_length=20, null=True),
         ),
         migrations.AddField(
             model_name='gonullusorunveriler',
             name='sorun_tipi',
-            field=models.CharField(choices=[('Hijyen', 'Hijyen'), ('Ürün Kalitesi', 'Ürün Kalitesi'), ('İnsan Sağlığı', 'İnsan Sağlığı'), ('Hizmet Kalitesi', 'Hizmet Kalitesi')], default='Hizmet Kalitesi', max_length=50),
+            field=models.CharField(choices=[('Hijyen', 'Hijyen'), ('Ürün Kalitesi', 'Ürün Kalitesi'), ('İnsan Sağlığı', 'İnsan Sağlığı'), ('Hizmet Kalitesi', 'Hizmet Kalitesi')], default='Hizmet Kalitesi', max_length=50, null=True),
         ),
     ]

@@ -22,6 +22,7 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from io import BytesIO
 from django.db.models import Sum, F
+from django.core.paginator import Paginator
 
 
 @login_required
@@ -233,10 +234,10 @@ def gonullu_durum_dashboard(request):
 
     # CSV indirme
     if 'csv' in request.GET:
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
         response['Content-Disposition'] = 'attachment; filename="gonullu_durum_veriler.csv"'
 
-        writer = csv.writer(response)
+        writer = csv.writer(response, delimiter=';')
         writer.writerow(['TC', 'İsim', 'Soyisim', 'Gün', 'Saat', 'Alan', 'Açıklama', 'Tarih', 'Saat'])
 
         for veri in veriler:
@@ -248,17 +249,22 @@ def gonullu_durum_dashboard(request):
                 veri.saat,
                 veri.alan,
                 veri.aciklama,
-                veri.submitteddate,
-                veri.submittedtime
+                veri.submitteddate.strftime('%Y-%m-%d'),
+                veri.submittedtime.strftime('%H:%M:%S')
             ])
 
         return response
+
+    # Pagination
+    paginator = Paginator(veriler, 50)  # Her sayfada 50 kayıt
+    page = request.GET.get('page')
+    veriler_paginated = paginator.get_page(page)
 
     # Alan listesini al
     alanlar = GonulluDurumVeriler.objects.values_list('alan', flat=True).distinct()
 
     context = {
-        'veriler': veriler,
+        'veriler': veriler_paginated,
         'alanlar': alanlar,
         'filtreler': {
             'baslangic_tarihi': baslangic_tarihi,
@@ -299,10 +305,10 @@ def gonullu_sorun_dashboard(request):
 
     # CSV indirme
     if 'csv' in request.GET:
-        response = HttpResponse(content_type='text/csv')
+        response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
         response['Content-Disposition'] = 'attachment; filename="gonullu_sorun_veriler.csv"'
 
-        writer = csv.writer(response)
+        writer = csv.writer(response, delimiter=';')
         writer.writerow(['TC', 'İsim', 'Soyisim', 'Gün', 'Saat', 'Alan', 'Sorun Tipi', 'Sorun Seviyesi', 'Açıklama', 'Tarih', 'Saat'])
 
         for veri in veriler:
@@ -316,8 +322,8 @@ def gonullu_sorun_dashboard(request):
                 veri.sorun_tipi,
                 veri.sorun_seviyesi,
                 veri.aciklama,
-                veri.submitteddate,
-                veri.submittedtime
+                veri.submitteddate.strftime('%Y-%m-%d'),
+                veri.submittedtime.strftime('%H:%M:%S')
             ])
 
         return response
