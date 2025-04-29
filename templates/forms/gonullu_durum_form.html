@@ -41,6 +41,30 @@
         border-color: var(--teknofest-blue);
         box-shadow: 0 0 0 0.25rem rgba(0, 75, 147, 0.25);
     }
+    
+    /* Catering ürünleri için özel stil */
+    .catering-item {
+        display: inline-block;
+        margin: 5px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border: 1px solid #ddd;
+    }
+    
+    .catering-item.selected {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .catering-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
 </style>
 {% endblock %}
 
@@ -76,32 +100,67 @@
                         <label for="alan" class="form-label">Alan</label>
                         <select class="form-control" id="alan" name="alan" required>
                             <option value="" disabled selected>Seçiniz</option>
-                            <option value="Bilişim Koordinatörlüğü">Bilişim Koordinatörlüğü</option>
-                            <option value="Bursiyer Koordinatörülüğü">Bursiyer Koordinatörülüğü</option>
-                            <option value="demoKx">demoKx</option>
-                            <option value="Deneyap Kart Koordinatörlüğü">Deneyap Kart Koordinatörlüğü</option>
-                            <option value="Deneyap Koordinatörlüğü">Deneyap Koordinatörlüğü</option>
-                            <option value="Eğitim Ar-Ge">Eğitim Ar-Ge</option>
-                            <option value="Fuar Koordinatörlüğü">Fuar Koordinatörlüğü</option>
-                            <option value="Girişim Koordinatörlüğü">Girişim Koordinatörlüğü</option>
-                            <option value="İdari İşler Koordinatörlüğü">İdari İşler Koordinatörlüğü</option>
-                            <option value="İnsan Kaynakları">İnsan Kaynakları</option>
-                            <option value="Kurumsal İletişim Koordinatörlüğü">Kurumsal İletişim Koordinatörlüğü</option>
-                            <option value="Mimari Tasarım Koordinatörlüğü">Mimari Tasarım Koordinatörlüğü</option>
-                            <option value="Operasyon Koordinatörlüğü">Operasyon Koordinatörlüğü</option>
-                            <option value="Saha Koord.">Saha Koord.</option>
-                            <option value="Satış ve Pazarlama Koordinatörlüğü">Satış ve Pazarlama Koordinatörlüğü</option>
-                            <option value="testKoordinatorluk">testKoordinatorluk</option>
-                            <option value="Ulaşım Koordinatörlüğü">Ulaşım Koordinatörlüğü</option>
-                            <option value="Yarışmalar Koordinatörlüğü">Yarışmalar Koordinatörlüğü</option>
+                            <option value="Selçuk Bey VIP">Selçuk Bey VIP</option>
+                            <option value="VIP Salon">VIP Salon</option>
+                            <option value="Yönetim Ofisi / Kriz Masası">Yönetim Ofisi / Kriz Masası</option>
+                            <option value="Vakıf Standı Yönetici Odası">Vakıf Standı Yönetici Odası</option>
+                            <option value="Dinamik Alan">Dinamik Alan</option>
+                            <option value="TSK">TSK</option>
+                            <option value="Gönüllü - Bursiyer">Gönüllü - Bursiyer</option>
+                            <option value="Basın">Basın</option>
+                            <option value="TRT Kulis Ana Sahne / Muhabir">TRT Kulis Ana Sahne / Muhabir</option>
+                            <option value="Arter / To Do / Kurumsal Ofis / Heysemist">Arter / To Do / Kurumsal Ofis / Heysemist</option>
+                            <option value="Pilot Event">Pilot Event</option>
+                            <option value="T3 Ofis">T3 Ofis</option>
+                            <option value="Teknofest Robolig Yarışması">Teknofest Robolig Yarışması</option>
+                            <option value="Teknofest KKTC Araştırma Yarışması">Teknofest KKTC Araştırma Yarışması</option>
+                            <option value="Bilim Pavyonu">Bilim Pavyonu</option>
                         </select>
                         <div class="form-text">Lütfen alan seçiniz.</div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="aciklama" class="form-label">Açıklama</label>
-                        <textarea class="form-control" id="aciklama" name="aciklama" rows="4" required></textarea>
-                        <div class="form-text">Lütfen durumu detaylı bir şekilde açıklayın.</div>
+                        <label class="form-label">Catering Durumu</label>
+                        <div class="d-flex">
+                            <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="catering_durum" id="catering_var" value="var" required>
+                                <label class="form-check-label" for="catering_var">
+                                    Catering Var
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="catering_durum" id="catering_yok" value="yok" required>
+                                <label class="form-check-label" for="catering_yok">
+                                    Catering Yok
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="catering_urunleri_container" style="display: none;">
+                        <label class="form-label">Catering Ürünleri</label>
+                        <div class="catering-container">
+                            <div class="catering-item" data-value="peynirli_su_boregi">Peynirli Su Böreği</div>
+                            <div class="catering-item" data-value="mercimek_koftesi">Mercimek Köftesi</div>
+                            <div class="catering-item" data-value="tatli_kurabiye">Tatlı Kurabiye</div>
+                            <div class="catering-item" data-value="tuzlu_kurabiye">Tuzlu Kurabiye</div>
+                            <div class="catering-item" data-value="islak_kek_tartolet">Islak Kek Tartolet</div>
+                            <div class="catering-item" data-value="mini_tiramisu">Mini Tiramisu</div>
+                            <div class="catering-item" data-value="mini_brownie">Mini Brownie</div>
+                            <div class="catering-item" data-value="mini_simit_pizza">Mini Simit Pizza</div>
+                            <div class="catering-item" data-value="zeytinyagli_yaprak_sarma">Zeytinyağlı Yaprak Sarma</div>
+                            <div class="catering-item" data-value="kanape_cesitleri">Kanape Çeşitleri</div>
+                            <div class="catering-item" data-value="mini_soguk_sandvic">Mini Soğuk Sandviç</div>
+                            <div class="catering-item" data-value="meyve_cesitleri">Meyve Çeşitleri</div>
+                            <div class="catering-item" data-value="kuru_yemis">Kuru Yemiş</div>
+                            <div class="catering-item" data-value="kahve_cesitleri">Kahve Çeşitleri</div>
+                            <div class="catering-item" data-value="cay">Çay</div>
+                            <div class="catering-item" data-value="bitki_cayi">Bitki Çayı</div>
+                            <div class="catering-item" data-value="cam_sise_su">Cam Şişe Su</div>
+                            <div class="catering-item" data-value="mesrubat_cesitleri">Meşrubat Çeşitleri</div>
+                            <div class="catering-item" data-value="portakal_suyu_limonata">Portakal Suyu/Limonata</div>
+                        </div>
+                        <input type="hidden" name="catering_urunleri" id="catering_urunleri_input">
                     </div>
                     
                     <div class="mb-3">
@@ -140,6 +199,45 @@
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         document.getElementById('saat').value = `${hours}:${minutes}`;
+        
+        // Catering durumu değişiklik dinleyicisi
+        const cateringVar = document.getElementById('catering_var');
+        const cateringYok = document.getElementById('catering_yok');
+        const cateringUrunleriContainer = document.getElementById('catering_urunleri_container');
+        const cateringUrunleriInput = document.getElementById('catering_urunleri_input');
+        
+        cateringVar.addEventListener('change', function() {
+            if (this.checked) {
+                cateringUrunleriContainer.style.display = 'block';
+            }
+        });
+        
+        cateringYok.addEventListener('change', function() {
+            if (this.checked) {
+                cateringUrunleriContainer.style.display = 'none';
+                // Catering ürünleri seçimini temizle
+                document.querySelectorAll('.catering-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                cateringUrunleriInput.value = '';
+            }
+        });
+        
+        // Catering ürünleri seçim işlemleri
+        const cateringItems = document.querySelectorAll('.catering-item');
+        
+        cateringItems.forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                updateCateringUrunleri();
+            });
+        });
+        
+        function updateCateringUrunleri() {
+            const selectedItems = document.querySelectorAll('.catering-item.selected');
+            const selectedValues = Array.from(selectedItems).map(item => item.dataset.value);
+            cateringUrunleriInput.value = JSON.stringify(selectedValues);
+        }
     });
     
     // Fotoğraf önizleme

@@ -23,9 +23,9 @@ class T3PersonelVerilerAdmin(admin.ModelAdmin):
 
 @admin.register(GonulluDurumVeriler)
 class GonulluDurumVerilerAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'gun', 'saat', 'alan', 'submitteddate', 'submittedtime')
-    list_filter = ('gun', 'alan', 'submitteddate')
-    search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'alan', 'aciklama')
+    list_display = ('kisi', 'gun', 'saat', 'alan', 'catering_durum', 'submitteddate', 'submittedtime')
+    list_filter = ('gun', 'alan', 'catering_durum', 'submitteddate')
+    search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'alan')
     readonly_fields = ('submitteddate', 'submittedtime')
 
 @admin.register(GonulluSorunVeriler)

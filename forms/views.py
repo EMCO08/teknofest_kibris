@@ -14,6 +14,7 @@ from .models import (
 from accounts.views import log_user_action
 import logging
 from django.db import connection
+import json
 
 def role_required(roles):
     """Belirli rollere sahip kullanıcıların erişimini kontrol eden dekoratör"""
@@ -45,19 +46,29 @@ def gonullu_durum_form(request):
         gun = request.POST.get('gun')
         saat = request.POST.get('saat')
         alan = request.POST.get('alan')
-        aciklama = request.POST.get('aciklama')
+        catering_durum = request.POST.get('catering_durum')
+        catering_urunleri = request.POST.get('catering_urunleri')
         fotograf = request.FILES.get('fotograf')
         
         try:
             # Debug için
             print(f"Gun: {gun}, type: {type(gun)}")
             
+            # catering_urunleri JSON string olarak geliyor, onu Python nesnesine çevirelim
+            catering_urunleri_data = None
+            if catering_urunleri:
+                try:
+                    catering_urunleri_data = json.loads(catering_urunleri)
+                except Exception as e:
+                    print(f"Catering ürünleri JSON parse hatası: {str(e)}")
+            
             GonulluDurumVeriler.objects.create(
                 kisi=request.user,
                 gun=gun,
                 saat=saat,
                 alan=alan,
-                aciklama=aciklama,
+                catering_durum=catering_durum,
+                catering_urunleri=catering_urunleri_data,
                 fotograf=fotograf
             )
             log_user_action(request, 'Gönüllü Durum Formu Gönderildi', 'Gönüllü Durum Form')

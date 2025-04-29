@@ -48,7 +48,8 @@ class GonulluDurumVeriler(models.Model):
     gun = models.CharField(max_length=50)
     saat = models.TimeField()
     alan = models.CharField(max_length=100)
-    aciklama = models.TextField()
+    catering_durum = models.CharField(max_length=10, choices=[('var', 'Catering Var'), ('yok', 'Catering Yok')], default='yok')
+    catering_urunleri = models.JSONField(blank=True, null=True)
     
     # CloudCube'a yükleme için storage parametresini kullan
     fotograf = models.ImageField(
