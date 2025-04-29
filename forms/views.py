@@ -91,6 +91,8 @@ def gonullu_sorun_form(request):
         gun = request.POST.get('gun')
         saat = request.POST.get('saat')
         alan = request.POST.get('alan')
+        sorun_tipi = request.POST.get('sorun_tipi')
+        sorun_seviyesi = request.POST.get('sorun_seviyesi')
         aciklama = request.POST.get('aciklama')
         fotograf = request.FILES.get('fotograf')
         
@@ -100,6 +102,8 @@ def gonullu_sorun_form(request):
                 gun=gun,
                 saat=saat,
                 alan=alan,
+                sorun_tipi=sorun_tipi,
+                sorun_seviyesi=sorun_seviyesi,
                 aciklama=aciklama,
                 fotograf=fotograf
             )

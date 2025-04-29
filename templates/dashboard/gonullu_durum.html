@@ -106,6 +106,8 @@
                         <th>Gün</th>
                         <th>Saat</th>
                         <th>Alan</th>
+                        <th>Catering Durumu</th>
+                        <th>Catering Ürünleri</th>
                         <th>Açıklama</th>
                         <th>Fotoğraf</th>
                         <th>Tarih</th>
@@ -119,6 +121,20 @@
                         <td>{{ veri.gun }}</td>
                         <td>{{ veri.saat }}</td>
                         <td>{{ veri.alan }}</td>
+                        <td>
+                            <span class="badge {% if veri.catering_durum == 'Var' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ veri.catering_durum }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if veri.catering_urunleri %}
+                                {% for urun in veri.catering_urunleri %}
+                                    <span class="badge bg-info me-1">{{ urun }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="badge bg-secondary">Ürün Yok</span>
+                            {% endif %}
+                        </td>
                         <td>{{ veri.aciklama }}</td>
                         <td>
                             {% if veri.fotograf %}
@@ -141,7 +157,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center">Henüz veri bulunmamaktadır.</td>
+                        <td colspan="10" class="text-center">Henüz veri bulunmamaktadır.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

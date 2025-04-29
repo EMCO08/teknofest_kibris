@@ -238,7 +238,7 @@ def gonullu_durum_dashboard(request):
         response['Content-Disposition'] = 'attachment; filename="gonullu_durum_veriler.csv"'
 
         writer = csv.writer(response, delimiter=';')
-        writer.writerow(['TC', 'İsim', 'Soyisim', 'Gün', 'Saat', 'Alan', 'Açıklama', 'Tarih', 'Saat'])
+        writer.writerow(['TC', 'İsim', 'Soyisim', 'Gün', 'Saat', 'Alan', 'Catering Durumu', 'Catering Ürünleri', 'Açıklama', 'Tarih', 'Saat'])
 
         for veri in veriler:
             writer.writerow([
@@ -248,6 +248,8 @@ def gonullu_durum_dashboard(request):
                 veri.gun,
                 veri.saat,
                 veri.alan,
+                veri.catering_durum,
+                ', '.join(veri.catering_urunleri) if veri.catering_urunleri else '',
                 veri.aciklama,
                 veri.submitteddate.strftime('%Y-%m-%d'),
                 veri.submittedtime.strftime('%H:%M:%S')
