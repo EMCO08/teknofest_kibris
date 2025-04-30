@@ -27,10 +27,10 @@
     }
     
     .photo-preview {
-        max-width: 100px;
-        max-height: 100px;
-        border-radius: 5px;
+        max-width: 50px;
+        max-height: 50px;
         margin-right: 5px;
+        border-radius: 4px;
         border: 1px solid #ddd;
         object-fit: cover;
     }
@@ -58,6 +58,34 @@
         background-position: center;
         opacity: 0.05;
         z-index: -1;
+    }
+    
+    .show-photo-btn {
+        padding: 2px 5px;
+        font-size: 0.75rem;
+    }
+    
+    .btn-sm.show-photo-btn {
+        padding: 2px 5px;
+        margin-left: 2px;
+    }
+    
+    .btn-sm.show-photo-btn i {
+        font-size: 0.7rem;
+    }
+    
+    .photo-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .photo-preview-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 5px;
     }
 </style>
 {% endblock %}
@@ -135,16 +163,37 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if veri.fotograf %}
-                                <div class="d-flex align-items-center">
-                                    <img src="{{ veri.get_fotograf_url }}" class="photo-preview" alt="Önizleme">
-                                    <button type="button" class="btn btn-sm btn-outline-primary show-photo-btn" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#photoModal" 
-                                            data-photo-url="{{ veri.get_fotograf_url }}"
-                                            data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }}">
-                                        <i class="fas fa-search-plus me-1"></i>Büyüt
-                                    </button>
+                            {% if veri.fotograflar_list or veri.fotograf %}
+                                <div class="photo-preview-container">
+                                    <!-- Yeni çoklu fotoğraflar -->
+                                    {% if veri.fotograflar_list %}
+                                        {% for fotograf in veri.fotograflar_list %}
+                                            <div class="photo-preview-item">
+                                                <img src="{{ fotograf.get_fotograf_url }}" class="photo-preview" alt="Önizleme">
+                                                <button type="button" class="btn btn-sm btn-outline-primary show-photo-btn" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#photoModal" 
+                                                    data-photo-url="{{ fotograf.get_fotograf_url }}"
+                                                    data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }} (Fotoğraf {{ forloop.counter }})">
+                                                    <i class="fas fa-search-plus"></i>
+                                                </button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    
+                                    <!-- Eski tek fotoğraf (geriye dönük uyumluluk için) -->
+                                    {% if veri.fotograf and not veri.fotograflar_list %}
+                                        <div class="photo-preview-item">
+                                            <img src="{{ veri.get_fotograf_url }}" class="photo-preview" alt="Önizleme">
+                                            <button type="button" class="btn btn-sm btn-outline-primary show-photo-btn" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#photoModal" 
+                                                    data-photo-url="{{ veri.get_fotograf_url }}"
+                                                    data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }}">
+                                                <i class="fas fa-search-plus"></i>
+                                            </button>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             {% else %}
                                 <span class="badge bg-secondary">Fotoğraf Yok</span>

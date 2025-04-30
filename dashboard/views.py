@@ -258,6 +258,10 @@ def gonullu_durum_dashboard(request):
     paginator = Paginator(veriler, 50)  # Her sayfada 50 kayıt
     page = request.GET.get('page')
     veriler_paginated = paginator.get_page(page)
+    
+    # Her veri için fotografları prefetch et
+    for veri in veriler_paginated:
+        veri.fotograflar_list = veri.fotograflar.all()
 
     # Alan listesini al
     alanlar = GonulluDurumVeriler.objects.values_list('alan', flat=True).distinct()
