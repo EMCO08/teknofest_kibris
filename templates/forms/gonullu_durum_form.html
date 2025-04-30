@@ -40,6 +40,43 @@
         gap: 10px;
         margin-top: 10px;
     }
+    .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .preview-item {
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .preview-item img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+    .remove-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+    }
+    .file-upload-counter {
+        margin-top: 5px;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
 </style>
 {% endblock %}
 
@@ -134,14 +171,15 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="fotograf" class="form-label">Fotoğraf (İsteğe Bağlı)</label>
-                        <input type="file" class="form-control" id="fotograf" name="fotograf" accept="image/*">
+                        <label for="fotograflar" class="form-label">Fotoğraflar (Maksimum 5 adet)</label>
+                        <input type="file" class="form-control" id="fotograflar" name="fotograflar" accept="image/*" multiple>
+                        <div class="file-upload-counter mt-1">0/5 fotoğraf seçildi</div>
                     </div>
 
                     <div class="mb-3" id="preview-container" style="display: none;">
                         <label class="form-label">Önizleme</label>
-                        <div class="text-center">
-                            <img id="preview-image" src="#" alt="Fotoğraf Önizleme" class="img-fluid img-thumbnail" style="max-height: 300px;">
+                        <div class="preview-grid">
+                            <!-- Fotoğraf önizlemeleri buraya gelecek -->
                         </div>
                     </div>
 
@@ -162,4 +200,149 @@
 
 {% block extra_js %}
 <script src="{% static 'js/gonullu_durum_form.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const MAX_FILES = 5;
+        const fileInput = document.getElementById('fotograflar');
+        const previewContainer = document.getElementById('preview-container');
+        const previewGrid = document.querySelector('.preview-grid');
+        const fileCounter = document.querySelector('.file-upload-counter');
+        
+        let selectedFiles = [];
+        
+        // Catering durum kontrolleri (mevcut JS kodunu koruyoruz)
+        const cateringVarRadio = document.getElementById('catering_var');
+        const cateringYokRadio = document.getElementById('catering_yok');
+        const cateringUrunleriContainer = document.getElementById('catering_urunleri_container');
+        const cateringUrunleriInput = document.getElementById('catering_urunleri_input');
+        const cateringItems = document.querySelectorAll('.catering-item');
+        
+        cateringVarRadio.addEventListener('change', function() {
+            if (this.checked) {
+                cateringUrunleriContainer.style.display = 'block';
+            }
+        });
+        
+        cateringYokRadio.addEventListener('change', function() {
+            if (this.checked) {
+                cateringUrunleriContainer.style.display = 'none';
+            }
+        });
+        
+        cateringItems.forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                
+                const selectedItems = document.querySelectorAll('.catering-item.selected');
+                const selectedValues = Array.from(selectedItems).map(item => item.dataset.value);
+                cateringUrunleriInput.value = selectedValues.join(',');
+            });
+        });
+        
+        // Fotoğraf yükleme ve önizleme
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            // Maksimum dosya sayısını kontrol et
+            if (selectedFiles.length + files.length > MAX_FILES) {
+                alert(`En fazla ${MAX_FILES} fotoğraf yükleyebilirsiniz.`);
+                fileInput.value = '';
+                return;
+            }
+            
+            // Seçilen dosyaları listeye ekle
+            selectedFiles = [...selectedFiles, ...files];
+            
+            // Dosya sayacını güncelle
+            fileCounter.textContent = `${selectedFiles.length}/${MAX_FILES} fotoğraf seçildi`;
+            
+            // Önizlemeleri göster
+            updatePreview();
+        });
+        
+        function updatePreview() {
+            // Önizleme konteynerini temizle
+            previewGrid.innerHTML = '';
+            
+            if (selectedFiles.length > 0) {
+                previewContainer.style.display = 'block';
+                
+                // Her dosya için önizleme oluştur
+                selectedFiles.forEach((file, index) => {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    img.alt = `Fotoğraf ${index + 1}`;
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'remove-image';
+                    removeBtn.innerHTML = 'X';
+                    removeBtn.addEventListener('click', function() {
+                        selectedFiles = selectedFiles.filter((_, i) => i !== index);
+                        updatePreview();
+                        
+                        // Dosya sayacını güncelle
+                        fileCounter.textContent = `${selectedFiles.length}/${MAX_FILES} fotoğraf seçildi`;
+                        
+                        // Dosya input alanını sıfırla
+                        fileInput.value = '';
+                        
+                        // Eğer tüm dosyalar kaldırıldıysa önizlemeyi gizle
+                        if (selectedFiles.length === 0) {
+                            previewContainer.style.display = 'none';
+                        }
+                    });
+                    
+                    previewItem.appendChild(img);
+                    previewItem.appendChild(removeBtn);
+                    previewGrid.appendChild(previewItem);
+                });
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        }
+        
+        // Form gönderildiğinde dosyaları FormData'ya ekle
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Mevcut dosya input alanını FormData'dan kaldır
+            formData.delete('fotograflar');
+            
+            // Seçilen fotoğrafları tek tek ekle
+            selectedFiles.forEach((file, index) => {
+                formData.append(`fotograf_${index}`, file);
+            });
+            
+            // Toplam fotoğraf sayısını ekle
+            formData.append('fotograf_sayisi', selectedFiles.length);
+            
+            // Form verilerini sunucuya gönder
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data && data.error) {
+                    alert(`Hata: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Form gönderme hatası:', error);
+                alert('Form gönderilirken bir hata oluştu.');
+            });
+        });
+    });
+</script>
 {% endblock %}
