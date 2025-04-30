@@ -330,6 +330,15 @@ def gonullu_sorun_dashboard(request):
             ])
 
         return response
+        
+    # Pagination
+    paginator = Paginator(veriler, 50)  # Her sayfada 50 kayıt
+    page = request.GET.get('page')
+    veriler_paginated = paginator.get_page(page)
+    
+    # Her veri için fotografları prefetch et
+    for veri in veriler_paginated:
+        veri.fotograflar_list = veri.fotograflar.all()
 
     # Alan listesini al
     alanlar = GonulluSorunVeriler.objects.values_list('alan', flat=True).distinct()
@@ -339,7 +348,7 @@ def gonullu_sorun_dashboard(request):
     sorun_seviyeleri = [choice[0] for choice in GonulluSorunVeriler.SORUN_SEVIYESI_CHOICES]
 
     context = {
-        'veriler': veriler,
+        'veriler': veriler_paginated,
         'alanlar': alanlar,
         'sorun_tipleri': sorun_tipleri,
         'sorun_seviyeleri': sorun_seviyeleri,

@@ -10,7 +10,8 @@ from .models import (
     GonulluSorunVeriler, 
     SorumluVeriler,
     SistemAyarlari,
-    GonulluDurumFotograf
+    GonulluDurumFotograf,
+    GonulluSorunFotograf
 )
 from accounts.views import log_user_action
 import logging
@@ -107,10 +108,10 @@ def gonullu_sorun_form(request):
         sorun_tipi = request.POST.get('sorun_tipi')
         sorun_seviyesi = request.POST.get('sorun_seviyesi')
         aciklama = request.POST.get('aciklama')
-        fotograf = request.FILES.get('fotograf')
         
         try:
-            GonulluSorunVeriler.objects.create(
+            # Önce sorun bildirimini oluştur
+            sorun = GonulluSorunVeriler.objects.create(
                 kisi=request.user,
                 gun=gun,
                 saat=saat,
@@ -118,8 +119,20 @@ def gonullu_sorun_form(request):
                 sorun_tipi=sorun_tipi,
                 sorun_seviyesi=sorun_seviyesi,
                 aciklama=aciklama,
-                fotograf=fotograf
             )
+            
+            # Birden fazla fotoğraf işleme (maximum 5)
+            if 'fotograflar' in request.FILES:
+                fotograflar = request.FILES.getlist('fotograflar')
+                max_fotograf = 5
+                
+                # Sadece izin verilen sayıda fotoğrafı işle
+                for i, fotograf in enumerate(fotograflar[:max_fotograf]):
+                    GonulluSorunFotograf.objects.create(
+                        sorun=sorun,
+                        fotograf=fotograf
+                    )
+            
             log_user_action(request, 'Gönüllü Sorun Formu Gönderildi', 'Gönüllü Sorun Form')
             messages.success(request, 'Sorun bildiriminiz başarıyla kaydedildi.')
             return redirect('forms:gonullu_form')

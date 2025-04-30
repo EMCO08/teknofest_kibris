@@ -8,18 +8,42 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fotoğraf önizleme
     const fileInput = document.getElementById('fotograf');
     const previewContainer = document.getElementById('preview-container');
-    const previewImage = document.getElementById('preview-image');
+    const previewContainer2 = document.getElementById('images-preview-container');
     
-    fileInput.addEventListener('change', function(e) {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
+    fileInput.addEventListener('change', function() {
+        // Önizleme konteynerini temizle
+        previewContainer2.innerHTML = '';
+        
+        if (this.files && this.files.length > 0) {
+            // Maksimum 5 fotoğraf kontrolü
+            const maxFiles = 5;
+            const fileCount = Math.min(this.files.length, maxFiles);
             
-            reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                previewContainer.style.display = 'block';
+            if (this.files.length > maxFiles) {
+                alert(`En fazla ${maxFiles} fotoğraf yükleyebilirsiniz. İlk ${maxFiles} fotoğraf seçildi.`);
             }
             
-            reader.readAsDataURL(this.files[0]);
+            // Seçilen fotoğrafları önizle
+            for (let i = 0; i < fileCount; i++) {
+                const reader = new FileReader();
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'mb-2 d-inline-block mx-1';
+                
+                const img = document.createElement('img');
+                img.className = 'img-fluid img-thumbnail';
+                img.style.maxHeight = '150px';
+                img.alt = `Fotoğraf ${i+1} Önizleme`;
+                
+                reader.onload = e => {
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(this.files[i]);
+                imgContainer.appendChild(img);
+                previewContainer2.appendChild(imgContainer);
+            }
+            
+            previewContainer.style.display = 'block';
         } else {
             previewContainer.style.display = 'none';
         }

@@ -154,6 +154,8 @@ class GonulluSorunVeriler(models.Model):
     sorun_tipi = models.CharField(max_length=50, choices=SORUN_TIPI_CHOICES, default='Hizmet Kalitesi')
     sorun_seviyesi = models.CharField(max_length=20, choices=SORUN_SEVIYESI_CHOICES, default='Düşük')
     aciklama = models.TextField()
+    
+    # Çoklu fotoğraf desteği için bu alan artık kullanılmayacak, ama geri uyumluluk için tutulacak
     fotograf = models.ImageField(
         upload_to='', 
         blank=True, 
@@ -193,6 +195,46 @@ class GonulluSorunVeriler(models.Model):
         verbose_name = 'Gönüllü Sorun Verisi'
         verbose_name_plural = 'Gönüllü Sorun Verileri'
         db_table = 'gonullu_sorun_veriler'
+
+class GonulluSorunFotograf(models.Model):
+    """Gönüllü sorun bildirimlerine ait fotoğraf modeli"""
+    sorun = models.ForeignKey(GonulluSorunVeriler, on_delete=models.CASCADE, related_name='fotograflar')
+    fotograf = models.ImageField(
+        upload_to='', 
+        storage=GonulluSorunStorage() if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL else None
+    )
+    added_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Fotoğraf - {self.sorun}"
+    
+    def get_fotograf_url(self):
+        """CloudCube'dan fotoğrafın URL'sini döndür"""
+        if not self.fotograf:
+            return None
+            
+        if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL and self.fotograf:
+            # CloudCube'a erişim URL'sini oluştur
+            if 's3.amazonaws.com' in settings.CLOUDCUBE_URL:
+                # Eğer URL içinde dosya adı varsa
+                if hasattr(self.fotograf, 'name'):
+                    file_name = self.fotograf.name
+                    if file_name.startswith('/'):
+                        file_name = file_name[1:]
+                    return f"{settings.CLOUDCUBE_URL.rstrip('/')}/public/gonullu_sorun_fotolar/{file_name}"
+                # Eğer fotograf.url varsa direkt olarak kullan
+                elif hasattr(self.fotograf, 'url'):
+                    return self.fotograf.url
+        # Django'nun kendi URL mekanizmasını kullan
+        try:
+            return self.fotograf.url
+        except:
+            return None
+    
+    class Meta:
+        verbose_name = 'Gönüllü Sorun Fotoğrafı'
+        verbose_name_plural = 'Gönüllü Sorun Fotoğrafları'
+        db_table = 'gonullu_sorun_fotograflar'
 
 class SorumluVeriler(models.Model):
     kisi = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sorumlu_veriler')
