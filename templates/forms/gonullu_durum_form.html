@@ -170,16 +170,22 @@
                         <input type="hidden" name="catering_urunleri" id="catering_urunleri_input">
                     </div>
 
-                    <div class="mb-3">
-                        <label for="fotograflar" class="form-label">Fotoğraflar (Maksimum 5 adet)</label>
-                        <input type="file" class="form-control" id="fotograflar" name="fotograflar" accept="image/*" multiple>
-                        <div class="file-upload-counter mt-1">0/5 fotoğraf seçildi</div>
-                    </div>
-
-                    <div class="mb-3" id="preview-container" style="display: none;">
-                        <label class="form-label">Önizleme</label>
-                        <div class="preview-grid">
-                            <!-- Fotoğraf önizlemeleri buraya gelecek -->
+                    <div id="fotograflar-container" class="mb-3">
+                        <label class="form-label">Fotoğraflar (Maksimum 5 adet)</label>
+                        <div class="mb-2">
+                            <input type="file" class="form-control" id="fotograf1" name="fotograf1" accept="image/*">
+                        </div>
+                        <div class="mb-2">
+                            <input type="file" class="form-control" id="fotograf2" name="fotograf2" accept="image/*">
+                        </div>
+                        <div class="mb-2">
+                            <input type="file" class="form-control" id="fotograf3" name="fotograf3" accept="image/*">
+                        </div>
+                        <div class="mb-2">
+                            <input type="file" class="form-control" id="fotograf4" name="fotograf4" accept="image/*">
+                        </div>
+                        <div class="mb-2">
+                            <input type="file" class="form-control" id="fotograf5" name="fotograf5" accept="image/*">
                         </div>
                     </div>
 
@@ -202,15 +208,7 @@
 <script src="{% static 'js/gonullu_durum_form.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const MAX_FILES = 5;
-        const fileInput = document.getElementById('fotograflar');
-        const previewContainer = document.getElementById('preview-container');
-        const previewGrid = document.querySelector('.preview-grid');
-        const fileCounter = document.querySelector('.file-upload-counter');
-        
-        let selectedFiles = [];
-        
-        // Catering durum kontrolleri (mevcut JS kodunu koruyoruz)
+        // Catering durum kontrolleri
         const cateringVarRadio = document.getElementById('catering_var');
         const cateringYokRadio = document.getElementById('catering_yok');
         const cateringUrunleriContainer = document.getElementById('catering_urunleri_container');
@@ -236,111 +234,6 @@
                 const selectedItems = document.querySelectorAll('.catering-item.selected');
                 const selectedValues = Array.from(selectedItems).map(item => item.dataset.value);
                 cateringUrunleriInput.value = selectedValues.join(',');
-            });
-        });
-        
-        // Fotoğraf yükleme ve önizleme
-        fileInput.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            
-            // Maksimum dosya sayısını kontrol et
-            if (selectedFiles.length + files.length > MAX_FILES) {
-                alert(`En fazla ${MAX_FILES} fotoğraf yükleyebilirsiniz.`);
-                fileInput.value = '';
-                return;
-            }
-            
-            // Seçilen dosyaları listeye ekle
-            selectedFiles = [...selectedFiles, ...files];
-            
-            // Dosya sayacını güncelle
-            fileCounter.textContent = `${selectedFiles.length}/${MAX_FILES} fotoğraf seçildi`;
-            
-            // Önizlemeleri göster
-            updatePreview();
-        });
-        
-        function updatePreview() {
-            // Önizleme konteynerini temizle
-            previewGrid.innerHTML = '';
-            
-            if (selectedFiles.length > 0) {
-                previewContainer.style.display = 'block';
-                
-                // Her dosya için önizleme oluştur
-                selectedFiles.forEach((file, index) => {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    img.alt = `Fotoğraf ${index + 1}`;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-image';
-                    removeBtn.innerHTML = 'X';
-                    removeBtn.addEventListener('click', function() {
-                        selectedFiles = selectedFiles.filter((_, i) => i !== index);
-                        updatePreview();
-                        
-                        // Dosya sayacını güncelle
-                        fileCounter.textContent = `${selectedFiles.length}/${MAX_FILES} fotoğraf seçildi`;
-                        
-                        // Dosya input alanını sıfırla
-                        fileInput.value = '';
-                        
-                        // Eğer tüm dosyalar kaldırıldıysa önizlemeyi gizle
-                        if (selectedFiles.length === 0) {
-                            previewContainer.style.display = 'none';
-                        }
-                    });
-                    
-                    previewItem.appendChild(img);
-                    previewItem.appendChild(removeBtn);
-                    previewGrid.appendChild(previewItem);
-                });
-            } else {
-                previewContainer.style.display = 'none';
-            }
-        }
-        
-        // Form gönderildiğinde dosyaları FormData'ya ekle
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            // Mevcut dosya input alanını FormData'dan kaldır
-            formData.delete('fotograflar');
-            
-            // Seçilen fotoğrafları tek tek ekle
-            selectedFiles.forEach((file, index) => {
-                formData.append(`fotograf_${index}`, file);
-            });
-            
-            // Toplam fotoğraf sayısını ekle
-            formData.append('fotograf_sayisi', selectedFiles.length);
-            
-            // Form verilerini sunucuya gönder
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    return response.json();
-                }
-            })
-            .then(data => {
-                if (data && data.error) {
-                    alert(`Hata: ${data.error}`);
-                }
-            })
-            .catch(error => {
-                console.error('Form gönderme hatası:', error);
-                alert('Form gönderilirken bir hata oluştu.');
             });
         });
     });
