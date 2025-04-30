@@ -51,7 +51,7 @@ class GonulluDurumVeriler(models.Model):
     catering_durum = models.CharField(max_length=10, choices=[('var', 'Catering Var'), ('yok', 'Catering Yok')], default='yok')
     catering_urunleri = models.JSONField(blank=True, null=True)
     
-    # CloudCube'a yükleme için storage parametresini kullan
+    # Çoklu fotoğraf desteği için bu alan artık kullanılmayacak, ama geri uyumluluk için tutulacak
     fotograf = models.ImageField(
         upload_to='', 
         blank=True, 
@@ -92,6 +92,46 @@ class GonulluDurumVeriler(models.Model):
         verbose_name = 'Gönüllü Durum Verisi'
         verbose_name_plural = 'Gönüllü Durum Verileri'
         db_table = 'gonullu_durum_veriler'
+
+class GonulluDurumFotograf(models.Model):
+    """Gönüllü durum bildirimlerine ait fotoğraf modeli"""
+    durum = models.ForeignKey(GonulluDurumVeriler, on_delete=models.CASCADE, related_name='fotograflar')
+    fotograf = models.ImageField(
+        upload_to='', 
+        storage=GonulluDurumStorage() if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL else None
+    )
+    added_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Fotoğraf - {self.durum}"
+    
+    def get_fotograf_url(self):
+        """CloudCube'dan fotoğrafın URL'sini döndür"""
+        if not self.fotograf:
+            return None
+            
+        if hasattr(settings, 'CLOUDCUBE_URL') and settings.CLOUDCUBE_URL and self.fotograf:
+            # CloudCube'a erişim URL'sini oluştur
+            if 's3.amazonaws.com' in settings.CLOUDCUBE_URL:
+                # Eğer URL içinde dosya adı varsa
+                if hasattr(self.fotograf, 'name'):
+                    file_name = self.fotograf.name
+                    if file_name.startswith('/'):
+                        file_name = file_name[1:]
+                    return f"{settings.CLOUDCUBE_URL.rstrip('/')}/public/gonullu_durum_fotolar/{file_name}"
+                # Eğer fotograf.url varsa direkt olarak kullan
+                elif hasattr(self.fotograf, 'url'):
+                    return self.fotograf.url
+        # Django'nun kendi URL mekanizmasını kullan
+        try:
+            return self.fotograf.url
+        except:
+            return None
+    
+    class Meta:
+        verbose_name = 'Gönüllü Durum Fotoğrafı'
+        verbose_name_plural = 'Gönüllü Durum Fotoğrafları'
+        db_table = 'gonullu_durum_fotograflar'
 
 class GonulluSorunVeriler(models.Model):
     SORUN_TIPI_CHOICES = [

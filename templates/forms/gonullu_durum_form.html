@@ -134,14 +134,15 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="fotograf" class="form-label">Fotoğraf (İsteğe Bağlı)</label>
-                        <input type="file" class="form-control" id="fotograf" name="fotograf" accept="image/*">
+                        <label for="fotograf" class="form-label">Fotoğraf (Max. 5 Adet - İsteğe Bağlı)</label>
+                        <input type="file" class="form-control" id="fotograf" name="fotograflar" accept="image/*" multiple>
+                        <small class="text-muted">En fazla 5 fotoğraf yükleyebilirsiniz</small>
                     </div>
 
                     <div class="mb-3" id="preview-container" style="display: none;">
                         <label class="form-label">Önizleme</label>
-                        <div class="text-center">
-                            <img id="preview-image" src="#" alt="Fotoğraf Önizleme" class="img-fluid img-thumbnail" style="max-height: 300px;">
+                        <div class="text-center" id="images-preview-container">
+                            <!-- Önizleme resimleri burada gösterilecek -->
                         </div>
                     </div>
 

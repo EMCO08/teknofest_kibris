@@ -4,8 +4,8 @@ from .models import (
     T3PersonelVeriler, 
     GonulluDurumVeriler, 
     GonulluSorunVeriler, 
-    SorumluVeriler
-
+    SorumluVeriler,
+    GonulluDurumFotograf
 )
 
 @admin.register(T3PersonelAtama)
@@ -21,23 +21,44 @@ class T3PersonelVerilerAdmin(admin.ModelAdmin):
     search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'koordinatorluk', 'birim')
     readonly_fields = ('submitteddate', 'submittedtime')
 
-@admin.register(GonulluDurumVeriler)
+class GonulluDurumFotografInline(admin.TabularInline):
+    model = GonulluDurumFotograf
+    extra = 0
+    readonly_fields = ['fotograf_preview']
+    
+    def fotograf_preview(self, obj):
+        if obj.fotograf:
+            return obj.get_fotograf_url()
+        return "Fotoğraf yok"
+    
+    fotograf_preview.short_description = "Fotoğraf Önizleme"
+
 class GonulluDurumVerilerAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'gun', 'saat', 'alan', 'catering_durum', 'submitteddate', 'submittedtime')
+    list_display = ('kisi', 'gun', 'alan', 'saat', 'catering_durum', 'submitteddate')
     list_filter = ('gun', 'alan', 'catering_durum', 'submitteddate')
-    search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'alan')
-    readonly_fields = ('submitteddate', 'submittedtime')
+    search_fields = ('kisi__first_name', 'kisi__last_name', 'alan')
+    readonly_fields = ['fotograf_preview']
+    inlines = [GonulluDurumFotografInline]
+    
+    def fotograf_preview(self, obj):
+        # Geriye dönük uyumluluk için eski fotograf alanını da göster
+        if obj.fotograf:
+            return obj.get_fotograf_url() or "Fotoğraf yok"
+        return "Fotoğraf yok"
+    
+    fotograf_preview.short_description = "Eski Fotoğraf (Geriye Dönük)"
 
-@admin.register(GonulluSorunVeriler)
 class GonulluSorunVerilerAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'gun', 'saat', 'alan', 'submitteddate', 'submittedtime')
-    list_filter = ('gun', 'alan', 'submitteddate')
-    search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim', 'alan', 'aciklama')
-    readonly_fields = ('submitteddate', 'submittedtime')
+    list_display = ('kisi', 'gun', 'alan', 'sorun_tipi', 'sorun_seviyesi', 'submitteddate')
+    list_filter = ('gun', 'alan', 'sorun_tipi', 'sorun_seviyesi', 'submitteddate')
+    search_fields = ('kisi__first_name', 'kisi__last_name', 'alan', 'aciklama')
 
-@admin.register(SorumluVeriler)
 class SorumluVerilerAdmin(admin.ModelAdmin):
-    list_display = ('kisi', 'gun', 'personel_yemek_siparis', 'taseron_yemek_siparis', 'submitteddate', 'submittedtime')
+    list_display = ('kisi', 'gun', 'personel_yemek_siparis', 'taseron_yemek_siparis', 'submitteddate')
     list_filter = ('gun', 'submitteddate')
-    search_fields = ('kisi__tc', 'kisi__isim', 'kisi__soyisim')
-    readonly_fields = ('submitteddate', 'submittedtime')
+    search_fields = ('kisi__first_name', 'kisi__last_name')
+
+admin.site.register(GonulluDurumVeriler, GonulluDurumVerilerAdmin)
+admin.site.register(GonulluSorunVeriler, GonulluSorunVerilerAdmin)
+admin.site.register(SorumluVeriler, SorumluVerilerAdmin)
+admin.site.register(GonulluDurumFotograf)

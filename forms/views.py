@@ -9,7 +9,8 @@ from .models import (
     GonulluDurumVeriler, 
     GonulluSorunVeriler, 
     SorumluVeriler,
-    SistemAyarlari
+    SistemAyarlari,
+    GonulluDurumFotograf
 )
 from accounts.views import log_user_action
 import logging
@@ -48,7 +49,6 @@ def gonullu_durum_form(request):
         alan = request.POST.get('alan')
         catering_durum = request.POST.get('catering_durum')
         catering_urunleri = request.POST.get('catering_urunleri')
-        fotograf = request.FILES.get('fotograf')
         
         try:
             # Debug için
@@ -62,15 +62,28 @@ def gonullu_durum_form(request):
                 except Exception as e:
                     print(f"Catering ürünleri JSON parse hatası: {str(e)}")
             
-            GonulluDurumVeriler.objects.create(
+            # Önce durum bildirimini oluştur
+            durum = GonulluDurumVeriler.objects.create(
                 kisi=request.user,
                 gun=gun,
                 saat=saat,
                 alan=alan,
                 catering_durum=catering_durum,
                 catering_urunleri=catering_urunleri_data,
-                fotograf=fotograf
             )
+            
+            # Birden fazla fotoğraf işleme (maximum 5)
+            if 'fotograflar' in request.FILES:
+                fotograflar = request.FILES.getlist('fotograflar')
+                max_fotograf = 5
+                
+                # Sadece izin verilen sayıda fotoğrafı işle
+                for i, fotograf in enumerate(fotograflar[:max_fotograf]):
+                    GonulluDurumFotograf.objects.create(
+                        durum=durum,
+                        fotograf=fotograf
+                    )
+            
             log_user_action(request, 'Gönüllü Durum Formu Gönderildi', 'Gönüllü Durum Form')
             messages.success(request, 'Durum bildiriminiz başarıyla kaydedildi.')
             return redirect('forms:gonullu_form')
