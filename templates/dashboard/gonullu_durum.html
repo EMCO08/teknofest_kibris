@@ -137,11 +137,15 @@
                     <label for="kisi_isim" class="form-label">İsim Arama</label>
                     <input type="text" class="form-control" id="kisi_isim" name="kisi_isim" value="{{ filtreler.kisi_isim }}" placeholder="İsim veya soyisim">
                 </div>
+                <div class="col-md-3">
+                    <label for="aciklama" class="form-label">Açıklama İçerik Arama</label>
+                    <input type="text" class="form-control" id="aciklama" name="aciklama" value="{{ filtreler.aciklama }}" placeholder="Açıklama içinde arama">
+                </div>
                 <div class="col-12 d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter me-1"></i>Filtrele
                     </button>
-                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}" class="btn btn-success">
+                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}{% if filtreler.aciklama %}&aciklama={{ filtreler.aciklama }}{% endif %}" class="btn btn-success">
                         <i class="fas fa-download me-1"></i>CSV İndir
                     </a>
                 </div>
@@ -158,6 +162,7 @@
                         <th>Alan</th>
                         <th>Catering Durumu</th>
                         <th>Catering Ürünleri</th>
+                        <th>Açıklama</th>
                         <th>Fotoğraf</th>
                         <th>Tarih</th>
                         <th>Saat</th>
@@ -182,6 +187,13 @@
                                 {% endfor %}
                             {% else %}
                                 <span class="badge bg-secondary">Ürün Yok</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if veri.aciklama %}
+                                {{ veri.aciklama }}
+                            {% else %}
+                                <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td>
@@ -238,10 +250,10 @@
             <ul class="pagination justify-content-center">
                 {% if veriler.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">&laquo; İlk</a>
+                        <a class="page-link" href="?page=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}{% if filtreler.aciklama %}&aciklama={{ filtreler.aciklama }}{% endif %}">&laquo; İlk</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Önceki</a>
+                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}{% if filtreler.aciklama %}&aciklama={{ filtreler.aciklama }}{% endif %}">Önceki</a>
                     </li>
                 {% endif %}
 
@@ -253,10 +265,10 @@
 
                 {% if veriler.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Sonraki</a>
+                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}{% if filtreler.aciklama %}&aciklama={{ filtreler.aciklama }}{% endif %}">Sonraki</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Son &raquo;</a>
+                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}{% if filtreler.aciklama %}&aciklama={{ filtreler.aciklama }}{% endif %}">Son &raquo;</a>
                     </li>
                 {% endif %}
             </ul>

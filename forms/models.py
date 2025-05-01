@@ -50,6 +50,7 @@ class GonulluDurumVeriler(models.Model):
     alan = models.CharField(max_length=100)
     catering_durum = models.CharField(max_length=10, choices=[('var', 'Catering Var'), ('yok', 'Catering Yok')], default='yok')
     catering_urunleri = models.JSONField(blank=True, null=True)
+    aciklama = models.TextField(blank=True, null=True, verbose_name="Açıklama")
     
     # Çoklu fotoğraf desteği için bu alan artık kullanılmayacak, ama geri uyumluluk için tutulacak
     fotograf = models.ImageField(

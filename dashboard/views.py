@@ -264,6 +264,7 @@ def gonullu_durum_dashboard(request):
     gun = request.GET.get('gun')
     catering_durum = request.GET.get('catering_durum')
     kisi_isim = request.GET.get('kisi_isim')
+    aciklama = request.GET.get('aciklama')
     
     # Temel sorgu
     veriler = GonulluDurumVeriler.objects.all().order_by('-submitteddate', '-submittedtime')
@@ -281,6 +282,8 @@ def gonullu_durum_dashboard(request):
         veriler = veriler.filter(catering_durum=catering_durum)
     if kisi_isim:
         veriler = veriler.filter(kisi__isim__icontains=kisi_isim) | veriler.filter(kisi__soyisim__icontains=kisi_isim)
+    if aciklama:
+        veriler = veriler.filter(aciklama__icontains=aciklama)
 
     # CSV indirme
     if 'csv' in request.GET:
@@ -288,7 +291,7 @@ def gonullu_durum_dashboard(request):
         response['Content-Disposition'] = 'attachment; filename="gonullu_durum_veriler.csv"'
 
         writer = csv.writer(response, delimiter=';')
-        writer.writerow(['İsim', 'Gün', 'Saat', 'Alan', 'Catering Durumu', 'Catering Ürünleri', 'Fotoğraf', 'Tarih', 'Saat'])
+        writer.writerow(['İsim', 'Gün', 'Saat', 'Alan', 'Catering Durumu', 'Catering Ürünleri', 'Açıklama', 'Fotoğraf', 'Tarih', 'Saat'])
         for veri in veriler:
             writer.writerow([
                 veri.kisi.get_full_name(),
@@ -297,6 +300,7 @@ def gonullu_durum_dashboard(request):
                 veri.alan,
                 veri.catering_durum,
                 ', '.join(veri.catering_urunleri) if veri.catering_urunleri else '',
+                veri.aciklama if veri.aciklama else '-',
                 'Var' if veri.fotograf else 'Yok',
                 veri.submitteddate,
                 veri.submittedtime,
@@ -334,6 +338,7 @@ def gonullu_durum_dashboard(request):
             'gun': gun,
             'catering_durum': catering_durum,
             'kisi_isim': kisi_isim,
+            'aciklama': aciklama,
         }
     }
 

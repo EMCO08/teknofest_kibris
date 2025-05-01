@@ -50,6 +50,7 @@ def gonullu_durum_form(request):
         alan = request.POST.get('alan')
         catering_durum = request.POST.get('catering_durum')
         catering_urunleri = request.POST.get('catering_urunleri')
+        aciklama = request.POST.get('aciklama')
         
         try:
             # Debug için
@@ -71,6 +72,7 @@ def gonullu_durum_form(request):
                 alan=alan,
                 catering_durum=catering_durum,
                 catering_urunleri=catering_urunleri_data,
+                aciklama=aciklama,
             )
             
             # Birden fazla fotoğraf işleme (maximum 5)
