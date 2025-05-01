@@ -261,7 +261,10 @@ def gonullu_durum_dashboard(request):
     baslangic_tarihi = request.GET.get('baslangic_tarihi')
     bitis_tarihi = request.GET.get('bitis_tarihi')
     alan = request.GET.get('alan')
-
+    gun = request.GET.get('gun')
+    catering_durum = request.GET.get('catering_durum')
+    kisi_isim = request.GET.get('kisi_isim')
+    
     # Temel sorgu
     veriler = GonulluDurumVeriler.objects.all().order_by('-submitteddate', '-submittedtime')
 
@@ -272,6 +275,12 @@ def gonullu_durum_dashboard(request):
         veriler = veriler.filter(submitteddate__lte=bitis_tarihi)
     if alan:
         veriler = veriler.filter(alan__icontains=alan)
+    if gun:
+        veriler = veriler.filter(gun=gun)
+    if catering_durum:
+        veriler = veriler.filter(catering_durum=catering_durum)
+    if kisi_isim:
+        veriler = veriler.filter(kisi__isim__icontains=kisi_isim) | veriler.filter(kisi__soyisim__icontains=kisi_isim)
 
     # CSV indirme
     if 'csv' in request.GET:
@@ -306,14 +315,25 @@ def gonullu_durum_dashboard(request):
 
     # Alan listesini al
     alanlar = GonulluDurumVeriler.objects.values_list('alan', flat=True).distinct()
+    
+    # Gün seçeneklerini al
+    gunler = GonulluDurumVeriler.objects.values_list('gun', flat=True).distinct()
+    
+    # Catering durumu seçenekleri
+    catering_durumlari = [('var', 'Catering Var'), ('yok', 'Catering Yok')]
 
     context = {
         'veriler': veriler_paginated,
         'alanlar': alanlar,
+        'gunler': gunler,
+        'catering_durumlari': catering_durumlari,
         'filtreler': {
             'baslangic_tarihi': baslangic_tarihi,
             'bitis_tarihi': bitis_tarihi,
             'alan': alan,
+            'gun': gun,
+            'catering_durum': catering_durum,
+            'kisi_isim': kisi_isim,
         }
     }
 

@@ -98,15 +98,15 @@
     <div class="card-body">
         <form method="get" class="mb-4">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="baslangic_tarihi" class="form-label">Başlangıç Tarihi</label>
                     <input type="date" class="form-control" id="baslangic_tarihi" name="baslangic_tarihi" value="{{ filtreler.baslangic_tarihi }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="bitis_tarihi" class="form-label">Bitiş Tarihi</label>
                     <input type="date" class="form-control" id="bitis_tarihi" name="bitis_tarihi" value="{{ filtreler.bitis_tarihi }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="alan" class="form-label">Alan</label>
                     <select class="form-select" id="alan" name="alan">
                         <option value="">Tümü</option>
@@ -115,11 +115,33 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <label for="gun" class="form-label">Gün</label>
+                    <select class="form-select" id="gun" name="gun">
+                        <option value="">Tümü</option>
+                        {% for g in gunler %}
+                            <option value="{{ g }}" {% if filtreler.gun == g %}selected{% endif %}>{{ g }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="catering_durum" class="form-label">Catering Durumu</label>
+                    <select class="form-select" id="catering_durum" name="catering_durum">
+                        <option value="">Tümü</option>
+                        {% for deger, etiket in catering_durumlari %}
+                            <option value="{{ deger }}" {% if filtreler.catering_durum == deger %}selected{% endif %}>{{ etiket }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="kisi_isim" class="form-label">İsim Arama</label>
+                    <input type="text" class="form-control" id="kisi_isim" name="kisi_isim" value="{{ filtreler.kisi_isim }}" placeholder="İsim veya soyisim">
+                </div>
                 <div class="col-12 d-flex justify-content-end">
                     <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter me-1"></i>Filtrele
                     </button>
-                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}" class="btn btn-success">
+                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}" class="btn btn-success">
                         <i class="fas fa-download me-1"></i>CSV İndir
                     </a>
                 </div>
@@ -216,10 +238,10 @@
             <ul class="pagination justify-content-center">
                 {% if veriler.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">&laquo; İlk</a>
+                        <a class="page-link" href="?page=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">&laquo; İlk</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">Önceki</a>
+                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Önceki</a>
                     </li>
                 {% endif %}
 
@@ -231,10 +253,10 @@
 
                 {% if veriler.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">Sonraki</a>
+                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Sonraki</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}">Son &raquo;</a>
+                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.catering_durum %}&catering_durum={{ filtreler.catering_durum }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Son &raquo;</a>
                     </li>
                 {% endif %}
             </ul>
