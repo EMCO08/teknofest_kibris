@@ -351,6 +351,8 @@ def gonullu_sorun_dashboard(request):
     alan = request.GET.get('alan')
     sorun_tipi = request.GET.get('sorun_tipi')
     sorun_seviyesi = request.GET.get('sorun_seviyesi')
+    gun = request.GET.get('gun')
+    kisi_isim = request.GET.get('kisi_isim')
 
     # Temel sorgu
     veriler = GonulluSorunVeriler.objects.all().order_by('-submitteddate', '-submittedtime')
@@ -366,6 +368,10 @@ def gonullu_sorun_dashboard(request):
         veriler = veriler.filter(sorun_tipi=sorun_tipi)
     if sorun_seviyesi:
         veriler = veriler.filter(sorun_seviyesi=sorun_seviyesi)
+    if gun:
+        veriler = veriler.filter(gun=gun)
+    if kisi_isim:
+        veriler = veriler.filter(kisi__isim__icontains=kisi_isim) | veriler.filter(kisi__soyisim__icontains=kisi_isim)
 
     # CSV indirme
     if 'csv' in request.GET:
@@ -404,6 +410,9 @@ def gonullu_sorun_dashboard(request):
     # Alan listesini al
     alanlar = GonulluSorunVeriler.objects.values_list('alan', flat=True).distinct()
     
+    # Gün listesini al
+    gunler = GonulluSorunVeriler.objects.values_list('gun', flat=True).distinct()
+    
     # Sorun tipleri ve seviyeleri için choices'ları al
     sorun_tipleri = [choice[0] for choice in GonulluSorunVeriler.SORUN_TIPI_CHOICES]
     sorun_seviyeleri = [choice[0] for choice in GonulluSorunVeriler.SORUN_SEVIYESI_CHOICES]
@@ -411,6 +420,7 @@ def gonullu_sorun_dashboard(request):
     context = {
         'veriler': veriler_paginated,
         'alanlar': alanlar,
+        'gunler': gunler,
         'sorun_tipleri': sorun_tipleri,
         'sorun_seviyeleri': sorun_seviyeleri,
         'filtreler': {
@@ -418,7 +428,9 @@ def gonullu_sorun_dashboard(request):
             'bitis_tarihi': bitis_tarihi,
             'alan': alan,
             'sorun_tipi': sorun_tipi,
-            'sorun_seviyesi': sorun_seviyesi
+            'sorun_seviyesi': sorun_seviyesi,
+            'gun': gun,
+            'kisi_isim': kisi_isim
         }
     }
 
