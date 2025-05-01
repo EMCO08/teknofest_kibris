@@ -17,6 +17,86 @@
     </div>
 </div>
 
+<!-- Koordinatörlük Tablosu -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-table me-2"></i>Koordinatörlük Veri Durumu</h4>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <form method="get" action="{% url 'dashboard:home' %}" class="d-flex align-items-center">
+                        <label for="gun" class="me-2">Gün Seçimi:</label>
+                        <select name="gun" id="gun" class="form-select me-2" style="max-width: 200px;" onchange="this.form.submit()">
+                            {% for gun in gunler %}
+                                <option value="{{ gun }}" {% if secilen_gun == gun %}selected{% endif %}>{{ gun }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">Filtrele</button>
+                    </form>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            {% with koordinator_chunks=koordinatorlukler|slice:":5" %}
+                            <tr>
+                                {% for koordinatorluk in koordinator_chunks %}
+                                <td class="text-center p-3 {% if koordinatorluk_veri_sayilari|get_item:koordinatorluk > 0 %}bg-success text-white{% else %}bg-light text-muted{% endif %}" style="width: 20%; height: 100px; vertical-align: middle;">
+                                    <h6>{{ koordinatorluk }}</h6>
+                                    <small>({{ koordinatorluk_veri_sayilari|get_item:koordinatorluk }})</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endwith %}
+                            
+                            {% with koordinator_chunks=koordinatorlukler|slice:"5:10" %}
+                            <tr>
+                                {% for koordinatorluk in koordinator_chunks %}
+                                <td class="text-center p-3 {% if koordinatorluk_veri_sayilari|get_item:koordinatorluk > 0 %}bg-success text-white{% else %}bg-light text-muted{% endif %}" style="width: 20%; height: 100px; vertical-align: middle;">
+                                    <h6>{{ koordinatorluk }}</h6>
+                                    <small>({{ koordinatorluk_veri_sayilari|get_item:koordinatorluk }})</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endwith %}
+                            
+                            {% with koordinator_chunks=koordinatorlukler|slice:"10:15" %}
+                            <tr>
+                                {% for koordinatorluk in koordinator_chunks %}
+                                <td class="text-center p-3 {% if koordinatorluk_veri_sayilari|get_item:koordinatorluk > 0 %}bg-success text-white{% else %}bg-light text-muted{% endif %}" style="width: 20%; height: 100px; vertical-align: middle;">
+                                    <h6>{{ koordinatorluk }}</h6>
+                                    <small>({{ koordinatorluk_veri_sayilari|get_item:koordinatorluk }})</small>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endwith %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="d-flex">
+                        <div class="me-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success me-2" style="width: 20px; height: 20px;"></div>
+                                <span>Veri Girilmiş</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light me-2" style="width: 20px; height: 20px; border: 1px solid #ccc;"></div>
+                                <span>Veri Girilmemiş</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if user.is_superuser or user.is_staff %}
 <div class="row mb-4">
     <div class="col-md-12">

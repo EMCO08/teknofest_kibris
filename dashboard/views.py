@@ -23,7 +23,13 @@ from openpyxl.utils import get_column_letter
 from io import BytesIO
 from django.db.models import Sum, F
 from django.core.paginator import Paginator
+from django.template.defaulttags import register
 
+# Template filtreleri
+@register.filter
+def get_item(dictionary, key):
+    """Dictionary'den değer almak için template filtresi"""
+    return dictionary.get(key, 0)
 
 @login_required
 @role_required(['izleyici', 'admin'])
@@ -53,8 +59,42 @@ def dashboard_home(request):
         .aggregate(toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox')))['toplam'] or 0
     )
 
-
-
+    # Koordinatörlük tablosu için veri hazırlama
+    # Seçilen gün (varsayılan olarak 1. gün)
+    secilen_gun = request.GET.get('gun', '1. Gün')
+    
+    # Tüm koordinatörlük listesi
+    koordinatorlukler = [
+        'Selçuk Bey VIP', 'VIP Salon', 'Yönetim Ofisi / Kriz Masası', 'Vakıf Standı Yönetici Odası',
+        'Dinamik Alan', 'TSK', 'Gönüllü - Bursiyer', 'Basın', 'TRT Kulis Ana Sahne / Muhabir',
+        'Arter / To Do / Kurumsal Ofis / Heysemist', 'Pilot Event', 'T3 Ofis', 
+        'Teknofest Robolig Yarışması', 'Teknofest KKTC Araştırma Yarışması', 'Bilim Pavyonu'
+    ]
+    
+    # Tüm günler
+    gunler = ['1. Gün', '2. Gün', '3. Gün', '4. Gün']
+    
+    # Koordinatörlük verilerini hesapla
+    koordinatorluk_veri_sayilari = {}
+    
+    # Her koordinatörlük için seçilen günde kaç veri girildiğini hesapla
+    for koordinatorluk in koordinatorlukler:
+        # Durum verilerini say
+        durum_sayisi = GonulluDurumVeriler.objects.filter(
+            alan=koordinatorluk, 
+            gun=secilen_gun
+        ).count()
+        
+        # Sorun verilerini say
+        sorun_sayisi = GonulluSorunVeriler.objects.filter(
+            alan=koordinatorluk, 
+            gun=secilen_gun
+        ).count()
+        
+        # Toplam veri sayısı
+        toplam_veri = durum_sayisi + sorun_sayisi
+        
+        koordinatorluk_veri_sayilari[koordinatorluk] = toplam_veri
 
     # Sistem ayarlarını al
     try:
@@ -69,9 +109,6 @@ def dashboard_home(request):
 
     context = {
         't3_veriler_sayisi': t3_veriler_sayisi,
-
-
-
         'gonullu_durum_sayisi': gonullu_durum_sayisi,
         'gonullu_sorun_sayisi': gonullu_sorun_sayisi,
         'sorumlu_veriler_sayisi': sorumlu_veriler_sayisi,
@@ -80,6 +117,10 @@ def dashboard_home(request):
         'toplam_t3_siparis': toplam_t3_siparis,
         'veri_guncelleme_son_saat': veri_guncelleme_son_saat,
         'veri_guncelleme_son_dakika': veri_guncelleme_son_dakika,
+        'secilen_gun': secilen_gun,
+        'gunler': gunler,
+        'koordinatorlukler': koordinatorlukler,
+        'koordinatorluk_veri_sayilari': koordinatorluk_veri_sayilari,
     }
 
     return render(request, 'dashboard/home.html', context)
