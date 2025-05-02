@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Giriş Yap - Yemek Otomasyonu{% endblock %}
 
@@ -25,7 +26,7 @@
                         <div class="input-group">
                             <input type="password" class="form-control" id="password" name="password" required>
                             <div class="input-group-append">
-                                <span class="input-group-text" style="cursor: pointer;" onclick="togglePasswordVisibility()">
+                                <span class="input-group-text toggle-password" style="cursor: pointer;">
                                     <i id="eyeIcon" class="fas fa-eye"></i>
                                 </span>
                             </div>
@@ -45,40 +46,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // TC Kimlik Numarası doğrulama
-    document.addEventListener('DOMContentLoaded', function() {
-        var tcInput = document.getElementById('tc');
-        if (tcInput) {
-            tcInput.addEventListener('input', function(e) {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                if (this.value.length > 11) {
-                    this.value = this.value.slice(0, 11);
-                }
-            });
-        }
-    });
-    
-    // Şifre göster/gizle fonksiyonu
-    function togglePasswordVisibility() {
-        try {
-            var passwordInput = document.getElementById('password');
-            var eyeIcon = document.getElementById('eyeIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
-                console.log('Şifre gösteriliyor'); // Debug için konsola yazdırma
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
-                console.log('Şifre gizleniyor'); // Debug için konsola yazdırma
-            }
-        } catch (error) {
-            console.error('Şifre göster/gizle hatası:', error);
-        }
-    }
-</script>
+<script src="{% static 'js/auth.js' %}"></script>
 {% endblock %} 
