@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Gönüllü Durum Raporu - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Gönüllü Durum Raporu</h3>
+                <a href="{% url 'dashboard:home' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left me-1"></i>Dashboarda Dön
+                </a>
+            </div>
+            <div class="card-body">
+                <p>Bu sayfada gönüllülerin günlük durum raporlarını görüntüleyebilirsiniz.</p>
+                
+                <!-- Gün Filtresi -->
+                <div class="mb-4">
+                    <form method="get" action="{% url 'dashboard:gonullu_durum_raporu' %}" class="d-flex align-items-center">
+                        <label for="gun" class="me-2">Gün Seçimi:</label>
+                        <select name="gun" id="gun" class="form-select me-2" style="max-width: 200px;" onchange="this.form.submit()">
+                            {% for gun in gunler %}
+                                <option value="{{ gun }}" {% if secilen_gun == gun %}selected{% endif %}>{{ gun }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">Filtrele</button>
+                    </form>
+                </div>
+                
+                <!-- Açıklama Kartı -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h5 class="mb-3">Renk Açıklamaları:</h5>
+                        <div class="d-flex flex-wrap">
+                            <div class="me-4 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success me-2" style="width: 20px; height: 20px;"></div>
+                                    <span>Geldi / 10.00'dan veya 15.30'dan önce</span>
+                                </div>
+                            </div>
+                            <div class="me-4 mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-danger me-2" style="width: 20px; height: 20px;"></div>
+                                    <span>Gelmedi / 10.00'dan veya 15.30'dan sonra</span>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light me-2" style="width: 20px; height: 20px; border: 1px solid #ccc;"></div>
+                                    <span>Veri Girilmemiş</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tüm Günler İçin Ayrı Tablolar -->
+                {% for gun in gunler %}
+                <h4 class="mt-4 mb-3 text-center bg-info text-white p-2 rounded">{{ gun }}</h4>
+                
+                <!-- Durum Tablosu -->
+                <div class="table-responsive mb-5">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 180px;"></th>
+                                {% for alan in alanlar %}
+                                <th class="text-center" colspan="2">{{ alan }}</th>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <th></th>
+                                {% for alan in alanlar %}
+                                <th class="text-center">Gelme Durumu</th>
+                                <th class="text-center">Geldiği Saat</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 09.00 Kontrolü -->
+                            <tr>
+                                <th class="bg-primary text-white align-middle">09.00 kontrolü</th>
+                                {% for alan in alanlar %}
+                                    {% with veri=gun_kontrol_verileri|dictitem:gun|dictitem:"09.00"|dictitem:alan %}
+                                    <td class="text-center {{ veri.gelme_durumu_renk }}">
+                                        {% if veri.gelme_durumu %}
+                                            {{ veri.gelme_durumu }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center {{ veri.gelme_saati_renk }}">
+                                        {% if veri.gelme_saati %}
+                                            {{ veri.gelme_saati }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- 14.30 Kontrolü -->
+                            <tr>
+                                <th class="bg-primary text-white align-middle">14.30 kontrolü</th>
+                                {% for alan in alanlar %}
+                                    {% with veri=gun_kontrol_verileri|dictitem:gun|dictitem:"14.30"|dictitem:alan %}
+                                    <td class="text-center {{ veri.gelme_durumu_renk }}">
+                                        {% if veri.gelme_durumu %}
+                                            {{ veri.gelme_durumu }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center {{ veri.gelme_saati_renk }}">
+                                        {% if veri.gelme_saati %}
+                                            {{ veri.gelme_saati }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+                
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        console.log("Gönüllü durum raporu sayfası yüklendi.");
+    });
+</script>
+{% endblock %} 

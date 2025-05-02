@@ -31,6 +31,18 @@ def get_item(dictionary, key):
     """Dictionary'den değer almak için template filtresi"""
     return dictionary.get(key, 0)
 
+@register.filter
+def dictsort(dictionary, key):
+    """Dictionary'yi belirli bir key'e göre sıralamak için template filtresi"""
+    return dict(sorted(dictionary.items()))
+
+@register.filter
+def dictitem(dictionary, key):
+    """Dictionary'den belirli bir key'e göre değer almak için template filtresi"""
+    if key in dictionary:
+        return dictionary[key]
+    return {}
+
 @login_required
 @role_required(['izleyici', 'admin'])
 def dashboard_home(request):
@@ -647,3 +659,87 @@ def get_koordinatorluk_for_user(request, user_id):
             'success': False,
             'error': str(e)
         })
+
+@login_required
+@role_required(['izleyici', 'admin'])
+def gonullu_durum_raporu(request):
+    """Gönüllü durum raporu sayfası"""
+    log_user_action(request, 'Gönüllü Durum Raporu Görüntülendi', 'Gönüllü Durum Raporu')
+    
+    # Seçilen gün (varsayılan olarak 1. Gün)
+    secilen_gun = request.GET.get('gun', '1. Gün')
+    
+    # Koordinatörlük/alan listesi - sütunlar olacak
+    alanlar = [
+        'Pilot Event', 'T3 Ofis', 'VIP Salonu', 'DİĞER ALANLAR'
+    ]
+    
+    # Tüm günler
+    gunler = ['1. Gün', '2. Gün', '3. Gün', '4. Gün']
+    
+    # Kontrol zamanları
+    kontrol_zamanlari = {
+        '09.00': {'limit_saat': '10.00'},
+        '14.30': {'limit_saat': '15.30'}
+    }
+    
+    # Sonuç verilerini tutacak yapı
+    # İlk key: gün, ikinci key: kontrol zamanı, üçüncü key: alan
+    gun_kontrol_verileri = {}
+    
+    # Her gün ve kontrol zamanı için verileri hazırla
+    for gun in gunler:
+        gun_kontrol_verileri[gun] = {}
+        
+        for kontrol_zamani, zaman_bilgisi in kontrol_zamanlari.items():
+            gun_kontrol_verileri[gun][kontrol_zamani] = {}
+            
+            # Her alan için
+            for alan in alanlar:
+                # Varsayılan değerler
+                gun_kontrol_verileri[gun][kontrol_zamani][alan] = {
+                    'gelme_durumu': None,
+                    'gelme_saati': None,
+                    'gelme_durumu_renk': 'bg-light text-muted',  # Varsayılan renk - veri yok
+                    'gelme_saati_renk': 'bg-light text-muted'  # Varsayılan renk - veri yok
+                }
+                
+                # Veritabanından veriyi çek
+                veriler = GonulluDurumVeriler.objects.filter(
+                    gun=gun,
+                    alan=alan
+                ).order_by('submitteddate', 'submittedtime')
+                
+                # Eğer veri varsa
+                if veriler.exists():
+                    veri = veriler.first()
+                    
+                    # Gelme durumu
+                    if veri.catering_durum == 'var':
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Geldi'
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-success text-white'
+                    else:
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Gelmedi'
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-danger text-white'
+                    
+                    # Gelme saati
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
+                    
+                    # Gelme saati kontrolü (10.00'dan önce/sonra veya 15.30'dan önce/sonra)
+                    saat, dakika = veri.saat.hour, veri.saat.minute
+                    limit_saat, limit_dakika = map(int, zaman_bilgisi['limit_saat'].split('.'))
+                    
+                    if (saat < limit_saat) or (saat == limit_saat and dakika < limit_dakika):
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-success text-white'
+                    else:
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-danger text-white'
+    
+    context = {
+        'secilen_gun': secilen_gun,
+        'gunler': gunler,
+        'alanlar': alanlar,
+        'kontrol_zamanlari': kontrol_zamanlari,
+        'gun_kontrol_verileri': gun_kontrol_verileri
+    }
+    
+    return render(request, 'dashboard/gonullu_durum_raporu.html', context)

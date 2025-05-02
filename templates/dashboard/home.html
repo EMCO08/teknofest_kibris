@@ -151,10 +151,6 @@
                 <h5 class="card-title">T3 Personel Verileri</h5>
                 <p class="card-text">Son 7 gün: {{ t3_veriler_sayisi }} kayıt</p>
 
-
-
-
-
                 <a href="{% url 'dashboard:t3personel' %}" class="btn btn-primary">
                     <i class="fas fa-arrow-right me-1"></i>Görüntüle
                 </a>
@@ -196,6 +192,21 @@
                 <p class="card-text">Son 7 gün: {{ sorumlu_veriler_sayisi }} kayıt</p>
                 <a href="{% url 'dashboard:sorumlu' %}" class="btn btn-info">
                     <i class="fas fa-arrow-right me-1"></i>Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-table fa-3x mb-3 text-danger"></i>
+                <h5 class="card-title">Gönüllü Durum Raporu</h5>
+                <p class="card-text">Gönüllü durum bilgilerini tablo formatında görüntüle</p>
+                <a href="{% url 'dashboard:gonullu_durum_raporu' %}" class="btn btn-danger">
+                    <i class="fas fa-table me-1"></i>Durumu Görüntüle
                 </a>
             </div>
         </div>
