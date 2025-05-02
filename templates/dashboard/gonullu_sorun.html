@@ -39,6 +39,13 @@
         max-height: 70vh;
         max-width: 100%;
         object-fit: contain;
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+    
+    .modal-photo.zoomed {
+        transform: scale(1.8);
+        cursor: zoom-out;
     }
     
     .modal-content {
@@ -87,6 +94,19 @@
         align-items: center;
         margin-bottom: 5px;
     }
+    
+    .zoom-controls {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        gap: 10px;
+    }
+    
+    .zoom-btn {
+        padding: 5px 10px;
+        font-size: 14px;
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 
@@ -98,15 +118,7 @@
     <div class="card-body">
         <form method="get" class="mb-4">
             <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="baslangic_tarihi" class="form-label">Başlangıç Tarihi</label>
-                    <input type="date" class="form-control" id="baslangic_tarihi" name="baslangic_tarihi" value="{{ filtreler.baslangic_tarihi }}">
-                </div>
-                <div class="col-md-3">
-                    <label for="bitis_tarihi" class="form-label">Bitiş Tarihi</label>
-                    <input type="date" class="form-control" id="bitis_tarihi" name="bitis_tarihi" value="{{ filtreler.bitis_tarihi }}">
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="alan" class="form-label">Alan</label>
                     <select class="form-select" id="alan" name="alan">
                         <option value="">Tümü</option>
@@ -115,7 +127,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="gun" class="form-label">Gün</label>
                     <select class="form-select" id="gun" name="gun">
                         <option value="">Tümü</option>
@@ -124,7 +136,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="sorun_tipi" class="form-label">Sorun Tipi</label>
                     <select class="form-select" id="sorun_tipi" name="sorun_tipi">
                         <option value="">Tümü</option>
@@ -133,7 +145,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="sorun_seviyesi" class="form-label">Sorun Seviyesi</label>
                     <select class="form-select" id="sorun_seviyesi" name="sorun_seviyesi">
                         <option value="">Tümü</option>
@@ -142,7 +154,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <label for="kisi_isim" class="form-label">İsim Arama</label>
                     <input type="text" class="form-control" id="kisi_isim" name="kisi_isim" value="{{ filtreler.kisi_isim }}" placeholder="İsim veya soyisim">
                 </div>
@@ -150,7 +162,7 @@
                     <button type="submit" class="btn btn-primary me-2">
                         <i class="fas fa-filter me-1"></i>Filtrele
                     </button>
-                    <a href="?csv=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}" class="btn btn-success">
+                    <a href="?csv=1{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}" class="btn btn-success">
                         <i class="fas fa-download me-1"></i>CSV İndir
                     </a>
                 </div>
@@ -245,10 +257,10 @@
             <ul class="pagination justify-content-center">
                 {% if veriler.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">&laquo; İlk</a>
+                        <a class="page-link" href="?page=1{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">&laquo; İlk</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Önceki</a>
+                        <a class="page-link" href="?page={{ veriler.previous_page_number }}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Önceki</a>
                     </li>
                 {% endif %}
 
@@ -260,10 +272,10 @@
 
                 {% if veriler.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Sonraki</a>
+                        <a class="page-link" href="?page={{ veriler.next_page_number }}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Sonraki</a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Son &raquo;</a>
+                        <a class="page-link" href="?page={{ veriler.paginator.num_pages }}{% if filtreler.alan %}&alan={{ filtreler.alan }}{% endif %}{% if filtreler.sorun_tipi %}&sorun_tipi={{ filtreler.sorun_tipi }}{% endif %}{% if filtreler.sorun_seviyesi %}&sorun_seviyesi={{ filtreler.sorun_seviyesi }}{% endif %}{% if filtreler.gun %}&gun={{ filtreler.gun }}{% endif %}{% if filtreler.kisi_isim %}&kisi_isim={{ filtreler.kisi_isim }}{% endif %}">Son &raquo;</a>
                     </li>
                 {% endif %}
             </ul>
@@ -289,6 +301,17 @@
                         <span>Fotoğraf yükleniyor...</span>
                     </div>
                     <img src="" alt="Sorun Fotoğrafı" class="modal-photo" id="modalPhoto">
+                </div>
+                <div class="zoom-controls">
+                    <button type="button" class="btn btn-sm btn-outline-warning zoom-btn" id="zoomInBtn">
+                        <i class="fas fa-search-plus me-1"></i>Yakınlaştır
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-warning zoom-btn" id="zoomOutBtn">
+                        <i class="fas fa-search-minus me-1"></i>Uzaklaştır
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary zoom-btn" id="resetZoomBtn">
+                        <i class="fas fa-undo me-1"></i>Sıfırla
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -323,6 +346,50 @@
         var photoLoader = document.getElementById('photoLoader');
         var photoModalLabel = document.getElementById('photoModalLabel');
         var downloadBtn = document.getElementById('downloadBtn');
+        var zoomInBtn = document.getElementById('zoomInBtn');
+        var zoomOutBtn = document.getElementById('zoomOutBtn');
+        var resetZoomBtn = document.getElementById('resetZoomBtn');
+        
+        var currentScale = 1;
+        var minScale = 0.5;
+        var maxScale = 3;
+        var scaleStep = 0.2;
+        
+        // Yakınlaştırma fonksiyonu
+        function updateZoom() {
+            modalPhoto.style.transform = `scale(${currentScale})`;
+        }
+        
+        // Yakınlaştır butonu
+        zoomInBtn.addEventListener('click', function() {
+            if (currentScale < maxScale) {
+                currentScale += scaleStep;
+                updateZoom();
+            }
+        });
+        
+        // Uzaklaştır butonu
+        zoomOutBtn.addEventListener('click', function() {
+            if (currentScale > minScale) {
+                currentScale -= scaleStep;
+                updateZoom();
+            }
+        });
+        
+        // Sıfırla butonu
+        resetZoomBtn.addEventListener('click', function() {
+            currentScale = 1;
+            updateZoom();
+        });
+        
+        // Fotoğrafa tıklama ile büyütme
+        modalPhoto.addEventListener('click', function() {
+            if (modalPhoto.classList.contains('zoomed')) {
+                modalPhoto.classList.remove('zoomed');
+            } else {
+                modalPhoto.classList.add('zoomed');
+            }
+        });
         
         // Fotoğraf butonlarına tıklandığında
         document.querySelectorAll('.show-photo-btn').forEach(function(button) {
@@ -339,6 +406,11 @@
                 // Yükleme göstergesini göster, fotoğrafı gizle
                 photoLoader.style.display = 'flex';
                 modalPhoto.style.display = 'none';
+                
+                // Ölçeği sıfırla
+                currentScale = 1;
+                modalPhoto.classList.remove('zoomed');
+                updateZoom();
                 
                 // Fotoğrafı yükle
                 modalPhoto.src = photoUrl;
@@ -357,6 +429,9 @@
         // Modal kapandığında
         photoModal.addEventListener('hidden.bs.modal', function() {
             modalPhoto.src = '';
+            currentScale = 1;
+            modalPhoto.classList.remove('zoomed');
+            updateZoom();
         });
     });
 </script>

@@ -277,7 +277,7 @@ def gonullu_durum_dashboard(request):
     if alan:
         veriler = veriler.filter(alan__icontains=alan)
     if gun:
-        veriler = veriler.filter(gun=gun)
+        veriler = veriler.filter(gun__icontains=gun)
     if catering_durum:
         veriler = veriler.filter(catering_durum=catering_durum)
     if kisi_isim:
@@ -374,7 +374,7 @@ def gonullu_sorun_dashboard(request):
     if sorun_seviyesi:
         veriler = veriler.filter(sorun_seviyesi=sorun_seviyesi)
     if gun:
-        veriler = veriler.filter(gun=gun)
+        veriler = veriler.filter(gun__icontains=gun)
     if kisi_isim:
         veriler = veriler.filter(kisi__isim__icontains=kisi_isim) | veriler.filter(kisi__soyisim__icontains=kisi_isim)
 
