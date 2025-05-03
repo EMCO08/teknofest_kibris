@@ -9,9 +9,9 @@
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Gönüllü Durum Raporu</h3>
                 <div>
-                    <a href="{% url 'dashboard:excel_indir' %}" class="btn btn-success me-2">
+                    <button id="exportToExcel" class="btn btn-success me-2">
                         <i class="fas fa-file-excel me-1"></i>Excel İndir
-                    </a>
+                    </button>
                     <a href="{% url 'dashboard:home' %}" class="btn btn-light">
                         <i class="fas fa-arrow-left me-1"></i>Dashboarda Dön
                     </a>
@@ -128,9 +128,30 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
     $(document).ready(function() {
         console.log("Gönüllü durum raporu sayfası yüklendi.");
+        
+        // Excel indirme fonksiyonu
+        $("#exportToExcel").on("click", function() {
+            var workbook = XLSX.utils.book_new();
+            
+            // Her gün için ayrı bir sayfa oluştur
+            $(".excel-table").each(function() {
+                var gun = $(this).data("gun");
+                var table = $(this)[0];
+                
+                // Tablodaki verileri al
+                var worksheet = XLSX.utils.table_to_sheet(table);
+                
+                // Sayfayı workbook'a ekle
+                XLSX.utils.book_append_sheet(workbook, worksheet, gun);
+            });
+            
+            // Excel dosyasını indir
+            XLSX.writeFile(workbook, "Gonullu_Durum_Raporu.xlsx");
+        });
     });
 </script>
 {% endblock %} 
