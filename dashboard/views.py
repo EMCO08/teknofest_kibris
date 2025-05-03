@@ -672,7 +672,7 @@ def gonullu_durum_raporu(request):
     
     # Koordinatörlük/alan listesi - sütunlar olacak
     alanlar = [
-        'Arter / To Do / Kurumsal Ofis / Heysemişt',
+        'Arter / To Do / Kurumsal Ofis / Heysemist',
         'Vakıf Standı Yönetici Odası',
         'TSK',
         'Basın',
