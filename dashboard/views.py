@@ -891,14 +891,18 @@ def gonullu_durum_raporu(request):
                         cell.font = siyah_font
             
             # Sütun genişliklerini ve satır yüksekliklerini ayarla
-            ws.column_dimensions['A'].width = 180
+            # Excel'de sütun genişlikleri karakter cinsinden, satır yükseklikleri nokta (point) cinsindendir
+            # Yaklaşık piksel dönüşümleri: 1 karakter ≈ 7.5 piksel, 1 nokta ≈ 1.33 piksel
+            
+            # 180 piksel genişlik için yaklaşık 24 karakter (180/7.5 = 24)
+            ws.column_dimensions['A'].width = 24
             for i in range(len(alanlar) * 2):
                 col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
-                ws.column_dimensions[col_letter].width = 180
+                ws.column_dimensions[col_letter].width = 24
             
-            # Satır yüksekliklerini ayarla
+            # 60 piksel yükseklik için yaklaşık 45 nokta (60/1.33 = 45)
             for i in range(1, 5):  # 1'den 4'e kadar (başlıklar ve veriler için toplam 4 satır)
-                ws.row_dimensions[i].height = 60
+                ws.row_dimensions[i].height = 45
         
         # İlk sayfayı sil (varsayılan oluşturulan)
         if "Sheet" in wb.sheetnames:
