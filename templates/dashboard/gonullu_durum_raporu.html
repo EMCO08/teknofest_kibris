@@ -15,8 +15,8 @@
             <div class="card-body">
                 <p>Bu sayfada gönüllülerin günlük durum raporlarını görüntüleyebilirsiniz.</p>
                 
-                <!-- Gün Filtresi ve Excel İndirme Butonu -->
-                <div class="mb-4 d-flex justify-content-between align-items-center">
+                <!-- Gün Filtresi -->
+                <div class="mb-4">
                     <form method="get" action="{% url 'dashboard:gonullu_durum_raporu' %}" class="d-flex align-items-center">
                         <label for="gun" class="me-2">Gün Seçimi:</label>
                         <select name="gun" id="gun" class="form-select me-2" style="max-width: 200px;" onchange="this.form.submit()">
@@ -26,11 +26,6 @@
                         </select>
                         <button type="submit" class="btn btn-primary">Filtrele</button>
                     </form>
-                    
-                    <!-- Excel İndirme Butonu -->
-                    <a href="{% url 'dashboard:gonullu_durum_raporu' %}?gun={{ secilen_gun }}&excel=1" class="btn btn-success">
-                        <i class="fas fa-file-excel me-1"></i>Excel Olarak İndir
-                    </a>
                 </div>
                 
                 <!-- Açıklama Kartı -->
