@@ -1,31 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Gönüllü Sorun Verileri - Yemek Otomasyonu{% endblock %}
 
 {% block extra_css %}
 <style>
-    .modal-image-container {
-        min-height: 300px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-    
-    .photo-loader {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(255, 255, 255, 0.8);
-        z-index: 10;
-    }
-    
     .photo-preview {
         max-width: 50px;
         max-height: 50px;
@@ -33,38 +12,6 @@
         border-radius: 4px;
         border: 1px solid #ddd;
         object-fit: cover;
-    }
-    
-    .modal-photo {
-        max-height: 70vh;
-        max-width: 100%;
-        object-fit: contain;
-        transition: transform 0.3s ease;
-        cursor: zoom-in;
-    }
-    
-    .modal-photo.zoomed {
-        transform: scale(1.8);
-        cursor: zoom-out;
-    }
-    
-    .modal-content {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .modal-content::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: url('/static/img/teknofest.jpg');
-        background-size: cover;
-        background-position: center;
-        opacity: 0.05;
-        z-index: -1;
     }
     
     .show-photo-btn {
@@ -93,19 +40,6 @@
         flex-direction: column;
         align-items: center;
         margin-bottom: 5px;
-    }
-    
-    .zoom-controls {
-        display: flex;
-        justify-content: center;
-        margin-top: 10px;
-        gap: 10px;
-    }
-    
-    .zoom-btn {
-        padding: 5px 10px;
-        font-size: 14px;
-        cursor: pointer;
     }
 </style>
 {% endblock %}
@@ -212,8 +146,6 @@
                                             <div class="photo-preview-item">
                                                 <img src="{{ fotograf.get_fotograf_url }}" class="photo-preview" alt="Önizleme">
                                                 <button type="button" class="btn btn-sm btn-outline-warning show-photo-btn" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#photoModal" 
                                                     data-photo-url="{{ fotograf.get_fotograf_url }}"
                                                     data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }} (Fotoğraf {{ forloop.counter }})">
                                                     <i class="fas fa-search-plus"></i>
@@ -227,8 +159,6 @@
                                         <div class="photo-preview-item">
                                             <img src="{{ veri.get_fotograf_url }}" class="photo-preview" alt="Önizleme">
                                             <button type="button" class="btn btn-sm btn-outline-warning show-photo-btn" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#photoModal" 
                                                     data-photo-url="{{ veri.get_fotograf_url }}"
                                                     data-photo-title="{{ veri.kisi.get_full_name }} - {{ veri.gun }} - {{ veri.alan }}">
                                                 <i class="fas fa-search-plus"></i>
@@ -283,49 +213,8 @@
         {% endif %}
     </div>
 </div>
-
-<!-- Ortak Fotoğraf Modal -->
-<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="photoModalLabel"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
-            </div>
-            <div class="modal-body text-center">
-                <div class="modal-image-container">
-                    <div class="photo-loader" id="photoLoader">
-                        <div class="spinner-border text-warning mb-2" role="status">
-                            <span class="visually-hidden">Yükleniyor...</span>
-                        </div>
-                        <span>Fotoğraf yükleniyor...</span>
-                    </div>
-                    <img src="" alt="Sorun Fotoğrafı" class="modal-photo" id="modalPhoto">
-                </div>
-                <div class="zoom-controls">
-                    <button type="button" class="btn btn-sm btn-outline-warning zoom-btn" id="zoomInBtn">
-                        <i class="fas fa-search-plus me-1"></i>Yakınlaştır
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-warning zoom-btn" id="zoomOutBtn">
-                        <i class="fas fa-search-minus me-1"></i>Uzaklaştır
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary zoom-btn" id="resetZoomBtn">
-                        <i class="fas fa-undo me-1"></i>Sıfırla
-                    </button>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-                <a href="#" download class="btn btn-warning" id="downloadBtn">
-                    <i class="fas fa-download me-1"></i>İndir
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="/static/js/photoViewer.js"></script>
+<script src="{% static 'js/simpleLightbox.js' %}"></script>
 {% endblock %} 
