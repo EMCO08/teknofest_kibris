@@ -778,146 +778,162 @@ def gonullu_durum_raporu(request):
     
     # Excel indirme isteği kontrolü
     if 'excel' in request.GET:
-        # Yeni bir Excel dosyası oluştur
-        wb = openpyxl.Workbook()
-        
-        # İlk sayfayı aktif et
-        ws = wb.active
-        ws.title = secilen_gun
-        
-        # Başlık hücresi
-        ws.merge_cells('A1:Z1')
-        baslik = ws['A1']
-        baslik.value = f"Gönüllü Durum Raporu - {secilen_gun}"
-        baslik.font = Font(size=16, bold=True)
-        baslik.alignment = Alignment(horizontal='center', vertical='center')
-        
-        # Hücre stilleri için kullanılacak dolgular
-        baslik_fill = PatternFill(start_color="000000", end_color="000000", fill_type="solid")
-        geldi_fill = PatternFill(start_color="92D050", end_color="92D050", fill_type="solid")
-        gelmedi_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
-        veri_yok_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
-        
-        # Hücre kenar stilleri
-        thin_border = Border(
-            left=Side(style='thin'), 
-            right=Side(style='thin'), 
-            top=Side(style='thin'), 
-            bottom=Side(style='thin')
-        )
-        
-        # Başlık satırı 1 - Alan isimleri
-        row_num = 3
-        ws.cell(row=row_num, column=1, value="").border = thin_border
-        
-        col_num = 2
-        for alan in alanlar:
-            ws.merge_cells(start_row=row_num, start_column=col_num, end_row=row_num, end_column=col_num+1)
-            cell = ws.cell(row=row_num, column=col_num, value=alan)
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = baslik_fill
-            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            cell.border = thin_border
+        try:
+            # Yeni bir Excel dosyası oluştur
+            wb = openpyxl.Workbook()
             
-            # İkinci sütunun da kenarlığını ayarla
-            ws.cell(row=row_num, column=col_num+1).border = thin_border
+            # İlk sayfayı aktif et
+            ws = wb.active
+            ws.title = secilen_gun
             
-            col_num += 2
-        
-        # Başlık satırı 2 - Durum ve Saat
-        row_num = 4
-        ws.cell(row=row_num, column=1, value="").border = thin_border
-        
-        col_num = 2
-        for _ in alanlar:
-            cell = ws.cell(row=row_num, column=col_num, value="Gelme Durumu")
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = baslik_fill
-            cell.alignment = Alignment(horizontal='center', vertical='center')
-            cell.border = thin_border
+            # Başlık hücresi
+            ws.merge_cells('A1:Z1')
+            baslik = ws['A1']
+            baslik.value = f"Gönüllü Durum Raporu - {secilen_gun}"
+            baslik.font = Font(size=16, bold=True)
+            baslik.alignment = Alignment(horizontal='center', vertical='center')
             
-            cell = ws.cell(row=row_num, column=col_num+1, value="Geldiği Saat")
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = baslik_fill
-            cell.alignment = Alignment(horizontal='center', vertical='center')
-            cell.border = thin_border
+            # Hücre stilleri için kullanılacak dolgular
+            baslik_fill = PatternFill(start_color="000000", end_color="000000", fill_type="solid")
+            geldi_fill = PatternFill(start_color="92D050", end_color="92D050", fill_type="solid")
+            gelmedi_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
+            veri_yok_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
             
-            col_num += 2
-        
-        # Kontrol zamanları ve veriler
-        row_num = 5
-        
-        # Seçilen gün için veri oluştur
-        for kontrol_zamani in ['09.00', '14.30']:
-            # Kontrol zamanı hücresi
-            cell = ws.cell(row=row_num, column=1, value=f"{kontrol_zamani} kontrolü")
-            cell.font = Font(bold=True, color="FFFFFF")
-            cell.fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
-            cell.alignment = Alignment(horizontal='center', vertical='center')
-            cell.border = thin_border
+            # Hücre kenar stilleri
+            thin_border = Border(
+                left=Side(style='thin'), 
+                right=Side(style='thin'), 
+                top=Side(style='thin'), 
+                bottom=Side(style='thin')
+            )
             
-            # Her alan için veri doldur
+            # Başlık satırı 1 - Alan isimleri
+            row_num = 3
+            ws.cell(row=row_num, column=1, value="").border = thin_border
+            
             col_num = 2
             for alan in alanlar:
-                veri = gun_kontrol_verileri[secilen_gun][kontrol_zamani].get(alan, {
-                    'gelme_durumu': None,
-                    'gelme_saati': None
-                })
-                
-                # Gelme durumu
-                gelme_durumu = veri.get('gelme_durumu', '-')
-                gelme_saati = veri.get('gelme_saati', '-')
-                
-                # Gelme durumu hücresi
-                cell = ws.cell(row=row_num, column=col_num, value=gelme_durumu if gelme_durumu else '-')
+                ws.merge_cells(start_row=row_num, start_column=col_num, end_row=row_num, end_column=col_num+1)
+                cell = ws.cell(row=row_num, column=col_num, value=alan)
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = baslik_fill
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
                 cell.border = thin_border
-                cell.alignment = Alignment(horizontal='center', vertical='center')
                 
-                # Gelme saati hücresi
-                cell_saat = ws.cell(row=row_num, column=col_num+1, value=gelme_saati if gelme_saati else '-')
-                cell_saat.border = thin_border
-                cell_saat.alignment = Alignment(horizontal='center', vertical='center')
-                
-                # Hücre renklerini ayarla
-                if gelme_durumu == 'Geldi':
-                    # Gelme durumu rengi
-                    cell.fill = geldi_fill
-                    cell.font = Font(color="FFFFFF")
-                    
-                    # Gelme saati kontrolü ve rengi
-                    if veri.get('gelme_saati_renk', '') == 'bg-success text-white':
-                        cell_saat.fill = geldi_fill
-                        cell_saat.font = Font(color="FFFFFF")
-                    else:
-                        cell_saat.fill = gelmedi_fill
-                        cell_saat.font = Font(color="FFFFFF")
-                        
-                elif gelme_durumu == 'Gelmedi':
-                    cell.fill = gelmedi_fill
-                    cell.font = Font(color="FFFFFF")
-                    cell_saat.fill = gelmedi_fill
-                    cell_saat.font = Font(color="FFFFFF")
-                else:
-                    cell.fill = veri_yok_fill
-                    cell_saat.fill = veri_yok_fill
+                # İkinci sütunun da kenarlığını ayarla
+                ws.cell(row=row_num, column=col_num+1).border = thin_border
                 
                 col_num += 2
             
-            row_num += 1
-        
-        # Sütun genişliklerini ayarla
-        ws.column_dimensions['A'].width = 20
-        for i in range(len(alanlar)):
-            col_letter1 = get_column_letter((i*2)+2)  # Durum sütunu
-            col_letter2 = get_column_letter((i*2)+3)  # Saat sütunu
-            ws.column_dimensions[col_letter1].width = 15
-            ws.column_dimensions[col_letter2].width = 15
-        
-        # Excel dosyasını HttpResponse olarak gönder
-        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename=Gonullu_Durum_Raporu_{secilen_gun.replace(".", "").replace(" ", "_")}.xlsx'
-        wb.save(response)
-        return response
+            # Başlık satırı 2 - Durum ve Saat
+            row_num = 4
+            ws.cell(row=row_num, column=1, value="").border = thin_border
+            
+            col_num = 2
+            for _ in alanlar:
+                cell = ws.cell(row=row_num, column=col_num, value="Gelme Durumu")
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = baslik_fill
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = thin_border
+                
+                cell = ws.cell(row=row_num, column=col_num+1, value="Geldiği Saat")
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = baslik_fill
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = thin_border
+                
+                col_num += 2
+            
+            # Kontrol zamanları ve veriler
+            row_num = 5
+            
+            # Seçilen gün için veri oluştur
+            for kontrol_zamani in ['09.00', '14.30']:
+                # Kontrol zamanı hücresi
+                cell = ws.cell(row=row_num, column=1, value=f"{kontrol_zamani} kontrolü")
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = thin_border
+                
+                # Her alan için veri doldur
+                col_num = 2
+                for alan in alanlar:
+                    # Veriyi güvenli bir şekilde al, yoksa boş sözlük döndür
+                    if secilen_gun in gun_kontrol_verileri and kontrol_zamani in gun_kontrol_verileri[secilen_gun] and alan in gun_kontrol_verileri[secilen_gun][kontrol_zamani]:
+                        veri = gun_kontrol_verileri[secilen_gun][kontrol_zamani][alan]
+                    else:
+                        veri = {'gelme_durumu': None, 'gelme_saati': None}
+                    
+                    # Gelme durumu
+                    gelme_durumu = veri.get('gelme_durumu', '-')
+                    gelme_saati = veri.get('gelme_saati', '-')
+                    
+                    # Gelme durumu hücresi
+                    cell = ws.cell(row=row_num, column=col_num, value=gelme_durumu if gelme_durumu else '-')
+                    cell.border = thin_border
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+                    
+                    # Gelme saati hücresi
+                    cell_saat = ws.cell(row=row_num, column=col_num+1, value=gelme_saati if gelme_saati else '-')
+                    cell_saat.border = thin_border
+                    cell_saat.alignment = Alignment(horizontal='center', vertical='center')
+                    
+                    # Hücre renklerini ayarla
+                    if gelme_durumu == 'Geldi':
+                        # Gelme durumu rengi
+                        cell.fill = geldi_fill
+                        cell.font = Font(color="FFFFFF")
+                        
+                        # Gelme saati kontrolü ve rengi
+                        if veri.get('gelme_saati_renk', '') == 'bg-success text-white':
+                            cell_saat.fill = geldi_fill
+                            cell_saat.font = Font(color="FFFFFF")
+                        else:
+                            cell_saat.fill = gelmedi_fill
+                            cell_saat.font = Font(color="FFFFFF")
+                            
+                    elif gelme_durumu == 'Gelmedi':
+                        cell.fill = gelmedi_fill
+                        cell.font = Font(color="FFFFFF")
+                        cell_saat.fill = gelmedi_fill
+                        cell_saat.font = Font(color="FFFFFF")
+                    else:
+                        cell.fill = veri_yok_fill
+                        cell_saat.fill = veri_yok_fill
+                    
+                    col_num += 2
+                
+                row_num += 1
+            
+            # Sütun genişliklerini ayarla
+            ws.column_dimensions['A'].width = 20
+            for i in range(len(alanlar)):
+                col_letter1 = get_column_letter((i*2)+2)  # Durum sütunu
+                col_letter2 = get_column_letter((i*2)+3)  # Saat sütunu
+                ws.column_dimensions[col_letter1].width = 15
+                ws.column_dimensions[col_letter2].width = 15
+            
+            # Excel dosyasını BytesIO nesnesine kaydet
+            buffer = BytesIO()
+            wb.save(buffer)
+            buffer.seek(0)
+            
+            # Excel dosyasını HttpResponse olarak gönder
+            dosya_adi = f"Gonullu_Durum_Raporu_{secilen_gun.replace('.', '').replace(' ', '_')}.xlsx"
+            response = HttpResponse(
+                buffer.getvalue(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            response['Content-Disposition'] = f'attachment; filename="{dosya_adi}"'
+            return response
+            
+        except Exception as e:
+            # Hata durumunda log oluştur ve hata mesajı göster
+            logging.error(f"Excel indirme hatası: {str(e)}")
+            messages.error(request, f"Excel indirme işlemi sırasında bir hata oluştu: {str(e)}")
+            return redirect('dashboard:gonullu_durum_raporu')
     
     context = {
         'secilen_gun': secilen_gun,
