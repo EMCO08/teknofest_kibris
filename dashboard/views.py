@@ -746,20 +746,25 @@ def gonullu_durum_raporu(request):
                 if veri.catering_durum == 'var':
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Geldi'
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-success text-white'
+                    
+                    # Gelme saati
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
+                    
+                    # Gelme saati kontrolü (10.00'dan önce/sonra veya 15.30'dan önce/sonra)
+                    saat, dakika = veri.saat.hour, veri.saat.minute
+                    limit_saat, limit_dakika = map(int, zaman_bilgisi['limit_saat'].split('.'))
+                    
+                    if (saat < limit_saat) or (saat == limit_saat and dakika < limit_dakika):
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-success text-white'
+                    else:
+                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-danger text-white'
                 else:
+                    # Gelme durumu "Gelmedi" ise
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Gelmedi'
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-danger text-white'
-                
-                # Gelme saati
-                gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
-                
-                # Gelme saati kontrolü (10.00'dan önce/sonra veya 15.30'dan önce/sonra)
-                saat, dakika = veri.saat.hour, veri.saat.minute
-                limit_saat, limit_dakika = map(int, zaman_bilgisi['limit_saat'].split('.'))
-                
-                if (saat < limit_saat) or (saat == limit_saat and dakika < limit_dakika):
-                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-success text-white'
-                else:
+                    
+                    # Gelme saati - gelmedi ise de saati göster ama kutu kırmızı olsun
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-danger text-white'
     
     context = {
