@@ -24,6 +24,7 @@ from io import BytesIO
 from django.db.models import Sum, F
 from django.core.paginator import Paginator
 from django.template.defaulttags import register
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side, Color
 
 # Template filtreleri
 @register.filter
@@ -771,6 +772,26 @@ def gonullu_durum_raporu(request):
     if 'excel' in request.GET:
         # Excel dosyası oluştur
         wb = openpyxl.Workbook()
+        # Stil eklemek için gerekli modülleri içe aktar
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side, Color
+        
+        # Renk tanımlamaları
+        baslik_fill = PatternFill(start_color="808080", end_color="808080", fill_type="solid")  # Gri
+        success_fill = PatternFill(start_color="00B050", end_color="00B050", fill_type="solid")  # Yeşil
+        danger_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")   # Kırmızı
+        light_fill = PatternFill(start_color="F0F0F0", end_color="F0F0F0", fill_type="solid")    # Açık gri
+        
+        # Yazı renkleri
+        beyaz_font = Font(color="FFFFFF", bold=True)
+        siyah_font = Font(color="000000", bold=True)
+        
+        # Hücre kenarlıkları
+        thin_border = Border(
+            left=Side(style='thin'), 
+            right=Side(style='thin'), 
+            top=Side(style='thin'), 
+            bottom=Side(style='thin')
+        )
         
         # Her gün için ayrı bir sayfa oluştur
         for gun in gunler:
@@ -783,11 +804,23 @@ def gonullu_durum_raporu(request):
                 header_row1.extend([alan, ""])
             ws.append(header_row1)
             
-            # Hücreleri birleştir
+            # Hücreleri birleştir ve başlık stilini uygula
             for col_idx, alan in enumerate(alanlar, 2):  # 2'den başla çünkü ilk sütun boş
                 start_col = (col_idx - 1) * 2  # Her alan 2 sütun kaplar
                 end_col = start_col + 1
                 ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+                
+                # Birleştirilmiş hücreye stil uygula
+                merged_cell = ws.cell(row=1, column=start_col)
+                merged_cell.fill = baslik_fill
+                merged_cell.font = beyaz_font
+                merged_cell.alignment = Alignment(horizontal='center', vertical='center')
+                merged_cell.border = thin_border
+            
+            # İlk sütun başlık stilini uygula
+            ws.cell(row=1, column=1).fill = baslik_fill
+            ws.cell(row=1, column=1).font = beyaz_font
+            ws.cell(row=1, column=1).border = thin_border
             
             # Başlık satırı 2
             header_row2 = [""]
@@ -795,9 +828,18 @@ def gonullu_durum_raporu(request):
                 header_row2.extend(["Gelme Durumu", "Geldiği Saat"])
             ws.append(header_row2)
             
+            # Başlık satırı 2'ye stil uygula
+            for col in range(1, len(alanlar) * 2 + 2):
+                cell = ws.cell(row=2, column=col)
+                cell.fill = baslik_fill
+                cell.font = beyaz_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = thin_border
+            
             # Veri satırları
-            for kontrol_zamani in ['09.00', '14.30']:
+            for row_idx, kontrol_zamani in enumerate(['09.00', '14.30'], 3):
                 row = [f"{kontrol_zamani} kontrolü"]
+                col_values = []
                 
                 for alan in alanlar:
                     if gun in gun_kontrol_verileri and kontrol_zamani in gun_kontrol_verileri[gun] and alan in gun_kontrol_verileri[gun][kontrol_zamani]:
@@ -805,12 +847,48 @@ def gonullu_durum_raporu(request):
                         # Veri varsa değerini, yoksa boş string ekle
                         gelme_durumu = veri['gelme_durumu'] if veri['gelme_durumu'] else ""
                         gelme_saati = veri['gelme_saati'] if veri['gelme_saati'] else ""
-                        row.extend([gelme_durumu, gelme_saati])
+                        
+                        # Renk kodlarını al
+                        gelme_durumu_renk = veri['gelme_durumu_renk']
+                        gelme_saati_renk = veri['gelme_saati_renk']
+                        
+                        col_values.extend([
+                            (gelme_durumu, gelme_durumu_renk),
+                            (gelme_saati, gelme_saati_renk)
+                        ])
                     else:
                         # Veri yoksa boş hücreler ekle
-                        row.extend(["", ""])
+                        col_values.extend([
+                            ("", 'bg-light text-muted'),
+                            ("", 'bg-light text-muted')
+                        ])
                 
-                ws.append(row)
+                # Sadece değerleri ekle
+                ws.append(row + [val[0] for val in col_values])
+                
+                # Şimdi stilleri uygula
+                # İlk sütun başlık stilini uygula (Kontrol saati)
+                ws.cell(row=row_idx, column=1).fill = baslik_fill
+                ws.cell(row=row_idx, column=1).font = beyaz_font
+                ws.cell(row=row_idx, column=1).alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row_idx, column=1).border = thin_border
+                
+                # Verilere stil uygula
+                for col_idx, (_, renk) in enumerate(col_values, 2):
+                    cell = ws.cell(row=row_idx, column=col_idx)
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+                    cell.border = thin_border
+                    
+                    # Renkleri uygula
+                    if 'bg-success' in renk:
+                        cell.fill = success_fill
+                        cell.font = beyaz_font
+                    elif 'bg-danger' in renk:
+                        cell.fill = danger_fill
+                        cell.font = beyaz_font
+                    else:
+                        cell.fill = light_fill
+                        cell.font = siyah_font
             
             # Sütun genişliklerini ayarla
             ws.column_dimensions['A'].width = 20
