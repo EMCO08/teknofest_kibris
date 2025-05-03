@@ -767,6 +767,74 @@ def gonullu_durum_raporu(request):
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
                     gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-danger text-white'
     
+    # Excel indirme işlemi
+    if 'excel' in request.GET:
+        # Excel dosyası oluştur
+        wb = openpyxl.Workbook()
+        
+        # Her gün için ayrı bir sayfa oluştur
+        for gun in gunler:
+            # Sayfa oluştur ve isimlendir
+            ws = wb.create_sheet(title=gun)
+            
+            # Başlık satırı 1
+            header_row1 = [""]
+            for alan in alanlar:
+                header_row1.extend([alan, ""])
+            ws.append(header_row1)
+            
+            # Hücreleri birleştir
+            for col_idx, alan in enumerate(alanlar, 2):  # 2'den başla çünkü ilk sütun boş
+                start_col = (col_idx - 1) * 2  # Her alan 2 sütun kaplar
+                end_col = start_col + 1
+                ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+            
+            # Başlık satırı 2
+            header_row2 = [""]
+            for _ in alanlar:
+                header_row2.extend(["Gelme Durumu", "Geldiği Saat"])
+            ws.append(header_row2)
+            
+            # Veri satırları
+            for kontrol_zamani in ['09.00', '14.30']:
+                row = [f"{kontrol_zamani} kontrolü"]
+                
+                for alan in alanlar:
+                    if gun in gun_kontrol_verileri and kontrol_zamani in gun_kontrol_verileri[gun] and alan in gun_kontrol_verileri[gun][kontrol_zamani]:
+                        veri = gun_kontrol_verileri[gun][kontrol_zamani][alan]
+                        # Veri varsa değerini, yoksa boş string ekle
+                        gelme_durumu = veri['gelme_durumu'] if veri['gelme_durumu'] else ""
+                        gelme_saati = veri['gelme_saati'] if veri['gelme_saati'] else ""
+                        row.extend([gelme_durumu, gelme_saati])
+                    else:
+                        # Veri yoksa boş hücreler ekle
+                        row.extend(["", ""])
+                
+                ws.append(row)
+            
+            # Sütun genişliklerini ayarla
+            ws.column_dimensions['A'].width = 20
+            for i in range(len(alanlar) * 2):
+                col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
+                ws.column_dimensions[col_letter].width = 15
+        
+        # İlk sayfayı sil (varsayılan oluşturulan)
+        if "Sheet" in wb.sheetnames:
+            del wb["Sheet"]
+        
+        # Excel dosyasını bellekte oluştur
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # HTTP yanıtı olarak döndür
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="Gonullu_Durum_Raporu.xlsx"'
+        return response
+    
     context = {
         'secilen_gun': secilen_gun,
         'gunler': gunler,
