@@ -890,11 +890,15 @@ def gonullu_durum_raporu(request):
                         cell.fill = light_fill
                         cell.font = siyah_font
             
-            # Sütun genişliklerini ayarla
-            ws.column_dimensions['A'].width = 20
+            # Sütun genişliklerini ve satır yüksekliklerini ayarla
+            ws.column_dimensions['A'].width = 180
             for i in range(len(alanlar) * 2):
                 col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
-                ws.column_dimensions[col_letter].width = 15
+                ws.column_dimensions[col_letter].width = 180
+            
+            # Satır yüksekliklerini ayarla
+            for i in range(1, 5):  # 1'den 4'e kadar (başlıklar ve veriler için toplam 4 satır)
+                ws.row_dimensions[i].height = 60
         
         # İlk sayfayı sil (varsayılan oluşturulan)
         if "Sheet" in wb.sheetnames:
