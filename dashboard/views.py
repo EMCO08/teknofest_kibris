@@ -671,7 +671,19 @@ def gonullu_durum_raporu(request):
     
     # Koordinatörlük/alan listesi - sütunlar olacak
     alanlar = [
-        'Pilot Event', 'T3 Ofis', 'VIP Salonu', 'DİĞER ALANLAR'
+        'Arter / To Do / Kurumsal Ofis / Heysemişt',
+        'Vakıf Standı Yönetici Odası',
+        'TSK',
+        'Basın',
+        'Gönüllü - Bursiyer',
+        'Yönetim Ofisi / Kriz Masası',
+        'T3 Ofis',
+        'Teknofest Robolig Yarışması',
+        'Teknofest KKTC Araştırma Yarışması',
+        'VIP Salon',
+        'TRT Kulis Ana Sahne / Muhabir',
+        'Bilim Pavyonu',
+        'Pilot Event'
     ]
     
     # Tüm günler
@@ -687,12 +699,17 @@ def gonullu_durum_raporu(request):
     # İlk key: gün, ikinci key: kontrol zamanı, üçüncü key: alan
     gun_kontrol_verileri = {}
     
+    # 14.00 saati (sabah ve öğleden sonra ayırımı için)
+    ayirim_saati = datetime.strptime('14.00', '%H.%M').time()
+    
     # Her gün ve kontrol zamanı için verileri hazırla
     for gun in gunler:
         gun_kontrol_verileri[gun] = {}
         
         for kontrol_zamani, zaman_bilgisi in kontrol_zamanlari.items():
             gun_kontrol_verileri[gun][kontrol_zamani] = {}
+            
+            limit_saat = datetime.strptime(zaman_bilgisi['limit_saat'], '%H.%M').time()
             
             # Her alan için
             for alan in alanlar:
@@ -704,35 +721,46 @@ def gonullu_durum_raporu(request):
                     'gelme_saati_renk': 'bg-light text-muted'  # Varsayılan renk - veri yok
                 }
                 
-                # Veritabanından veriyi çek
+                # Veritabanından o gün ve alan için girişleri çek
                 veriler = GonulluDurumVeriler.objects.filter(
                     gun=gun,
                     alan=alan
-                ).order_by('submitteddate', 'submittedtime')
+                )
                 
-                # Eğer veri varsa
-                if veriler.exists():
-                    veri = veriler.first()
-                    
-                    # Gelme durumu
-                    if veri.catering_durum == 'var':
-                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Geldi'
-                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-success text-white'
-                    else:
-                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Gelmedi'
-                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-danger text-white'
-                    
-                    # Gelme saati
-                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
-                    
-                    # Gelme saati kontrolü (10.00'dan önce/sonra veya 15.30'dan önce/sonra)
-                    saat, dakika = veri.saat.hour, veri.saat.minute
-                    limit_saat, limit_dakika = map(int, zaman_bilgisi['limit_saat'].split('.'))
-                    
-                    if (saat < limit_saat) or (saat == limit_saat and dakika < limit_dakika):
-                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-success text-white'
-                    else:
-                        gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-danger text-white'
+                # Kontrol saati için uygun veriyi seç
+                if kontrol_zamani == '09.00':
+                    # 09.00 kontrolü için 14.00'dan önce girilen tüm kayıtları al
+                    filtrelenmis_veriler = veriler.filter(saat__lt=ayirim_saati).order_by('-submitteddate', '-submittedtime')
+                else:
+                    # 14.30 kontrolü için 14.00 ve sonrası girilen tüm kayıtları al
+                    filtrelenmis_veriler = veriler.filter(saat__gte=ayirim_saati).order_by('-submitteddate', '-submittedtime')
+                
+                # Eğer ilgili saat aralığında veri yoksa, o alan için hiçbir veri gösterme
+                if not filtrelenmis_veriler.exists():
+                    continue
+                
+                # Filtrelenmiş verilerin ilki (en son girilen kayıt)
+                veri = filtrelenmis_veriler.first()  
+                
+                # Gelme durumu
+                if veri.catering_durum == 'var':
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Geldi'
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-success text-white'
+                else:
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu'] = 'Gelmedi'
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_durumu_renk'] = 'bg-danger text-white'
+                
+                # Gelme saati
+                gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati'] = veri.saat.strftime('%H.%M')
+                
+                # Gelme saati kontrolü (10.00'dan önce/sonra veya 15.30'dan önce/sonra)
+                saat, dakika = veri.saat.hour, veri.saat.minute
+                limit_saat, limit_dakika = map(int, zaman_bilgisi['limit_saat'].split('.'))
+                
+                if (saat < limit_saat) or (saat == limit_saat and dakika < limit_dakika):
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-success text-white'
+                else:
+                    gun_kontrol_verileri[gun][kontrol_zamani][alan]['gelme_saati_renk'] = 'bg-danger text-white'
     
     context = {
         'secilen_gun': secilen_gun,
