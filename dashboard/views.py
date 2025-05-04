@@ -798,71 +798,117 @@ def gonullu_durum_raporu(request):
             # Sayfa oluştur ve isimlendir
             ws = wb.create_sheet(title=gun)
             
-            # Veri satırlarının başlangıç sırası
-            current_row = 1
+            # Başlık satırı 1 - Alan isimleri
+            header_row1 = [""]
+            for alan in alanlar:
+                # Her alan için başlık hücresi (3 sütunluk: Gelme Durumu, Geldiği Saat, Resim)
+                header_row1.append(alan)
+                for _ in range(2):  # 3 sütun için 2 boş hücre ekle
+                    header_row1.append("")
+            ws.append(header_row1)
             
-            # Excel başlık satırı - tüm alanlar
-            alan_headers = ["Alan", "Kontrol Saati", "Gelme Durumu", "Geldiği Saat", "Fotoğraflar", "Gönderen", "Gönderilme Zamanı"]
-            ws.append(alan_headers)
+            # Hücreleri birleştir ve başlık stilini uygula
+            for col_idx, alan in enumerate(alanlar, 2):  # 2'den başla çünkü ilk sütun boş
+                start_col = (col_idx - 1) * 3 + 1  # Her alan artık 3 sütun kaplar
+                end_col = start_col + 2
+                ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+                
+                # Birleştirilmiş hücreye stil uygula
+                merged_cell = ws.cell(row=1, column=start_col)
+                merged_cell.value = alan  # Alan adını ekle
+                merged_cell.fill = baslik_fill
+                merged_cell.font = beyaz_font
+                merged_cell.alignment = Alignment(horizontal='center', vertical='center')
+                merged_cell.border = thin_border
             
-            # Başlık satırına stil uygula
-            for col in range(1, len(alan_headers) + 1):
-                cell = ws.cell(row=1, column=col)
+            # İlk sütun başlık stilini uygula
+            ws.cell(row=1, column=1).fill = baslik_fill
+            ws.cell(row=1, column=1).font = beyaz_font
+            ws.cell(row=1, column=1).border = thin_border
+            
+            # Başlık satırı 2 - Gelme Durumu, Geldiği Saat, Resim
+            header_row2 = [""]
+            for _ in alanlar:
+                header_row2.extend(["Gelme Durumu", "Geldiği Saat", "Resim"])
+            ws.append(header_row2)
+            
+            # Başlık satırı 2'ye stil uygula
+            for col in range(1, len(alanlar) * 3 + 2):
+                cell = ws.cell(row=2, column=col)
                 cell.fill = baslik_fill
                 cell.font = beyaz_font
                 cell.alignment = Alignment(horizontal='center', vertical='center')
                 cell.border = thin_border
             
-            # Tüm alanlar için veri ekle
-            for alan in alanlar:
-                # 09.00 ve 14.30 kontrolleri için ayrı ayrı veri çek
-                for kontrol_zamani, zaman_bilgisi in kontrol_zamanlari.items():
-                    # Saat aralığını belirle
+            # Kontrol zamanları için satır indeksi
+            current_row = 3
+            
+            # 09.00 ve 14.30 kontrolleri için ayrı satırlar oluştur
+            for kontrol_zamani in ['09.00', '14.30']:
+                # Kontrol zamanı başlık satırı
+                ws.cell(row=current_row, column=1).value = f"{kontrol_zamani} kontrolü"
+                ws.cell(row=current_row, column=1).fill = baslik_fill
+                ws.cell(row=current_row, column=1).font = beyaz_font
+                ws.cell(row=current_row, column=1).alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=current_row, column=1).border = thin_border
+                
+                # İlk satırın diğer sütunlarını boş olarak ayarla
+                for col in range(2, len(alanlar) * 3 + 2):
+                    cell = ws.cell(row=current_row, column=col)
+                    cell.value = ""
+                    cell.fill = light_fill
+                    cell.border = thin_border
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+                
+                # Her alan için ayrı ayrı veri ekle
+                for col_idx, alan in enumerate(alanlar, 0):
+                    # Bu alan için başlangıç sütunu
+                    col_start = col_idx * 3 + 2  # +2 çünkü ilk sütun kontrol zamanı için
+                    
+                    # Veritabanından verileri al
                     if kontrol_zamani == '09.00':
-                        # 09.00 kontrolü için 14.00'dan önce girilen tüm kayıtları al
-                        saat_filtresi = {'saat__lt': ayirim_saati}
+                        veriler = GonulluDurumVeriler.objects.filter(
+                            gun=gun,
+                            alan=alan,
+                            saat__lt=ayirim_saati
+                        ).order_by('-submitteddate', '-submittedtime')
                     else:
-                        # 14.30 kontrolü için 14.00 ve sonrası girilen tüm kayıtları al
-                        saat_filtresi = {'saat__gte': ayirim_saati}
+                        veriler = GonulluDurumVeriler.objects.filter(
+                            gun=gun,
+                            alan=alan,
+                            saat__gte=ayirim_saati
+                        ).order_by('-submitteddate', '-submittedtime')
                     
-                    # Veritabanından o gün ve alan için TÜM girişleri çek (en son değil)
-                    veriler = GonulluDurumVeriler.objects.filter(
-                        gun=gun,
-                        alan=alan,
-                        **saat_filtresi
-                    ).order_by('-submitteddate', '-submittedtime')
+                    # Bu alan için veri yoksa, sonraki alana geç
+                    if not veriler.exists():
+                        continue
                     
-                    # Her bir veriyi ayrı satır olarak ekle
+                    # Veri varsa, her bir veri için işlem yap
+                    row_idx = current_row
                     for veri in veriler:
-                        # Satır verileri
-                        current_row += 1
+                        # Gelme durumu
+                        gelme_durumu = "Geldi" if veri.catering_durum == 'var' else "Gelmedi"
+                        gelme_durumu_renk = success_fill if veri.catering_durum == 'var' else danger_fill
                         
-                        # Gelme durumu ve rengi
-                        if veri.catering_durum == 'var':
-                            gelme_durumu = 'Geldi'
-                            gelme_durumu_renk = 'bg-success text-white'
-                        else:
-                            gelme_durumu = 'Gelmedi'
-                            gelme_durumu_renk = 'bg-danger text-white'
-                        
-                        # Gelme saati ve rengi
+                        # Gelme saati
                         gelme_saati = veri.saat.strftime('%H.%M')
                         
-                        # Gelme saati kontrolü (10.00'dan önce/sonra veya 15.30'dan önce/sonra)
-                        saat, dakika = veri.saat.hour, veri.saat.minute
-                        limit_saat, limit_dakika = map(int, zaman_bilgisi['limit_saat'].split('.'))
+                        # Gelme saati rengi (10.00 veya 15.30'dan önce/sonra)
+                        limit_saat = kontrol_zamanlari[kontrol_zamani]['limit_saat']
+                        limit_saat_obj = datetime.strptime(limit_saat, '%H.%M').time()
                         
-                        if (saat < limit_saat) or (saat == limit_saat and dakika < limit_dakika):
-                            gelme_saati_renk = 'bg-success text-white'
+                        if veri.saat < limit_saat_obj:
+                            gelme_saati_renk = success_fill
                         else:
-                            gelme_saati_renk = 'bg-danger text-white'
+                            gelme_saati_renk = danger_fill
                         
                         # Fotoğraf linkleri
                         fotograf_linkleri = ""
+                        
                         # Yeni çoklu fotoğraf sistemindeki fotoğrafları kontrol et
                         fotograflar = list(veri.fotograflar.all())
                         if fotograflar:
-                            # Tüm fotoğraf linklerini numaralandırarak ekle
+                            # Tüm fotoğraf linklerini numaralandırarak göster
                             numarali_linkler = []
                             for i, foto in enumerate(fotograflar, 1):
                                 foto_url = foto.get_fotograf_url()
@@ -875,78 +921,61 @@ def gonullu_durum_raporu(request):
                             if foto_url:  # None değilse ekle
                                 fotograf_linkleri = f"1. {foto_url}"
                         
-                        # Veriyi ekle
-                        row_data = [
-                            alan,
-                            f"{kontrol_zamani}",
-                            gelme_durumu,
-                            gelme_saati,
-                            fotograf_linkleri,
-                            veri.kisi.get_full_name(),
-                            f"{veri.submitteddate} {veri.submittedtime}"
-                        ]
-                        ws.append(row_data)
-                        
-                        # Stil uygulama
-                        # Alan ve kontrol saati hücreleri
-                        for col in range(1, 3):
-                            cell = ws.cell(row=current_row, column=col)
-                            cell.alignment = Alignment(horizontal='center', vertical='center')
-                            cell.border = thin_border
-                        
-                        # Gelme durumu hücresi
-                        cell = ws.cell(row=current_row, column=3)
-                        if 'bg-success' in gelme_durumu_renk:
-                            cell.fill = success_fill
-                            cell.font = beyaz_font
-                        else:
-                            cell.fill = danger_fill
-                            cell.font = beyaz_font
+                        # Gelme Durumu hücresi
+                        cell = ws.cell(row=row_idx, column=col_start)
+                        cell.value = gelme_durumu
+                        cell.fill = gelme_durumu_renk
+                        cell.font = beyaz_font
+                        cell.border = thin_border
                         cell.alignment = Alignment(horizontal='center', vertical='center')
-                        cell.border = thin_border
                         
-                        # Gelme saati hücresi
-                        cell = ws.cell(row=current_row, column=4)
-                        if 'bg-success' in gelme_saati_renk:
-                            cell.fill = success_fill
-                            cell.font = beyaz_font
-                        else:
-                            cell.fill = danger_fill
-                            cell.font = beyaz_font
+                        # Geldiği Saat hücresi
+                        cell = ws.cell(row=row_idx, column=col_start + 1)
+                        cell.value = gelme_saati
+                        cell.fill = gelme_saati_renk
+                        cell.font = beyaz_font
+                        cell.border = thin_border
                         cell.alignment = Alignment(horizontal='center', vertical='center')
+                        
+                        # Resim hücresi
+                        cell = ws.cell(row=row_idx, column=col_start + 2)
+                        cell.value = fotograf_linkleri
+                        cell.fill = light_fill
                         cell.border = thin_border
                         
-                        # Fotoğraf linkleri hücresi
-                        cell = ws.cell(row=current_row, column=5)
-                        cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
-                        cell.border = thin_border
-                        
-                        # İlk fotoğrafı hiperlink olarak ayarla
+                        # Fotoğraf linki varsa hiperlink ekle
                         if fotograf_linkleri:
+                            # İlk URL'i bul ve hiperlink olarak ayarla
                             import re
-                            first_url_match = re.search(r'\d+\.\s+(https?://\S+)', fotograf_linkleri.split('\n')[0])
+                            first_url_match = re.search(r'\d+\.\s+(https?://\S+)', fotograf_linkleri)
                             if first_url_match:
                                 cell.hyperlink = first_url_match.group(1)
                                 cell.font = Font(color="0000FF", underline="single")
                         
-                        # Gönderen kişi ve zaman hücreleri
-                        for col in range(6, 8):
-                            cell = ws.cell(row=current_row, column=col)
-                            cell.alignment = Alignment(horizontal='center', vertical='center')
-                            cell.border = thin_border
+                        cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+                        
+                        # Bir sonraki satıra geç
+                        row_idx += 1
+                
+                # Bir sonraki kontrol zamanı için satır indeksini güncelle
+                current_row = max(current_row + 1, row_idx)
             
             # Sütun genişliklerini ayarla
-            ws.column_dimensions['A'].width = 35  # Alan
-            ws.column_dimensions['B'].width = 15  # Kontrol Saati
-            ws.column_dimensions['C'].width = 15  # Gelme Durumu
-            ws.column_dimensions['D'].width = 15  # Geldiği Saat
-            ws.column_dimensions['E'].width = 60  # Fotoğraflar
-            ws.column_dimensions['F'].width = 25  # Gönderen
-            ws.column_dimensions['G'].width = 25  # Gönderilme Zamanı
+            ws.column_dimensions['A'].width = 24
             
-            # Satır yüksekliklerini ayarla - fotoğraf linklerinin görünmesi için
-            for i in range(1, current_row + 1):
-                ws.row_dimensions[i].height = 30  # Normal yükseklik
+            # Her alan 3 sütundan oluşuyor (Gelme Durumu, Geldiği Saat, Resim)
+            for i in range(len(alanlar) * 3):
+                col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
+                
+                # Resim sütunlarını daha geniş yap (her 3. sütun)
+                if (i % 3) == 2:
+                    ws.column_dimensions[col_letter].width = 30  # Resim linki için daha geniş
+                else:
+                    ws.column_dimensions[col_letter].width = 20  # Diğer sütunlar için normal genişlik
+            
+            # Satır yüksekliklerini ayarla
+            for i in range(1, current_row):
+                ws.row_dimensions[i].height = 45  # Tüm satırlar için standart yükseklik
         
         # İlk sayfayı sil (varsayılan oluşturulan)
         if "Sheet" in wb.sheetnames:
