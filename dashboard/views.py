@@ -801,13 +801,13 @@ def gonullu_durum_raporu(request):
             # Başlık satırı 1
             header_row1 = [""]
             for alan in alanlar:
-                header_row1.extend([alan, ""])
+                header_row1.extend([alan, "", ""])  # Alan başına 3 sütun: Gelme Durumu, Geldiği Saat, Resim
             ws.append(header_row1)
             
             # Hücreleri birleştir ve başlık stilini uygula
             for col_idx, alan in enumerate(alanlar, 2):  # 2'den başla çünkü ilk sütun boş
-                start_col = (col_idx - 1) * 2  # Her alan 2 sütun kaplar
-                end_col = start_col + 1
+                start_col = (col_idx - 1) * 3  # Her alan artık 3 sütun kaplar
+                end_col = start_col + 2
                 ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
                 
                 # Birleştirilmiş hücreye stil uygula
@@ -825,11 +825,11 @@ def gonullu_durum_raporu(request):
             # Başlık satırı 2
             header_row2 = [""]
             for _ in alanlar:
-                header_row2.extend(["Gelme Durumu", "Geldiği Saat"])
+                header_row2.extend(["Gelme Durumu", "Geldiği Saat", "Resim"])
             ws.append(header_row2)
             
             # Başlık satırı 2'ye stil uygula
-            for col in range(1, len(alanlar) * 2 + 2):
+            for col in range(1, len(alanlar) * 3 + 2):
                 cell = ws.cell(row=2, column=col)
                 cell.fill = baslik_fill
                 cell.font = beyaz_font
@@ -852,13 +852,46 @@ def gonullu_durum_raporu(request):
                         gelme_durumu_renk = veri['gelme_durumu_renk']
                         gelme_saati_renk = veri['gelme_saati_renk']
                         
+                        # Fotoğraf linkini ekle - önce veritabanından ilgili kaydı bul
+                        fotograf_linkleri = ""
+                        if gelme_durumu:  # Eğer gelme durumu varsa fotoğraf da arayabiliriz
+                            try:
+                                # İlgili gün, alan ve saate göre veritabanında kayıt ara
+                                kayit = GonulluDurumVeriler.objects.filter(
+                                    gun=gun,
+                                    alan=alan,
+                                    saat=datetime.strptime(gelme_saati, '%H.%M').time() if gelme_saati else None
+                                ).order_by('-submitteddate', '-submittedtime').first()
+                                
+                                if kayit:
+                                    # Önce yeni çoklu fotoğraf sistemindeki fotoğrafları kontrol et
+                                    fotograflar = list(kayit.fotograflar.all())
+                                    if fotograflar:
+                                        # Tüm fotoğraf linklerini numaralandırarak göster
+                                        numarali_linkler = []
+                                        for i, foto in enumerate(fotograflar, 1):
+                                            foto_url = foto.get_fotograf_url()
+                                            if foto_url:  # None değilse ekle
+                                                numarali_linkler.append(f"{i}. {foto_url}")
+                                        fotograf_linkleri = "\n".join(numarali_linkler)
+                            except Exception as e:
+                                # Hata durumunda sessizce geç - excelde fotoğraf görünmeyecek
+                                pass
+                        # Eski tek fotoğraf sistemini kontrol et
+                        elif kayit.fotograf:
+                            foto_url = kayit.get_fotograf_url()
+                            if foto_url:  # None değilse ekle
+                                fotograf_linkleri = f"1. {foto_url}"
+                        
                         col_values.extend([
                             (gelme_durumu, gelme_durumu_renk),
-                            (gelme_saati, gelme_saati_renk)
+                            (gelme_saati, gelme_saati_renk),
+                            (fotograf_linkleri, 'bg-light text-muted')  # Fotoğraf linkleri
                         ])
                     else:
-                        # Veri yoksa boş hücreler ekle
+                        # Veri yoksa boş hücreler ekle (üç sütun için)
                         col_values.extend([
+                            ("", 'bg-light text-muted'),
                             ("", 'bg-light text-muted'),
                             ("", 'bg-light text-muted')
                         ])
@@ -889,20 +922,44 @@ def gonullu_durum_raporu(request):
                     else:
                         cell.fill = light_fill
                         cell.font = siyah_font
+                    
+                    # Eğer fotoğraf sütunu ise hücre formatını ayarla
+                    if (col_idx - 2) % 3 == 2:  # 3 sütunluk yapıda her 3. sütun (resim sütunu)
+                        # URL olduğundan hiperlink olarak ayarla
+                        value = cell.value
+                        if value and value.strip():
+                            # İlk URL'i bul ve hiperlink olarak ayarla
+                            urls = value.split('\n')
+                            if urls:
+                                # İlk URL'deki numarayı çıkarıp sadece linki al
+                                import re
+                                first_url_match = re.search(r'\d+\.\s+(https?://\S+)', urls[0])
+                                if first_url_match:
+                                    cell.hyperlink = first_url_match.group(1)
+                                    cell.font = Font(color="0000FF", underline="single")  # Mavi ve altı çizili
+                                
+                                # URL'leri kısaltma işlemi yok - numaralandırılmış linkler olduğu gibi görünsün
+                                # wrap_text özelliği açık olsun ki linkler düzgün görünsün
+                                cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
             
-            # Sütun genişliklerini ve satır yüksekliklerini ayarla
-            # Excel'de sütun genişlikleri karakter cinsinden, satır yükseklikleri nokta (point) cinsindendir
-            # Yaklaşık piksel dönüşümleri: 1 karakter ≈ 7.5 piksel, 1 nokta ≈ 1.33 piksel
+        # Sütun genişliklerini ve satır yüksekliklerini ayarla
+        # Excel'de sütun genişlikleri karakter cinsinden, satır yükseklikleri nokta (point) cinsindendir
+        ws.column_dimensions['A'].width = 24
+        
+        # Her alan 3 sütundan oluşuyor (Gelme Durumu, Geldiği Saat, Resim)
+        for i in range(len(alanlar) * 3):
+            col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
             
-            # 180 piksel genişlik için yaklaşık 24 karakter (180/7.5 = 24)
-            ws.column_dimensions['A'].width = 24
-            for i in range(len(alanlar) * 2):
-                col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
-                ws.column_dimensions[col_letter].width = 24
-            
-            # 60 piksel yükseklik için yaklaşık 45 nokta (60/1.33 = 45)
-            for i in range(1, 5):  # 1'den 4'e kadar (başlıklar ve veriler için toplam 4 satır)
-                ws.row_dimensions[i].height = 45
+            # Resim sütunlarını daha geniş yap (her 3. sütun)
+            if (i % 3) == 2:
+                ws.column_dimensions[col_letter].width = 30  # Resim linki için daha geniş
+            else:
+                ws.column_dimensions[col_letter].width = 20  # Diğer sütunlar için normal genişlik
+        
+        # Satır yüksekliklerini arttır (fotoğraf linklerini gösterebilmek için)
+        for i in range(1, 5):  
+            row_height = 60 if i > 2 else 40  # Veri satırları için daha yüksek
+            ws.row_dimensions[i].height = row_height
         
         # İlk sayfayı sil (varsayılan oluşturulan)
         if "Sheet" in wb.sheetnames:
