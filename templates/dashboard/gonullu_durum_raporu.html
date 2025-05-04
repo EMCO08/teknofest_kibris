@@ -71,12 +71,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- 09.00 Kontrolü Başlık -->
-                            <tr style="height: 15px;" class="bg-secondary text-white">
-                                <th colspan="{{ alanlar|length|add:alanlar|length|add:1 }}">09.00 Kontrolü Verileri</th>
-                            </tr>
-                            
-                            <!-- 09.00 Kontrolü Son Veri (Özet olarak gösterilir) -->
+                            <!-- 09.00 Kontrolü -->
                             <tr style="height: 15px;">
                                 <th class="bg-primary text-white align-middle">09.00 kontrolü</th>
                                 {% for alan in alanlar %}
@@ -99,39 +94,7 @@
                                 {% endfor %}
                             </tr>
                             
-                            <!-- 09.00 Kontrolü Tüm Verileri -->
-                            {% for veri_index in '123456789'|make_list %}
-                                <tr style="height: 15px;" class="excel-only">
-                                    <th class="bg-light align-middle">Veri {{ veri_index }}</th>
-                                    {% for alan in alanlar %}
-                                        {% with tum_veriler=gun_tum_veriler|dictitem:gun|dictitem:"09.00"|dictitem:alan %}
-                                        {% with veri=tum_veriler|dictitem:veri_index|default:None %}
-                                        <td class="text-center {% if veri and veri.gelme_durumu_renk %}{{ veri.gelme_durumu_renk }}{% endif %}" style="width: 15px;">
-                                            {% if veri and veri.gelme_durumu %}
-                                                {{ veri.gelme_durumu }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center {% if veri and veri.gelme_saati_renk %}{{ veri.gelme_saati_renk }}{% endif %}" style="width: 15px;">
-                                            {% if veri and veri.gelme_saati %}
-                                                {{ veri.gelme_saati }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        {% endwith %}
-                                        {% endwith %}
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                            
-                            <!-- 14.30 Kontrolü Başlık -->
-                            <tr style="height: 15px;" class="bg-secondary text-white">
-                                <th colspan="{{ alanlar|length|add:alanlar|length|add:1 }}">14.30 Kontrolü Verileri</th>
-                            </tr>
-                            
-                            <!-- 14.30 Kontrolü Son Veri (Özet olarak gösterilir) -->
+                            <!-- 14.30 Kontrolü -->
                             <tr style="height: 15px;">
                                 <th class="bg-primary text-white align-middle">14.30 kontrolü</th>
                                 {% for alan in alanlar %}
@@ -153,33 +116,6 @@
                                     {% endwith %}
                                 {% endfor %}
                             </tr>
-                            
-                            <!-- 14.30 Kontrolü Tüm Verileri -->
-                            {% for veri_index in '123456789'|make_list %}
-                                <tr style="height: 15px;" class="excel-only">
-                                    <th class="bg-light align-middle">Veri {{ veri_index }}</th>
-                                    {% for alan in alanlar %}
-                                        {% with tum_veriler=gun_tum_veriler|dictitem:gun|dictitem:"14.30"|dictitem:alan %}
-                                        {% with veri=tum_veriler|dictitem:veri_index|default:None %}
-                                        <td class="text-center {% if veri and veri.gelme_durumu_renk %}{{ veri.gelme_durumu_renk }}{% endif %}" style="width: 15px;">
-                                            {% if veri and veri.gelme_durumu %}
-                                                {{ veri.gelme_durumu }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center {% if veri and veri.gelme_saati_renk %}{{ veri.gelme_saati_renk }}{% endif %}" style="width: 15px;">
-                                            {% if veri and veri.gelme_saati %}
-                                                {{ veri.gelme_saati }}
-                                            {% else %}
-                                                -
-                                            {% endif %}
-                                        </td>
-                                        {% endwith %}
-                                        {% endwith %}
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -195,11 +131,6 @@
 <script>
     $(document).ready(function() {
         console.log("Gönüllü durum raporu sayfası yüklendi.");
-        
-        // Excel'e indirmediğimizde excel-only sınıfına sahip satırları gizleyelim
-        if (!window.location.search.includes('excel=1')) {
-            $('.excel-only').hide();
-        }
     });
 </script>
 {% endblock %} 
