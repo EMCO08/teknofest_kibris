@@ -955,6 +955,8 @@ def gonullu_durum_raporu(request):
             row_idx += 1
 
             # 09.00 ve 14.30 arası tüm verileri ekle (en fazla 9 satır)
+            sabah_verileri_satir_sayisi = 0
+            
             for alan in alanlar:
                 # İlgili gün ve alan için tüm verileri al
                 sabah_verileri = []
@@ -972,6 +974,9 @@ def gonullu_durum_raporu(request):
                 except Exception as e:
                     # Hata durumunda boş liste kullan
                     sabah_verileri = []
+                
+                # Her alan için kaç satır eklendiğini takip et
+                alan_satir_sayisi = 0
                 
                 # Alana göre tüm verileri ekle
                 for i, alan_idx in enumerate(range(0, len(alanlar) * 3, 3)):
@@ -1030,9 +1035,15 @@ def gonullu_durum_raporu(request):
                                 
                             ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
                             ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).border = thin_border
+                            
+                            # Her alan için maksimum satır sayısını güncelle
+                            alan_satir_sayisi = max(alan_satir_sayisi, veri_idx + 1)
+                
+                # En çok satır ekleyen alana göre sabah verileri satır sayısını güncelle
+                sabah_verileri_satir_sayisi = max(sabah_verileri_satir_sayisi, alan_satir_sayisi)
             
-            # En fazla 9 satır ekleyeceğiz
-            row_idx += 9
+            # Dinamik olarak satır indeksini güncelle (alan verisi sayısına göre)
+            row_idx += sabah_verileri_satir_sayisi if sabah_verileri_satir_sayisi > 0 else 0
             
             # 14.30 kontrolü satırı ekle
             row = ["14.30 kontrolü"]
@@ -1142,6 +1153,8 @@ def gonullu_durum_raporu(request):
             row_idx += 1
             
             # 14.30 sonrası tüm verileri ekle
+            aksam_verileri_satir_sayisi = 0
+            
             for alan in alanlar:
                 # İlgili gün ve alan için tüm verileri al
                 aksam_verileri = []
@@ -1159,6 +1172,9 @@ def gonullu_durum_raporu(request):
                 except Exception as e:
                     # Hata durumunda boş liste kullan
                     aksam_verileri = []
+                
+                # Her alan için kaç satır eklendiğini takip et
+                alan_satir_sayisi = 0
                 
                 # Alana göre tüm verileri ekle
                 for i, alan_idx in enumerate(range(0, len(alanlar) * 3, 3)):
@@ -1217,6 +1233,12 @@ def gonullu_durum_raporu(request):
                                 
                             ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
                             ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).border = thin_border
+                            
+                            # Her alan için maksimum satır sayısını güncelle
+                            alan_satir_sayisi = max(alan_satir_sayisi, veri_idx + 1)
+                
+                # En çok satır ekleyen alana göre akşam verileri satır sayısını güncelle
+                aksam_verileri_satir_sayisi = max(aksam_verileri_satir_sayisi, alan_satir_sayisi)
             
             # Bu sayfa için tüm sütunların genişliğini ayarla
             for i in range(1, (len(alanlar) * 3) + 2):  # Tüm sütunlar (+1 for A sütunu)
