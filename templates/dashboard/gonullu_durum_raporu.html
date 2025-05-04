@@ -54,36 +54,36 @@
                 
                 <!-- Durum Tablosu -->
                 <div class="table-responsive mb-5">
-                    <table class="table table-bordered table-hover excel-table" data-gun="{{ gun }}">
+                    <table class="table table-bordered table-hover excel-table" data-gun="{{ gun }}" style="width: 50px;">
                         <thead class="table-dark">
-                            <tr>
-                                <th style="width: 180px;"></th>
+                            <tr style="height: 15px;">
+                                <th style="width: 15px;"></th>
                                 {% for alan in alanlar %}
-                                <th class="text-center" colspan="2">{{ alan }}</th>
+                                <th class="text-center" colspan="2" style="width: 15px;">{{ alan }}</th>
                                 {% endfor %}
                             </tr>
-                            <tr>
+                            <tr style="height: 15px;">
                                 <th></th>
                                 {% for alan in alanlar %}
-                                <th class="text-center">Gelme Durumu</th>
-                                <th class="text-center">Geldiği Saat</th>
+                                <th class="text-center" style="width: 15px;">Gelme Durumu</th>
+                                <th class="text-center" style="width: 15px;">Geldiği Saat</th>
                                 {% endfor %}
                             </tr>
                         </thead>
                         <tbody>
                             <!-- 09.00 Kontrolü -->
-                            <tr>
+                            <tr style="height: 15px;">
                                 <th class="bg-primary text-white align-middle">09.00 kontrolü</th>
                                 {% for alan in alanlar %}
                                     {% with veri=gun_kontrol_verileri|dictitem:gun|dictitem:"09.00"|dictitem:alan %}
-                                    <td class="text-center {{ veri.gelme_durumu_renk }}">
+                                    <td class="text-center {{ veri.gelme_durumu_renk }}" style="width: 15px;">
                                         {% if veri.gelme_durumu %}
                                             {{ veri.gelme_durumu }}
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
-                                    <td class="text-center {{ veri.gelme_saati_renk }}">
+                                    <td class="text-center {{ veri.gelme_saati_renk }}" style="width: 15px;">
                                         {% if veri.gelme_saati %}
                                             {{ veri.gelme_saati }}
                                         {% else %}
@@ -95,18 +95,18 @@
                             </tr>
                             
                             <!-- 14.30 Kontrolü -->
-                            <tr>
+                            <tr style="height: 15px;">
                                 <th class="bg-primary text-white align-middle">14.30 kontrolü</th>
                                 {% for alan in alanlar %}
                                     {% with veri=gun_kontrol_verileri|dictitem:gun|dictitem:"14.30"|dictitem:alan %}
-                                    <td class="text-center {{ veri.gelme_durumu_renk }}">
+                                    <td class="text-center {{ veri.gelme_durumu_renk }}" style="width: 15px;">
                                         {% if veri.gelme_durumu %}
                                             {{ veri.gelme_durumu }}
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
-                                    <td class="text-center {{ veri.gelme_saati_renk }}">
+                                    <td class="text-center {{ veri.gelme_saati_renk }}" style="width: 15px;">
                                         {% if veri.gelme_saati %}
                                             {{ veri.gelme_saati }}
                                         {% else %}
