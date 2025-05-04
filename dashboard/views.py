@@ -1218,19 +1218,15 @@ def gonullu_durum_raporu(request):
                             ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
                             ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).border = thin_border
             
-        # Sütun genişliklerini ve satır yüksekliklerini ayarla
-        # Excel'de sütun genişlikleri karakter cinsinden, satır yükseklikleri nokta (point) cinsindendir
-        
-        # Tüm sütunlar için genişlik ayarla (30 karakter - yaklaşık 270 pixel)
-        for i in range(1, (len(alanlar) * 3) + 2):  # Tüm sütunlar (+1 for A sütunu)
-            col_letter = get_column_letter(i)
-            ws.column_dimensions[col_letter].width = 30
-            
-        # Tüm satırlar için yükseklik ayarla (51 punto - yaklaşık 80 pixel)
-        # Son satır numarasını belirleme (her sayfa farklı sayıda satıra sahip olabilir)
-        max_row = ws.max_row
-        for i in range(1, max_row + 1):
-            ws.row_dimensions[i].height = 51
+            # Bu sayfa için tüm sütunların genişliğini ayarla
+            for i in range(1, (len(alanlar) * 3) + 2):  # Tüm sütunlar (+1 for A sütunu)
+                col_letter = get_column_letter(i)
+                ws.column_dimensions[col_letter].width = 30
+                
+            # Bu sayfa için tüm satırların yüksekliğini ayarla
+            max_row = ws.max_row
+            for i in range(1, max_row + 1):
+                ws.row_dimensions[i].height = 51
         
         # İlk sayfayı sil (varsayılan oluşturulan)
         if "Sheet" in wb.sheetnames:
