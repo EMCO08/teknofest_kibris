@@ -25,6 +25,7 @@ from django.db.models import Sum, F
 from django.core.paginator import Paginator
 from django.template.defaulttags import register
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side, Color
+import re
 
 # Template filtreleri
 @register.filter
@@ -799,34 +800,41 @@ def gonullu_durum_raporu(request):
             ws = wb.create_sheet(title=gun)
             
             # Başlık satırı 1
-            header_row1 = [""]
-            for alan in alanlar:
-                header_row1.extend([alan, "", ""])  # Alan başına 3 sütun: Gelme Durumu, Geldiği Saat, Resim
-            ws.append(header_row1)
+            header_row1 = [""]  # İlk sütun boş
+            current_col = 2     # Sütun B'den başla
             
-            # Hücreleri birleştir ve başlık stilini uygula
-            for col_idx, alan in enumerate(alanlar, 2):  # 2'den başla çünkü ilk sütun boş
-                start_col = (col_idx - 1) * 3  # Her alan artık 3 sütun kaplar
-                end_col = start_col + 2
-                ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+            for alan in alanlar:
+                # Alan adını ekle ve hücre birleştirmesi yap
+                ws.cell(row=1, column=current_col, value=alan)
+                ws.merge_cells(start_row=1, start_column=current_col, end_row=1, end_column=current_col+2)
                 
-                # Birleştirilmiş hücreye stil uygula
-                merged_cell = ws.cell(row=1, column=start_col)
+                # Birleştirilmiş hücrenin formatını ayarla
+                merged_cell = ws.cell(row=1, column=current_col)
                 merged_cell.fill = baslik_fill
                 merged_cell.font = beyaz_font
                 merged_cell.alignment = Alignment(horizontal='center', vertical='center')
                 merged_cell.border = thin_border
+                
+                # Sonraki alan için sütun indeksini güncelle
+                current_col += 3
             
             # İlk sütun başlık stilini uygula
             ws.cell(row=1, column=1).fill = baslik_fill
             ws.cell(row=1, column=1).font = beyaz_font
             ws.cell(row=1, column=1).border = thin_border
             
-            # Başlık satırı 2
-            header_row2 = [""]
+            # Başlık satırı 2 - Alt başlıklar
+            current_col = 2  # Sütun B'den başla
+            
+            # İlk sütunu boş bırak (A sütunu - kontrol zamanları için)
+            ws.cell(row=2, column=1, value="")
+            
+            # Her alan için alt başlıkları ekle (Gelme Durumu, Geldiği Saat, Resim)
             for _ in alanlar:
-                header_row2.extend(["Gelme Durumu", "Geldiği Saat", "Resim"])
-            ws.append(header_row2)
+                ws.cell(row=2, column=current_col, value="Gelme Durumu")
+                ws.cell(row=2, column=current_col+1, value="Geldiği Saat")
+                ws.cell(row=2, column=current_col+2, value="Resim")
+                current_col += 3
             
             # Başlık satırı 2'ye stil uygula
             for col in range(1, len(alanlar) * 3 + 2):
@@ -867,22 +875,18 @@ def gonullu_durum_raporu(request):
                                     # Önce yeni çoklu fotoğraf sistemindeki fotoğrafları kontrol et
                                     fotograflar = list(kayit.fotograflar.all())
                                     if fotograflar:
-                                        # Tüm fotoğraf linklerini numaralandırarak göster
-                                        numarali_linkler = []
+                                        # Tüm fotoğraf linklerini numaralı olarak göster
+                                        fotograf_linkleri = ""  # Değişkeni boş string ile başlat
                                         for i, foto in enumerate(fotograflar, 1):
-                                            foto_url = foto.get_fotograf_url()
-                                            if foto_url:  # None değilse ekle
-                                                numarali_linkler.append(f"{i}. {foto_url}")
-                                        fotograf_linkleri = "\n".join(numarali_linkler)
+                                            fotograf_linkleri += f"{i}. {foto.get_fotograf_url()}\n"
+                                        fotograf_linkleri = fotograf_linkleri.strip()
                             except Exception as e:
                                 # Hata durumunda sessizce geç - excelde fotoğraf görünmeyecek
                                 pass
-                        # Eski tek fotoğraf sistemini kontrol et
-                        elif kayit.fotograf:
-                            foto_url = kayit.get_fotograf_url()
-                            if foto_url:  # None değilse ekle
-                                fotograf_linkleri = f"1. {foto_url}"
-                        
+                        else:
+                            # Eski tek fotoğraf sistemini kontrol et
+                            if kayit and kayit.fotograf:
+                                fotograf_linkleri = f"1. {kayit.get_fotograf_url()}"
                         col_values.extend([
                             (gelme_durumu, gelme_durumu_renk),
                             (gelme_saati, gelme_saati_renk),
@@ -928,19 +932,23 @@ def gonullu_durum_raporu(request):
                         # URL olduğundan hiperlink olarak ayarla
                         value = cell.value
                         if value and value.strip():
-                            # İlk URL'i bul ve hiperlink olarak ayarla
+                            # Numaralı listeye göre düzenlenmiş URL'leri koruyalım
                             urls = value.split('\n')
-                            if urls:
-                                # İlk URL'deki numarayı çıkarıp sadece linki al
-                                import re
-                                first_url_match = re.search(r'\d+\.\s+(https?://\S+)', urls[0])
-                                if first_url_match:
-                                    cell.hyperlink = first_url_match.group(1)
-                                    cell.font = Font(color="0000FF", underline="single")  # Mavi ve altı çizili
-                                
-                                # URL'leri kısaltma işlemi yok - numaralandırılmış linkler olduğu gibi görünsün
-                                # wrap_text özelliği açık olsun ki linkler düzgün görünsün
-                                cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+                            
+                            # İlk URL'yi hücreye hiperlink olarak ekle (eğer varsa)
+                            for url in urls:
+                                # "1. http://..." formatından URL kısmını al
+                                link_match = re.search(r'\d+\.\s*(https?://\S+)', url)
+                                if link_match:
+                                    cell.hyperlink = link_match.group(1)
+                                    break
+                            
+                            # URL'leri olduğu gibi göster, kısaltma yapma
+                            cell.value = value
+                            
+                            # URL sütunları için hücre biçimlendirmesi
+                            cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+                            cell.font = Font(color="0000FF")
             
         # Sütun genişliklerini ve satır yüksekliklerini ayarla
         # Excel'de sütun genişlikleri karakter cinsinden, satır yükseklikleri nokta (point) cinsindendir
