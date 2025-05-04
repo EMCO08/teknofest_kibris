@@ -1220,22 +1220,17 @@ def gonullu_durum_raporu(request):
             
         # Sütun genişliklerini ve satır yüksekliklerini ayarla
         # Excel'de sütun genişlikleri karakter cinsinden, satır yükseklikleri nokta (point) cinsindendir
-        ws.column_dimensions['A'].width = 24
         
-        # Her alan 3 sütundan oluşuyor (Gelme Durumu, Geldiği Saat, Resim)
-        for i in range(len(alanlar) * 3):
-            col_letter = get_column_letter(i + 2)  # 2'den başla çünkü A sütunu zaten ayarlandı
+        # Tüm sütunlar için genişlik ayarla (30 karakter - yaklaşık 270 pixel)
+        for i in range(1, (len(alanlar) * 3) + 2):  # Tüm sütunlar (+1 for A sütunu)
+            col_letter = get_column_letter(i)
+            ws.column_dimensions[col_letter].width = 30
             
-            # Resim sütunlarını daha geniş yap (her 3. sütun)
-            if (i % 3) == 2:
-                ws.column_dimensions[col_letter].width = 30  # Resim linki için daha geniş
-            else:
-                ws.column_dimensions[col_letter].width = 20  # Diğer sütunlar için normal genişlik
-        
-        # Satır yüksekliklerini arttır (fotoğraf linklerini gösterebilmek için)
-        for i in range(1, 5):  
-            row_height = 60 if i > 2 else 40  # Veri satırları için daha yüksek
-            ws.row_dimensions[i].height = row_height
+        # Tüm satırlar için yükseklik ayarla (51 punto - yaklaşık 80 pixel)
+        # Son satır numarasını belirleme (her sayfa farklı sayıda satıra sahip olabilir)
+        max_row = ws.max_row
+        for i in range(1, max_row + 1):
+            ws.row_dimensions[i].height = 51
         
         # İlk sayfayı sil (varsayılan oluşturulan)
         if "Sheet" in wb.sheetnames:
