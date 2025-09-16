@@ -183,7 +183,7 @@ def t3personel_dashboard(request):
 
         headers = ['TC', 'İsim', 'Soyisim', 'Koordinatörlük', 'Birim',
 
-                'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Toplam', 'Tarih', 'Saat']
+                'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Coffee Break', 'Toplam', 'Tarih', 'Saat']
 
         ws.append(headers)
 
@@ -193,7 +193,7 @@ def t3personel_dashboard(request):
 
         for veri in veriler:
 
-            toplam = veri.ogle_yemegi + veri.aksam_yemegi + veri.lunchbox
+            toplam = veri.ogle_yemegi + veri.aksam_yemegi + veri.lunchbox + (veri.coffee_break or 0)
 
             ws.append([
 
@@ -212,6 +212,8 @@ def t3personel_dashboard(request):
                 veri.aksam_yemegi,
 
                 veri.lunchbox,
+
+                veri.coffee_break or 0,  # Coffee Break değerini ekle, None ise 0 olarak ayarla
 
                 toplam,
 
