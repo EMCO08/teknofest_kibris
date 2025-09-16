@@ -217,11 +217,10 @@
     <div class="col-md-12">
         <div class="card shadow-lg fade-in">
             <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Genel Analiz</h4>
+                <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Son 7 Günlük Özet</h4>
             </div>
             <div class="card-body">
-                <!-- Özet Kartları -->
-                <div class="row mb-4">
+                <div class="row">
                     <div class="col-md-4">
                         <div class="card bg-light mb-3">
                             <div class="card-body text-center">
@@ -249,153 +248,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Koordinatörlük Bazında Yemek Analizi -->
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                    <h5 class="card-title mb-0">Koordinatörlük Bazında Yemek Analizi</h5>
-                                    <div class="date-selector">
-                                        <select id="dateSelect" class="form-select">
-                                            {% for tarih in tarihler %}
-                                                <option value="{{ tarih }}">{{ tarih }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="chart-container" style="position: relative; height:400px;">
-                                    <canvas id="koordinatorlukChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <!-- Chart.js kütüphanesi -->
-            {% block extra_js %}
-            <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-            <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Analiz verileri
-                const analiz_verileri = JSON.parse('{{ analiz_verileri|escapejs }}');
-                const tarihler = JSON.parse('{{ tarihler|escapejs }}');
-                
-                // Renkleri tanımla
-                const colors = [
-                    '#36a2eb', '#ff6384', '#4bc0c0', '#ffcd56', '#9966ff', '#ff9f40',
-                    '#00cc99', '#ff6666', '#6699ff', '#ffb366', '#99cc00', '#cc99ff',
-                    '#669900', '#0099cc', '#ff9999', '#cc0066', '#9999ff', '#006666'
-                ];
-                
-                // Koordinatörlük grafiğini oluştur
-                let koordinatorlukChart = null;
-                
-                function createKoordinatorlukChart(selectedDate) {
-                    // Eğer zaten bir grafik varsa, önce onu temizle
-                    if (koordinatorlukChart) {
-                        koordinatorlukChart.destroy();
-                    }
-                    
-                    const ctx = document.getElementById('koordinatorlukChart').getContext('2d');
-                    
-                    // Seçilen gün için verileri hazırla
-                    const koordinatorlukler = [];
-                    const yemekSayilari = [];
-                    
-                    for (const [koordinatorluk, gunVerileri] of Object.entries(analiz_verileri)) {
-                        if (selectedDate in gunVerileri) {
-                            koordinatorlukler.push(koordinatorluk);
-                            yemekSayilari.push(gunVerileri[selectedDate]);
-                        }
-                    }
-                    
-                    // Verileri azalan şekilde sırala
-                    let combinedData = koordinatorlukler.map((k, i) => ({
-                        koordinatorluk: k,
-                        yemek: yemekSayilari[i]
-                    }));
-                    
-                    combinedData.sort((a, b) => b.yemek - a.yemek);
-                    
-                    // Sıralanmış verileri tekrar ayır
-                    const sortedKoordinatorlukler = combinedData.map(d => d.koordinatorluk);
-                    const sortedYemekSayilari = combinedData.map(d => d.yemek);
-                    
-                    // Grafiği oluştur
-                    koordinatorlukChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: sortedKoordinatorlukler,
-                            datasets: [{
-                                label: 'Toplam Yemek Siparişi',
-                                data: sortedYemekSayilari,
-                                backgroundColor: colors.slice(0, sortedKoordinatorlukler.length),
-                                borderColor: colors.slice(0, sortedKoordinatorlukler.length),
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: selectedDate + ' Tarihli Koordinatörlük Bazında Toplam Yemek Siparişleri',
-                                    font: {
-                                        size: 16
-                                    }
-                                },
-                                legend: {
-                                    display: false
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return 'Toplam Yemek: ' + context.raw;
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Yemek Sayısı'
-                                    }
-                                },
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Koordinatörlükler'
-                                    },
-                                    ticks: {
-                                        autoSkip: false,
-                                        maxRotation: 45,
-                                        minRotation: 45
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-                
-                // Tarih seçici değiştiğinde grafiği güncelle
-                const dateSelect = document.getElementById('dateSelect');
-                dateSelect.addEventListener('change', function() {
-                    createKoordinatorlukChart(this.value);
-                });
-                
-                // İlk grafik oluşturma
-                if (tarihler.length > 0) {
-                    createKoordinatorlukChart(tarihler[0]);
-                }
-            });
-            </script>
-            {% endblock %}
             
         </div>
     </div>
