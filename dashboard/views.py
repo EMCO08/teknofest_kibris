@@ -55,23 +55,48 @@ def dashboard_home(request):
     son_7_gun = timezone.now().date() - timedelta(days=7)
 
     t3_veriler_sayisi = T3PersonelVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
-
-
     gonullu_durum_sayisi = GonulluDurumVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
     gonullu_sorun_sayisi = GonulluSorunVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
     sorumlu_veriler_sayisi = SorumluVeriler.objects.filter(submitteddate__gte=son_7_gun).count()
-
 
     # Toplam sipariş sayıları
     toplam_personel_siparis = SorumluVeriler.objects.filter(submitteddate__gte=son_7_gun).aggregate(Sum('personel_yemek_siparis'))['personel_yemek_siparis__sum'] or 0
     toplam_taseron_siparis = SorumluVeriler.objects.filter(submitteddate__gte=son_7_gun).aggregate(Sum('taseron_yemek_siparis'))['taseron_yemek_siparis__sum'] or 0
     
-
     toplam_t3_siparis = (
         T3PersonelVeriler.objects
         .filter(submitteddate__gte=son_7_gun)
-        .aggregate(toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox')))['toplam'] or 0
+        .aggregate(toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox') + F('coffee_break', output_field=models.IntegerField())))['toplam'] or 0
     )
+    
+    # Koordinatörlük bazında günlük yemek analizi için veriler
+    tarihler = T3PersonelVeriler.objects.filter(
+        submitteddate__gte=son_7_gun
+    ).values_list('submitteddate', flat=True).distinct().order_by('submitteddate')
+    
+    # Koordinatörlük bazında toplam yemek verilerini hazırla
+    analiz_verileri = {}
+    tarih_listesi = []
+    
+    # Tüm koordinatörlükler için veri hazırla
+    for k in koordinatorlukler:
+        analiz_verileri[k] = {}
+        for tarih in tarihler:
+            # Bu koordinatörlük ve gün için toplam yemek siparişi
+            toplam_yemek = T3PersonelVeriler.objects.filter(
+                koordinatorluk=k, 
+                submitteddate=tarih
+            ).aggregate(
+                toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox') + F('coffee_break', output_field=models.IntegerField()))
+            )['toplam'] or 0
+            
+            # Tarih formatını değiştir - DD.MM.YYYY olarak
+            tarih_str = tarih.strftime('%d.%m.%Y')
+            analiz_verileri[k][tarih_str] = toplam_yemek
+            
+            # Tarih listesini de ayrıca oluştur
+            if tarih_str not in tarih_listesi:
+                tarih_listesi.append(tarih_str)
 
     # Koordinatörlük tablosu için veri hazırlama
     # Seçilen gün (varsayılan olarak 1. gün)
@@ -121,6 +146,9 @@ def dashboard_home(request):
     except (SistemAyarlari.DoesNotExist, ValueError):
         veri_guncelleme_son_dakika = 0  # Varsayılan değer
 
+    # JSON serilestirme için
+    import json
+    
     context = {
         't3_veriler_sayisi': t3_veriler_sayisi,
         'gonullu_durum_sayisi': gonullu_durum_sayisi,
@@ -135,6 +163,8 @@ def dashboard_home(request):
         'gunler': gunler,
         'koordinatorlukler': koordinatorlukler,
         'koordinatorluk_veri_sayilari': koordinatorluk_veri_sayilari,
+        'analiz_verileri': json.dumps(analiz_verileri),
+        'tarihler': json.dumps(tarih_listesi)
     }
 
     return render(request, 'dashboard/home.html', context)
@@ -253,39 +283,7 @@ def t3personel_dashboard(request):
     koordinatorlukler = T3PersonelVeriler.objects.values_list('koordinatorluk', flat=True).distinct()
     birimler = T3PersonelVeriler.objects.values_list('birim', flat=True).distinct()
     
-    # Genel Analiz için koordinatörlük bazında toplam yemek istatistikleri (Son 7 günlük)
-    son_7_gun = timezone.now().date() - timedelta(days=7)
-    
-    # Günleri almak için
-    tarihler = T3PersonelVeriler.objects.filter(submitteddate__gte=son_7_gun).values_list('submitteddate', flat=True).distinct().order_by('submitteddate')
-    
-    # Koordinatörlük bazında toplam yemek verilerini hazırla
-    analiz_verileri = {}
-    tarih_listesi = []
-    
-    # Tüm koordinatörlükler için veri hazırla
-    for k in koordinatorlukler:
-        analiz_verileri[k] = {}
-        for tarih in tarihler:
-            # Bu koordinatörlük ve gün için toplam yemek siparişi
-            toplam_yemek = T3PersonelVeriler.objects.filter(
-                koordinatorluk=k, 
-                submitteddate=tarih
-            ).aggregate(
-                toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox') + F('coffee_break', output_field=models.IntegerField()))
-            )['toplam'] or 0
-            
-            # Tarih formatını değiştir - DD.MM.YYYY olarak
-            tarih_str = tarih.strftime('%d.%m.%Y')
-            analiz_verileri[k][tarih_str] = toplam_yemek
-            
-            # Tarih listesini de ayrıca oluştur
-            if tarih_str not in tarih_listesi:
-                tarih_listesi.append(tarih_str)
-    
-    # JSON serilestirme için
-    import json
-    
+
     context = {
         'veriler': veriler,
         'koordinatorlukler': koordinatorlukler,
@@ -295,9 +293,7 @@ def t3personel_dashboard(request):
             'bitis_tarihi': bitis_tarihi,
             'koordinatorluk': koordinatorluk,
             'birim': birim,
-        },
-        'analiz_verileri': json.dumps(analiz_verileri),
-        'tarihler': json.dumps(tarih_listesi)
+        }
     }
 
     return render(request, 'dashboard/t3personel.html', context)
