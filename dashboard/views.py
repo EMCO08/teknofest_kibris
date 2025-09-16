@@ -252,7 +252,40 @@ def t3personel_dashboard(request):
     # Koordinatörlük ve birim listelerini al
     koordinatorlukler = T3PersonelVeriler.objects.values_list('koordinatorluk', flat=True).distinct()
     birimler = T3PersonelVeriler.objects.values_list('birim', flat=True).distinct()
-
+    
+    # Genel Analiz için koordinatörlük bazında toplam yemek istatistikleri (Son 7 günlük)
+    son_7_gun = timezone.now().date() - timedelta(days=7)
+    
+    # Günleri almak için
+    tarihler = T3PersonelVeriler.objects.filter(submitteddate__gte=son_7_gun).values_list('submitteddate', flat=True).distinct().order_by('submitteddate')
+    
+    # Koordinatörlük bazında toplam yemek verilerini hazırla
+    analiz_verileri = {}
+    tarih_listesi = []
+    
+    # Tüm koordinatörlükler için veri hazırla
+    for k in koordinatorlukler:
+        analiz_verileri[k] = {}
+        for tarih in tarihler:
+            # Bu koordinatörlük ve gün için toplam yemek siparişi
+            toplam_yemek = T3PersonelVeriler.objects.filter(
+                koordinatorluk=k, 
+                submitteddate=tarih
+            ).aggregate(
+                toplam=Sum(F('ogle_yemegi') + F('aksam_yemegi') + F('lunchbox') + F('coffee_break', output_field=models.IntegerField()))
+            )['toplam'] or 0
+            
+            # Tarih formatını değiştir - DD.MM.YYYY olarak
+            tarih_str = tarih.strftime('%d.%m.%Y')
+            analiz_verileri[k][tarih_str] = toplam_yemek
+            
+            # Tarih listesini de ayrıca oluştur
+            if tarih_str not in tarih_listesi:
+                tarih_listesi.append(tarih_str)
+    
+    # JSON serilestirme için
+    import json
+    
     context = {
         'veriler': veriler,
         'koordinatorlukler': koordinatorlukler,
@@ -262,7 +295,9 @@ def t3personel_dashboard(request):
             'bitis_tarihi': bitis_tarihi,
             'koordinatorluk': koordinatorluk,
             'birim': birim,
-        }
+        },
+        'analiz_verileri': json.dumps(analiz_verileri),
+        'tarihler': json.dumps(tarih_listesi)
     }
 
     return render(request, 'dashboard/t3personel.html', context)
