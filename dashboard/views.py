@@ -86,7 +86,7 @@ def dashboard_home(request):
     ]
     
     # Tüm günler
-    gunler = ['1. Gün', '2. Gün', '3. Gün', '4. Gün']
+    gunler = ['1. Gün', '2. Gün', '3. Gün', '4. Gün', '5. Gün']
     
     # Koordinatörlük verilerini hesapla
     koordinatorluk_veri_sayilari = {}
