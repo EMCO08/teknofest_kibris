@@ -674,28 +674,6 @@ def gonullu_durum_raporu(request):
     # Seçilen gün (varsayılan olarak 1. Gün)
     secilen_gun = request.GET.get('gun', '1. Gün')
     
-    # Her alan için girilen veri sayısını hesapla
-    koordinatorluk_veri_sayilari = {}
-    
-    # Her alan için gönüllü durum ve sorun verilerini say
-    for alan in alanlar:
-        # Durum verilerini say
-        durum_sayisi = GonulluDurumVeriler.objects.filter(
-            alan=alan, 
-            gun=secilen_gun
-        ).count()
-        
-        # Sorun verilerini say
-        sorun_sayisi = GonulluSorunVeriler.objects.filter(
-            alan=alan, 
-            gun=secilen_gun
-        ).count()
-        
-        # Toplam veri sayısı
-        toplam_veri = durum_sayisi + sorun_sayisi
-        
-        koordinatorluk_veri_sayilari[alan] = toplam_veri
-    
     # Koordinatörlük/alan listesi - sütunlar olacak
     alanlar = [
         'Selçuk Bey VIP',
@@ -726,7 +704,29 @@ def gonullu_durum_raporu(request):
     ]
     
     # Tüm günler
-    gunler = ['1. Gün', '2. Gün', '3. Gün', '4. Gün']
+    gunler = ['1. Gün', '2. Gün', '3. Gün', '4. Gün', '5. Gün']
+
+    # Her alan için girilen veri sayısını hesapla
+    koordinatorluk_veri_sayilari = {}
+    
+    # Her alan için gönüllü durum ve sorun verilerini say
+    for alan in alanlar:
+        # Durum verilerini say
+        durum_sayisi = GonulluDurumVeriler.objects.filter(
+            alan=alan, 
+            gun=secilen_gun
+        ).count()
+        
+        # Sorun verilerini say
+        sorun_sayisi = GonulluSorunVeriler.objects.filter(
+            alan=alan, 
+            gun=secilen_gun
+        ).count()
+        
+        # Toplam veri sayısı
+        toplam_veri = durum_sayisi + sorun_sayisi
+        
+        koordinatorluk_veri_sayilari[alan] = toplam_veri
     
     # Kontrol zamanları
     kontrol_zamanlari = {
