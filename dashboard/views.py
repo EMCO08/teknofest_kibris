@@ -676,19 +676,21 @@ def gonullu_durum_raporu(request):
     
     # Koordinatörlük/alan listesi - sütunlar olacak
     alanlar = [
-        'Arter / To Do / Kurumsal Ofis / Heysemist',
-        'Vakıf Standı Yönetici Odası',
-        'TSK',
-        'Basın',
-        'Gönüllü - Bursiyer',
+        'Selçuk Bey VIP',
+        'VIP Salon',
         'Yönetim Ofisi / Kriz Masası',
+        'Vakıf Standı Yönetici Odası',
+        'Dinamik Alan',
+        'TSK',
+        'Gönüllü - Bursiyer',
+        'Basın',
+        'TRT Kulis Ana Sahne / Muhabir',
+        'Arter / To Do / Kurumsal Ofis / Heysemist',
+        'Pilot Event',
         'T3 Ofis',
         'Teknofest Robolig Yarışması',
         'Teknofest KKTC Araştırma Yarışması',
-        'VIP Salon',
-        'TRT Kulis Ana Sahne / Muhabir',
-        'Bilim Pavyonu',
-        'Pilot Event'
+        'Bilim Pavyonu'
     ]
     
     # Tüm günler
