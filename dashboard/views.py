@@ -1115,10 +1115,14 @@ def gonullu_durum_raporu(request):
                 # En çok satır ekleyen alana göre sabah verileri satır sayısını güncelle
                 sabah_verileri_satir_sayisi = max(sabah_verileri_satir_sayisi, alan_satir_sayisi)
             
-            # Sabah verileri eklendi, şimdi 14.30 kontrolü için satır indeksini güncelle
+            # 14.30 kontrolü satırı için doğru satır indeksini hesapla
+            # 09.00 kontrolü satırından sonra sabah verileri eklenmiş olabilir
+            # 14.30 kontrolü satırı, sabah verilerinin bittiği yerden hemen sonra gelmeli
             if sabah_verileri_satir_sayisi > 0:
+                # Sabah verileri varsa, onların bittiği yerden sonraki satıra 14.30 kontrolü ekle
                 row_idx = sabah_verileri_baslangic_satir + sabah_verileri_satir_sayisi
             else:
+                # Sabah verileri yoksa, 09.00 kontrolü satırından sonraki satıra 14.30 kontrolü ekle
                 row_idx += 1
             
             # 14.30 kontrolü satırı ekle
@@ -1226,9 +1230,9 @@ def gonullu_durum_raporu(request):
                         cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
                         cell.font = Font(color="0000FF")
             
-            row_idx += 1
-            
             # 14.30 kontrolü satırı eklendi, şimdi akşam verilerini ekleyelim
+            # Akşam verileri için satır indeksini güncelle
+            row_idx += 1
             aksam_verileri_satir_sayisi = 0
             aksam_verileri_baslangic_satir = row_idx + 1  # Akşam verileri için başlangıç satırı
             
