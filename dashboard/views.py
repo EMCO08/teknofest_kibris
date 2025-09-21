@@ -816,8 +816,8 @@ def gonullu_durum_raporu(request):
         # Stil eklemek için gerekli modülleri içe aktar
         from openpyxl.styles import PatternFill, Font, Alignment, Border, Side, Color
         
-        # Renk tanımlamaları
-        baslik_fill = PatternFill(start_color="808080", end_color="808080", fill_type="solid")  # Gri
+        # Renk tanımlamaları - Daha canlı renkler
+        baslik_fill = PatternFill(start_color="005AA9", end_color="005AA9", fill_type="solid")  # Teknofest Mavi
         success_fill = PatternFill(start_color="00B050", end_color="00B050", fill_type="solid")  # Yeşil
         danger_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")   # Kırmızı
         light_fill = PatternFill(start_color="F0F0F0", end_color="F0F0F0", fill_type="solid")    # Açık gri
@@ -839,9 +839,28 @@ def gonullu_durum_raporu(request):
             # Sayfa oluştur ve isimlendir
             ws = wb.create_sheet(title=gun)
             
-            # Başlık satırı 1
+            # Başlık satırı - Sayfa başlığı ekle
+            # Sayfa başlığı ekle - tüm sütunları kapsayacak şekilde birleştir
+            last_column_letter = get_column_letter((len(alanlar) * 3) + 1)
+            ws.merge_cells(f'A1:{last_column_letter}1')
+            baslik_cell = ws.cell(row=1, column=1, value=f"TEKNOFEST KIBRIS - {gun} GÖNÜLLÜ DURUM RAPORU")
+            baslik_cell.font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
+            baslik_cell.alignment = Alignment(horizontal='center', vertical='center')
+            baslik_cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")  # Kırmızı başlık
+            
+            # Rapor tarihi ekle - daha iyi görünüm için genleştirilmiş hücre
+            ws.merge_cells(f'A2:C2')
+            tarih_cell = ws.cell(row=2, column=1, value=f"Rapor Tarihi: {timezone.now().strftime('%d.%m.%Y %H:%M')}")
+            tarih_cell.font = Font(bold=True)
+            tarih_cell.alignment = Alignment(horizontal='left', vertical='center')
+            tarih_cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
+            
+            # Alan başlıkları için satır
             header_row1 = [""]  # İlk sütun boş
             current_col = 2     # Sütun B'den başla
+            
+            # Satır ayarla - başlık ekstra satır olduğu için
+            ws.row_dimensions[1].height = 30
             
             for alan in alanlar:
                 # Alan adını ekle ve hücre birleştirmesi yap
@@ -863,29 +882,29 @@ def gonullu_durum_raporu(request):
             ws.cell(row=1, column=1).font = beyaz_font
             ws.cell(row=1, column=1).border = thin_border
             
-            # Başlık satırı 2 - Alt başlıklar
+            # Başlık satırı 3 - Alt başlıklar (başlık ve tarih satırından sonra)
             current_col = 2  # Sütun B'den başla
             
             # İlk sütunu boş bırak (A sütunu - kontrol zamanları için)
-            ws.cell(row=2, column=1, value="")
+            ws.cell(row=3, column=1, value="")
             
             # Her alan için alt başlıkları ekle (Gelme Durumu, Geldiği Saat, Resim)
             for _ in alanlar:
-                ws.cell(row=2, column=current_col, value="Gelme Durumu")
-                ws.cell(row=2, column=current_col+1, value="Geldiği Saat")
-                ws.cell(row=2, column=current_col+2, value="Resim")
+                ws.cell(row=3, column=current_col, value="Gelme Durumu")
+                ws.cell(row=3, column=current_col+1, value="Geldiği Saat")
+                ws.cell(row=3, column=current_col+2, value="Fotoğraf")
                 current_col += 3
             
-            # Başlık satırı 2'ye stil uygula
+            # Başlık satırı 3'e stil uygula
             for col in range(1, len(alanlar) * 3 + 2):
-                cell = ws.cell(row=2, column=col)
+                cell = ws.cell(row=3, column=col)
                 cell.fill = baslik_fill
                 cell.font = beyaz_font
                 cell.alignment = Alignment(horizontal='center', vertical='center')
                 cell.border = thin_border
             
-            # Veri satırları
-            row_idx = 3
+            # Veri satırları (başlık ve tarihten sonra 4. satırdan başla)
+            row_idx = 4
             
             # 09.00 kontrolü satırı ekle
             row = ["09.00 kontrolü"]
@@ -1280,10 +1299,21 @@ def gonullu_durum_raporu(request):
                 # En çok satır ekleyen alana göre akşam verileri satır sayısını güncelle
                 aksam_verileri_satir_sayisi = max(aksam_verileri_satir_sayisi, alan_satir_sayisi)
             
-            # Bu sayfa için tüm sütunların genişliğini ayarla
+            # Bu sayfa için tüm sütunların genişliğini ayarla - Daha iyi düzenlenmiş görünüm için
             for i in range(1, (len(alanlar) * 3) + 2):  # Tüm sütunlar (+1 for A sütunu)
                 col_letter = get_column_letter(i)
-                ws.column_dimensions[col_letter].width = 30
+                # İlk sütun için özel genişlik
+                if i == 1:
+                    ws.column_dimensions[col_letter].width = 20
+                # Gelme Durumu sütunları için
+                elif (i - 2) % 3 == 0:
+                    ws.column_dimensions[col_letter].width = 20
+                # Gelme Saati sütunları için
+                elif (i - 3) % 3 == 0:
+                    ws.column_dimensions[col_letter].width = 20
+                # Fotoğraf sütunları için
+                else:
+                    ws.column_dimensions[col_letter].width = 40
                 
             # Bu sayfa için tüm satırların yüksekliğini ayarla
             max_row = ws.max_row
@@ -1296,6 +1326,17 @@ def gonullu_durum_raporu(request):
         
         # Excel dosyasını bellekte oluştur
         output = BytesIO()
+        
+        try:
+            # Excel özelliklerini ve meta verilerini ayarla
+            wb.properties.creator = "TEKNOFEST Kıbrıs Otomasyon"
+            wb.properties.title = "Gönüllü Durum Raporu"
+            wb.properties.description = "TEKNOFEST Kıbrıs Gönüllü Durum Raporu"
+            wb.properties.subject = "Gönüllü Durum Raporu - " + timezone.now().strftime('%Y-%m-%d')
+        except Exception:
+            # Meta veri ayarlaması başarısız olursa sessizce devam et
+            pass
+        
         wb.save(output)
         output.seek(0)
         
@@ -1304,7 +1345,10 @@ def gonullu_durum_raporu(request):
             output,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="Gonullu_Durum_Raporu.xlsx"'
+        # Dosya adına tarih ekleyerek daha iyi organize edilmiş dosyalar
+        tarih_str = timezone.now().strftime('%Y%m%d%H%M')
+        secilen_gun_temiz = secilen_gun.replace('. ', '')
+        response['Content-Disposition'] = f'attachment; filename="Gonullu_Durum_Raporu_{secilen_gun_temiz}_{tarih_str}.xlsx"'
         return response
     
     context = {
