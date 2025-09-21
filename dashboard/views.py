@@ -1463,7 +1463,7 @@ def z_raporu(request):
         
         for veri in detay_veriler:
             ws_detay.append([
-                veri.user.get_full_name(),  # İsim
+                veri.kisi.get_full_name(),  # İsim
                 veri.gun,                   # Gün
                 veri.submittedtime,         # Saat
                 veri.alan,                  # Alan
