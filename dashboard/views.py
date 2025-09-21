@@ -872,8 +872,8 @@ def gonullu_durum_raporu(request):
             # Satır ayarla - başlık ekstra satır olduğu için
             ws.row_dimensions[1].height = 30
             
-            # Alan başlıklarını 3. satıra taşıyalım (1. ve 2. satır başlık ve tarih için kullanılıyor)
-            row_for_columns = 3
+            # Alan başlıklarını 4. satıra taşıyalım (1. ve 2. satır başlık ve tarih, 3. satır alt başlıklar için kullanılıyor)
+            row_for_columns = 4
             
             for alan in alanlar:
                 # Alan adını ekle ve hücre birleştirmesi yap
@@ -905,16 +905,18 @@ def gonullu_durum_raporu(request):
                 ws.cell(row=3, column=current_col+2, value="Fotoğraf")
                 current_col += 3
             
-            # Başlık satırı 3'e stil uygula
-            for col in range(1, len(alanlar) * 3 + 2):
-                cell = ws.cell(row=3, column=col)
-                cell.fill = baslik_fill
-                cell.font = beyaz_font
-                cell.alignment = Alignment(horizontal='center', vertical='center')
-                cell.border = thin_border
+            # Başlık satırı 3'e stil uygula - birleştirilmiş hücrelere erişmeye gerek yok
+            # Çünkü hücreler zaten yukarıda birleştirilmiş ve stilleri uygulanmış durumda
+            # Sadece birleştirilmemiş hücrelere stil uygulayalım
             
-            # Veri satırları (başlık ve tarihten sonra 4. satırdan başla)
-            row_idx = 4
+            # İlk sütun (A sütunu) için stil uygula
+            ws.cell(row=3, column=1).fill = baslik_fill
+            ws.cell(row=3, column=1).font = beyaz_font
+            ws.cell(row=3, column=1).alignment = Alignment(horizontal='center', vertical='center')
+            ws.cell(row=3, column=1).border = thin_border
+            
+            # Veri satırları (başlık, tarih ve alt başlıklardan sonra 5. satırdan başla)
+            row_idx = 5
             
             # 09.00 kontrolü satırı ekle
             row = ["09.00 kontrolü"]
