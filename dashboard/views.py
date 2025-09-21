@@ -843,16 +843,14 @@ def gonullu_durum_raporu(request):
             # Sayfa başlığı ekle - tüm sütunları kapsayacak şekilde birleştir
             # Önce hücreye değer atayıp sonra birleştirme yapmalıyız
             last_column_letter = get_column_letter((len(alanlar) * 3) + 1)
+            # Önce başlık hücresini oluştur ve stilini ayarla
             baslik_cell = ws.cell(row=1, column=1, value=f"TEKNOFEST KIBRIS - {gun} GÖNÜLLÜ DURUM RAPORU")
-            # Stilini ayarla
             baslik_cell.font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
             baslik_cell.alignment = Alignment(horizontal='center', vertical='center')
             baslik_cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
-            # Hücre birleştirmeyi en son yap
+            
+            # Sonra hücre birleştirmeyi yap - birleştirdikten sonra stil uygulamaya çalışma
             ws.merge_cells(f'A1:{last_column_letter}1')
-            baslik_cell.font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
-            baslik_cell.alignment = Alignment(horizontal='center', vertical='center')
-            baslik_cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")  # Kırmızı başlık
             
             # Rapor tarihi ekle - daha iyi görünüm için genleştirilmiş hücre
             # Önce hücreye değer atayıp sonra birleştirme yapmalıyız
@@ -874,25 +872,25 @@ def gonullu_durum_raporu(request):
             # Satır ayarla - başlık ekstra satır olduğu için
             ws.row_dimensions[1].height = 30
             
+            # Alan başlıklarını 3. satıra taşıyalım (1. ve 2. satır başlık ve tarih için kullanılıyor)
+            row_for_columns = 3
+            
             for alan in alanlar:
                 # Alan adını ekle ve hücre birleştirmesi yap
                 # Önce hücreye değer atayıp stilini ayarlayalım
-                alan_cell = ws.cell(row=1, column=current_col, value=alan)
+                alan_cell = ws.cell(row=row_for_columns, column=current_col, value=alan)
                 alan_cell.fill = baslik_fill
                 alan_cell.font = beyaz_font
                 alan_cell.alignment = Alignment(horizontal='center', vertical='center')
                 alan_cell.border = thin_border
                 
                 # Sonra hücre birleştirmesi yapalım
-                ws.merge_cells(start_row=1, start_column=current_col, end_row=1, end_column=current_col+2)
+                ws.merge_cells(start_row=row_for_columns, start_column=current_col, end_row=row_for_columns, end_column=current_col+2)
                 
                 # Sonraki alan için sütun indeksini güncelle
                 current_col += 3
             
-            # İlk sütun başlık stilini uygula
-            ws.cell(row=1, column=1).fill = baslik_fill
-            ws.cell(row=1, column=1).font = beyaz_font
-            ws.cell(row=1, column=1).border = thin_border
+            # İlk sütun başlık stili yukarıda uygulandı, birleştirilen hücreleri tekrar değiştirmeye gerek yok
             
             # Başlık satırı 3 - Alt başlıklar (başlık ve tarih satırından sonra)
             current_col = 2  # Sütun B'den başla
@@ -1463,24 +1461,26 @@ def z_raporu(request):
         ws_detay = wb.active
         ws_detay.title = "Detaylı Veri Raporu"
         
-        # Başlıklar
-        ws_detay.append(['İsim', 'Gün', 'Saat', 'Alan', 'Catering D', 'Catering Ü', 'Açıklama', 'Fotoğraf', 'Tarih', 'Saat'])
+        # Başlıklar - T3PersonelVeriler modeli için uygun alanlar
+        ws_detay.append(['İsim', 'Koordinatörlük', 'Birim', 'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Coffee Break', 'Toplam', 'Tarih', 'Saat'])
         
         # Detaylı veri listesi - 'user' yerine 'kisi' kullanmalıyız
         detay_veriler = t3_veriler.select_related('kisi')
         
         for veri in detay_veriler:
+            # T3PersonelVeriler modeli için uygun alanlarla veriyi ekleyelim
+            toplam = veri.ogle_yemegi + veri.aksam_yemegi + veri.lunchbox + (veri.coffee_break or 0)
             ws_detay.append([
                 veri.kisi.get_full_name(),  # İsim
-                veri.gun,                   # Gün
-                veri.submittedtime,         # Saat
-                veri.alan,                  # Alan
-                veri.ogle_yemegi,           # Catering D
-                veri.aksam_yemegi,          # Catering Ü
-                veri.aciklama,              # Açıklama
-                "Var" if veri.fotograf else "Yok", # Fotoğraf
+                veri.koordinatorluk,        # Koordinatörlük
+                veri.birim,                # Birim
+                veri.ogle_yemegi,           # Öğle Yemeği
+                veri.aksam_yemegi,         # Akşam Yemeği
+                veri.lunchbox,             # Lunchbox
+                veri.coffee_break or 0,     # Coffee Break (None ise 0 olsun)
+                toplam,                    # Toplam
                 veri.submitteddate,         # Tarih
-                veri.submittedtime,         # Saat (tekrar)
+                veri.submittedtime,         # Saat
             ])
             
         # Günlük Rapor Sayfası
