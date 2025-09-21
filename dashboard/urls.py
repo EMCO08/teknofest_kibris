@@ -13,4 +13,5 @@ urlpatterns = [
     path('t3personel/atama-ekle/', views.t3personel_atama_ekle, name='t3personel_atama_ekle'),
     path('t3personel/get-koordinatorluk/<int:user_id>/', views.get_koordinatorluk_for_user, name='get_koordinatorluk_for_user'),
     path('gonullu/durum-raporu/', views.gonullu_durum_raporu, name='gonullu_durum_raporu'),
+    path('z-raporu/', views.z_raporu, name='z_raporu'),
 ] 

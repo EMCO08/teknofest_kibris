@@ -1314,3 +1314,162 @@ def gonullu_durum_raporu(request):
     }
     
     return render(request, 'dashboard/gonullu_durum_raporu.html', context)
+
+@login_required
+@role_required(['izleyici', 'admin'])
+def z_raporu(request):
+    """Z raporu sayfası"""
+    log_user_action(request, 'Z Raporu Görüntülendi', 'Z Raporu')
+    
+    # Son 7 günlük verileri getir
+    son_7_gun = timezone.now().date() - timedelta(days=7)
+    
+    # Tarih filtreleme için
+    baslangic_tarihi = request.GET.get('baslangic_tarihi', (timezone.now().date() - timedelta(days=7)).strftime('%Y-%m-%d'))
+    bitis_tarihi = request.GET.get('bitis_tarihi', timezone.now().date().strftime('%Y-%m-%d'))
+    
+    # T3 Personel verileri
+    t3_veriler = T3PersonelVeriler.objects.filter(
+        submitteddate__gte=baslangic_tarihi,
+        submitteddate__lte=bitis_tarihi
+    )
+    
+    # Günlük toplam sayılar
+    gunluk_toplam_veriler = {}
+    tarihler = t3_veriler.values_list('submitteddate', flat=True).distinct().order_by('submitteddate')
+    
+    for tarih in tarihler:
+        tarih_str = tarih.strftime('%Y-%m-%d')
+        gunluk_veriler = t3_veriler.filter(submitteddate=tarih)
+        
+        gunluk_toplam = {
+            'ogle_yemegi': gunluk_veriler.aggregate(Sum('ogle_yemegi'))['ogle_yemegi__sum'] or 0,
+            'aksam_yemegi': gunluk_veriler.aggregate(Sum('aksam_yemegi'))['aksam_yemegi__sum'] or 0,
+            'lunchbox': gunluk_veriler.aggregate(Sum('lunchbox'))['lunchbox__sum'] or 0,
+            'coffee_break': gunluk_veriler.aggregate(Sum('coffee_break'))['coffee_break__sum'] or 0,
+        }
+        
+        gunluk_toplam['toplam'] = (
+            gunluk_toplam['ogle_yemegi'] + 
+            gunluk_toplam['aksam_yemegi'] + 
+            gunluk_toplam['lunchbox'] + 
+            gunluk_toplam['coffee_break']
+        )
+        
+        gunluk_toplam_veriler[tarih_str] = gunluk_toplam
+    
+    # Koordinatörlük bazında toplam sayılar
+    koordinatorluk_toplam_veriler = {}
+    koordinatorlukler = t3_veriler.values_list('koordinatorluk', flat=True).distinct()
+    
+    for koordinatorluk in koordinatorlukler:
+        koordinatorluk_veriler = t3_veriler.filter(koordinatorluk=koordinatorluk)
+        
+        koordinatorluk_toplam = {
+            'ogle_yemegi': koordinatorluk_veriler.aggregate(Sum('ogle_yemegi'))['ogle_yemegi__sum'] or 0,
+            'aksam_yemegi': koordinatorluk_veriler.aggregate(Sum('aksam_yemegi'))['aksam_yemegi__sum'] or 0,
+            'lunchbox': koordinatorluk_veriler.aggregate(Sum('lunchbox'))['lunchbox__sum'] or 0,
+            'coffee_break': koordinatorluk_veriler.aggregate(Sum('coffee_break'))['coffee_break__sum'] or 0,
+        }
+        
+        koordinatorluk_toplam['toplam'] = (
+            koordinatorluk_toplam['ogle_yemegi'] + 
+            koordinatorluk_toplam['aksam_yemegi'] + 
+            koordinatorluk_toplam['lunchbox'] + 
+            koordinatorluk_toplam['coffee_break']
+        )
+        
+        koordinatorluk_toplam_veriler[koordinatorluk] = koordinatorluk_toplam
+    
+    # Genel toplam sayılar
+    genel_toplam = {
+        'ogle_yemegi': t3_veriler.aggregate(Sum('ogle_yemegi'))['ogle_yemegi__sum'] or 0,
+        'aksam_yemegi': t3_veriler.aggregate(Sum('aksam_yemegi'))['aksam_yemegi__sum'] or 0,
+        'lunchbox': t3_veriler.aggregate(Sum('lunchbox'))['lunchbox__sum'] or 0,
+        'coffee_break': t3_veriler.aggregate(Sum('coffee_break'))['coffee_break__sum'] or 0,
+    }
+    
+    genel_toplam['toplam'] = (
+        genel_toplam['ogle_yemegi'] + 
+        genel_toplam['aksam_yemegi'] + 
+        genel_toplam['lunchbox'] + 
+        genel_toplam['coffee_break']
+    )
+    
+    # Excel indirme
+    if 'excel' in request.GET:
+        wb = openpyxl.Workbook()
+        
+        # Günlük Rapor Sayfası
+        ws_gunluk = wb.active
+        ws_gunluk.title = "Günlük Z Raporu"
+        
+        # Başlıklar
+        ws_gunluk.append(['Tarih', 'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Coffee Break', 'Toplam'])
+        
+        # Veriler
+        for tarih, veriler in sorted(gunluk_toplam_veriler.items()):
+            ws_gunluk.append([
+                tarih,
+                veriler['ogle_yemegi'],
+                veriler['aksam_yemegi'],
+                veriler['lunchbox'],
+                veriler['coffee_break'],
+                veriler['toplam']
+            ])
+        
+        # Koordinatörlük Rapor Sayfası
+        ws_koordinatorluk = wb.create_sheet(title="Koordinatörlük Z Raporu")
+        
+        # Başlıklar
+        ws_koordinatorluk.append(['Koordinatörlük', 'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Coffee Break', 'Toplam'])
+        
+        # Veriler
+        for koordinatorluk, veriler in sorted(koordinatorluk_toplam_veriler.items()):
+            ws_koordinatorluk.append([
+                koordinatorluk,
+                veriler['ogle_yemegi'],
+                veriler['aksam_yemegi'],
+                veriler['lunchbox'],
+                veriler['coffee_break'],
+                veriler['toplam']
+            ])
+        
+        # Genel Toplam Sayfası
+        ws_genel = wb.create_sheet(title="Genel Toplam")
+        
+        # Başlık ve veriler
+        ws_genel.append(['Rapor Türü', 'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Coffee Break', 'Toplam'])
+        ws_genel.append([
+            f"{baslangic_tarihi} - {bitis_tarihi} Arası Genel Toplam",
+            genel_toplam['ogle_yemegi'],
+            genel_toplam['aksam_yemegi'],
+            genel_toplam['lunchbox'],
+            genel_toplam['coffee_break'],
+            genel_toplam['toplam']
+        ])
+        
+        # Excel dosyasını bellekte oluştur
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # HTTP yanıtı olarak döndür
+        response = HttpResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="Z_Raporu.xlsx"'
+        return response
+    
+    context = {
+        'gunluk_toplam_veriler': gunluk_toplam_veriler,
+        'koordinatorluk_toplam_veriler': koordinatorluk_toplam_veriler,
+        'genel_toplam': genel_toplam,
+        'filtreler': {
+            'baslangic_tarihi': baslangic_tarihi,
+            'bitis_tarihi': bitis_tarihi,
+        }
+    }
+    
+    return render(request, 'dashboard/z_raporu.html', context)
