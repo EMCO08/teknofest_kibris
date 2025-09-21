@@ -843,18 +843,26 @@ def gonullu_durum_raporu(request):
             # Sayfa başlığı ekle - tüm sütunları kapsayacak şekilde birleştir
             # Önce hücreye değer atayıp sonra birleştirme yapmalıyız
             last_column_letter = get_column_letter((len(alanlar) * 3) + 1)
-            ws.cell(row=1, column=1, value=f"TEKNOFEST KIBRIS - {gun} GÖNÜLLÜ DURUM RAPORU")
+            baslik_cell = ws.cell(row=1, column=1, value=f"TEKNOFEST KIBRIS - {gun} GÖNÜLLÜ DURUM RAPORU")
+            # Stilini ayarla
+            baslik_cell.font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
+            baslik_cell.alignment = Alignment(horizontal='center', vertical='center')
+            baslik_cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")
+            # Hücre birleştirmeyi en son yap
             ws.merge_cells(f'A1:{last_column_letter}1')
-            baslik_cell = ws.cell(row=1, column=1)
             baslik_cell.font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
             baslik_cell.alignment = Alignment(horizontal='center', vertical='center')
             baslik_cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")  # Kırmızı başlık
             
             # Rapor tarihi ekle - daha iyi görünüm için genleştirilmiş hücre
             # Önce hücreye değer atayıp sonra birleştirme yapmalıyız
-            ws.cell(row=2, column=1, value=f"Rapor Tarihi: {timezone.now().strftime('%d.%m.%Y %H:%M')}")
+            tarih_cell = ws.cell(row=2, column=1, value=f"Rapor Tarihi: {timezone.now().strftime('%d.%m.%Y %H:%M')}")
+            # Stilini ayarla
+            tarih_cell.font = Font(bold=True)
+            tarih_cell.alignment = Alignment(horizontal='left', vertical='center')
+            tarih_cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
+            # Hücre birleştirmeyi en son yap
             ws.merge_cells(f'A2:C2')
-            tarih_cell = ws.cell(row=2, column=1)
             tarih_cell.font = Font(bold=True)
             tarih_cell.alignment = Alignment(horizontal='left', vertical='center')
             tarih_cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
@@ -868,15 +876,15 @@ def gonullu_durum_raporu(request):
             
             for alan in alanlar:
                 # Alan adını ekle ve hücre birleştirmesi yap
-                ws.cell(row=1, column=current_col, value=alan)
-                ws.merge_cells(start_row=1, start_column=current_col, end_row=1, end_column=current_col+2)
+                # Önce hücreye değer atayıp stilini ayarlayalım
+                alan_cell = ws.cell(row=1, column=current_col, value=alan)
+                alan_cell.fill = baslik_fill
+                alan_cell.font = beyaz_font
+                alan_cell.alignment = Alignment(horizontal='center', vertical='center')
+                alan_cell.border = thin_border
                 
-                # Birleştirilmiş hücrenin formatını ayarla
-                merged_cell = ws.cell(row=1, column=current_col)
-                merged_cell.fill = baslik_fill
-                merged_cell.font = beyaz_font
-                merged_cell.alignment = Alignment(horizontal='center', vertical='center')
-                merged_cell.border = thin_border
+                # Sonra hücre birleştirmesi yapalım
+                ws.merge_cells(start_row=1, start_column=current_col, end_row=1, end_column=current_col+2)
                 
                 # Sonraki alan için sütun indeksini güncelle
                 current_col += 3
