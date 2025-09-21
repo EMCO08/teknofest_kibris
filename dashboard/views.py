@@ -5,6 +5,9 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Sum, Count
 from django.utils import timezone
 import csv
+import json
+import openpyxl
+from io import BytesIO
 from datetime import datetime, timedelta
 from forms.models import (
     T3PersonelVeriler, 
@@ -1397,12 +1400,35 @@ def z_raporu(request):
     )
     
     # Excel indirme
-    if 'excel' in request.GET:
+    if 'excel' in request.GET or 'rapor' in request.GET:
         wb = openpyxl.Workbook()
         
+        # Detaylı Veri Raporu Sayfası (kullanıcının istediği sütunlar)
+        ws_detay = wb.active
+        ws_detay.title = "Detaylı Veri Raporu"
+        
+        # Başlıklar
+        ws_detay.append(['İsim', 'Gün', 'Saat', 'Alan', 'Catering D', 'Catering Ü', 'Açıklama', 'Fotoğraf', 'Tarih', 'Saat'])
+        
+        # Detaylı veri listesi
+        detay_veriler = t3_veriler.select_related('user')
+        
+        for veri in detay_veriler:
+            ws_detay.append([
+                veri.user.get_full_name(),  # İsim
+                veri.gun,                   # Gün
+                veri.submittedtime,         # Saat
+                veri.alan,                  # Alan
+                veri.ogle_yemegi,           # Catering D
+                veri.aksam_yemegi,          # Catering Ü
+                veri.aciklama,              # Açıklama
+                "Var" if veri.fotograf else "Yok", # Fotoğraf
+                veri.submitteddate,         # Tarih
+                veri.submittedtime,         # Saat (tekrar)
+            ])
+            
         # Günlük Rapor Sayfası
-        ws_gunluk = wb.active
-        ws_gunluk.title = "Günlük Z Raporu"
+        ws_gunluk = wb.create_sheet(title="Günlük Z Raporu")
         
         # Başlıklar
         ws_gunluk.append(['Tarih', 'Öğle Yemeği', 'Akşam Yemeği', 'Lunchbox', 'Coffee Break', 'Toplam'])
@@ -1459,7 +1485,13 @@ def z_raporu(request):
             output,
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        response['Content-Disposition'] = 'attachment; filename="Z_Raporu.xlsx"'
+        
+        if 'rapor' in request.GET:
+            dosya_adi = f"Detayli_Rapor_{baslangic_tarihi}_{bitis_tarihi}.xlsx"
+        else:
+            dosya_adi = f"Z_Raporu_{baslangic_tarihi}_{bitis_tarihi}.xlsx"
+            
+        response['Content-Disposition'] = f'attachment; filename="{dosya_adi}"'
         return response
     
     context = {

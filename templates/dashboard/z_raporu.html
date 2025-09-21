@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Z Raporu - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h3 class="mb-0"><i class="fas fa-cash-register me-2"></i>Z Raporu</h3>
+                <div>
+                    <a href="?rapor=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}" class="btn btn-warning me-2">
+                        <i class="fas fa-file-csv me-1"></i>Detaylı Rapor İndir
+                    </a>
+                    <a href="?excel=1{% if filtreler.baslangic_tarihi %}&baslangic_tarihi={{ filtreler.baslangic_tarihi }}{% endif %}{% if filtreler.bitis_tarihi %}&bitis_tarihi={{ filtreler.bitis_tarihi }}{% endif %}" class="btn btn-success me-2">
+                        <i class="fas fa-file-excel me-1"></i>Z Raporu İndir
+                    </a>
+                    <a href="{% url 'dashboard:home' %}" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboarda Dön
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="lead">Bu sayfada T3 personel yemek siparişlerinin günlük ve koordinatörlük bazında toplamlarını görüntüleyebilirsiniz.</p>
+                
+                <!-- Filtreleme Formu -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-5">
+                                <label for="baslangic_tarihi" class="form-label">Başlangıç Tarihi</label>
+                                <input type="date" class="form-control" id="baslangic_tarihi" name="baslangic_tarihi" value="{{ filtreler.baslangic_tarihi }}">
+                            </div>
+                            <div class="col-md-5">
+                                <label for="bitis_tarihi" class="form-label">Bitiş Tarihi</label>
+                                <input type="date" class="form-control" id="bitis_tarihi" name="bitis_tarihi" value="{{ filtreler.bitis_tarihi }}">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-filter me-1"></i>Filtrele
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Genel Toplam Kartı -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>Genel Toplam</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col">
+                                <h5>Öğle Yemeği</h5>
+                                <h2>{{ genel_toplam.ogle_yemegi }}</h2>
+                            </div>
+                            <div class="col">
+                                <h5>Akşam Yemeği</h5>
+                                <h2>{{ genel_toplam.aksam_yemegi }}</h2>
+                            </div>
+                            <div class="col">
+                                <h5>Lunchbox</h5>
+                                <h2>{{ genel_toplam.lunchbox }}</h2>
+                            </div>
+                            <div class="col">
+                                <h5>Coffee Break</h5>
+                                <h2>{{ genel_toplam.coffee_break }}</h2>
+                            </div>
+                            <div class="col">
+                                <h5>Toplam</h5>
+                                <h2 class="text-danger">{{ genel_toplam.toplam }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Günlük Toplam Tablosu -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Günlük Toplam</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Tarih</th>
+                                        <th>Öğle Yemeği</th>
+                                        <th>Akşam Yemeği</th>
+                                        <th>Lunchbox</th>
+                                        <th>Coffee Break</th>
+                                        <th>Toplam</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tarih, veriler in gunluk_toplam_veriler.items %}
+                                    <tr>
+                                        <td>{{ tarih }}</td>
+                                        <td>{{ veriler.ogle_yemegi }}</td>
+                                        <td>{{ veriler.aksam_yemegi }}</td>
+                                        <td>{{ veriler.lunchbox }}</td>
+                                        <td>{{ veriler.coffee_break }}</td>
+                                        <td class="fw-bold">{{ veriler.toplam }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">Seçili tarih aralığında veri bulunamadı.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Koordinatörlük Toplam Tablosu -->
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-users me-2"></i>Koordinatörlük Bazında Toplam</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Koordinatörlük</th>
+                                        <th>Öğle Yemeği</th>
+                                        <th>Akşam Yemeği</th>
+                                        <th>Lunchbox</th>
+                                        <th>Coffee Break</th>
+                                        <th>Toplam</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for koordinatorluk, veriler in koordinatorluk_toplam_veriler.items %}
+                                    <tr>
+                                        <td>{{ koordinatorluk }}</td>
+                                        <td>{{ veriler.ogle_yemegi }}</td>
+                                        <td>{{ veriler.aksam_yemegi }}</td>
+                                        <td>{{ veriler.lunchbox }}</td>
+                                        <td>{{ veriler.coffee_break }}</td>
+                                        <td class="fw-bold">{{ veriler.toplam }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">Seçili tarih aralığında veri bulunamadı.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        console.log("Z Raporu sayfası yüklendi.");
+    });
+</script>
+{% endblock %}
+
