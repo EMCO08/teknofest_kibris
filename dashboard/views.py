@@ -841,16 +841,20 @@ def gonullu_durum_raporu(request):
             
             # Başlık satırı - Sayfa başlığı ekle
             # Sayfa başlığı ekle - tüm sütunları kapsayacak şekilde birleştir
+            # Önce hücreye değer atayıp sonra birleştirme yapmalıyız
             last_column_letter = get_column_letter((len(alanlar) * 3) + 1)
+            ws.cell(row=1, column=1, value=f"TEKNOFEST KIBRIS - {gun} GÖNÜLLÜ DURUM RAPORU")
             ws.merge_cells(f'A1:{last_column_letter}1')
-            baslik_cell = ws.cell(row=1, column=1, value=f"TEKNOFEST KIBRIS - {gun} GÖNÜLLÜ DURUM RAPORU")
+            baslik_cell = ws.cell(row=1, column=1)
             baslik_cell.font = Font(name='Calibri', size=14, bold=True, color="FFFFFF")
             baslik_cell.alignment = Alignment(horizontal='center', vertical='center')
             baslik_cell.fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")  # Kırmızı başlık
             
             # Rapor tarihi ekle - daha iyi görünüm için genleştirilmiş hücre
+            # Önce hücreye değer atayıp sonra birleştirme yapmalıyız
+            ws.cell(row=2, column=1, value=f"Rapor Tarihi: {timezone.now().strftime('%d.%m.%Y %H:%M')}")
             ws.merge_cells(f'A2:C2')
-            tarih_cell = ws.cell(row=2, column=1, value=f"Rapor Tarihi: {timezone.now().strftime('%d.%m.%Y %H:%M')}")
+            tarih_cell = ws.cell(row=2, column=1)
             tarih_cell.font = Font(bold=True)
             tarih_cell.alignment = Alignment(horizontal='left', vertical='center')
             tarih_cell.fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
@@ -1454,8 +1458,8 @@ def z_raporu(request):
         # Başlıklar
         ws_detay.append(['İsim', 'Gün', 'Saat', 'Alan', 'Catering D', 'Catering Ü', 'Açıklama', 'Fotoğraf', 'Tarih', 'Saat'])
         
-        # Detaylı veri listesi
-        detay_veriler = t3_veriler.select_related('user')
+        # Detaylı veri listesi - 'user' yerine 'kisi' kullanmalıyız
+        detay_veriler = t3_veriler.select_related('kisi')
         
         for veri in detay_veriler:
             ws_detay.append([
