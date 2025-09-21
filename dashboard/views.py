@@ -1023,10 +1023,9 @@ def gonullu_durum_raporu(request):
                         cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
                         cell.font = Font(color="0000FF")
             
-            row_idx += 1
-
-            # 09.00 ve 14.30 arası tüm verileri ekle (en fazla 9 satır)
+            # 09.00 kontrolü satırı eklendi, şimdi sabah verilerini ekleyelim
             sabah_verileri_satir_sayisi = 0
+            sabah_verileri_baslangic_satir = row_idx + 1  # Sabah verileri için başlangıç satırı
             
             for alan in alanlar:
                 # İlgili gün ve alan için tüm verileri al
@@ -1054,30 +1053,33 @@ def gonullu_durum_raporu(request):
                     if i == alanlar.index(alan) and sabah_verileri:
                         # Bu alan için veri ekle (en fazla 9 veri)
                         for veri_idx, veri in enumerate(sabah_verileri[:9]):
+                            # Sabah verileri için doğru satır indeksini kullan
+                            sabah_satir = sabah_verileri_baslangic_satir + veri_idx
+                            
                             # Satır yoksa yeni satır ekle
-                            if row_idx + veri_idx >= len(ws._cells) or row_idx + veri_idx not in ws._cells:
+                            if sabah_satir >= len(ws._cells) or sabah_satir not in ws._cells:
                                 # Yeni satır ekle
                                 ws.append([""] * (len(alanlar) * 3 + 1))
                             
                             # Hücre değerlerini ekle
                             # Gelme durumu
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).value = "Geldi" if veri.catering_durum == 'var' else "Gelmedi"
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).fill = success_fill if veri.catering_durum == 'var' else danger_fill
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).font = beyaz_font
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).border = thin_border
+                            ws.cell(row=sabah_satir, column=2 + alan_idx).value = "Geldi" if veri.catering_durum == 'var' else "Gelmedi"
+                            ws.cell(row=sabah_satir, column=2 + alan_idx).fill = success_fill if veri.catering_durum == 'var' else danger_fill
+                            ws.cell(row=sabah_satir, column=2 + alan_idx).font = beyaz_font
+                            ws.cell(row=sabah_satir, column=2 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
+                            ws.cell(row=sabah_satir, column=2 + alan_idx).border = thin_border
                             
                             # Gelme saati
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).value = veri.saat.strftime('%H.%M')
+                            ws.cell(row=sabah_satir, column=3 + alan_idx).value = veri.saat.strftime('%H.%M')
                             
                             # Saat kontrolü (10.00'dan önce mi sonra mı)
                             limit_saat = datetime.strptime(kontrol_zamanlari['09.00']['limit_saat'], '%H.%M').time()
                             saat_bg = success_fill if veri.saat < limit_saat else danger_fill
                             
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).fill = saat_bg
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).font = beyaz_font
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).border = thin_border
+                            ws.cell(row=sabah_satir, column=3 + alan_idx).fill = saat_bg
+                            ws.cell(row=sabah_satir, column=3 + alan_idx).font = beyaz_font
+                            ws.cell(row=sabah_satir, column=3 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
+                            ws.cell(row=sabah_satir, column=3 + alan_idx).border = thin_border
                             
                             # Fotoğraf linkleri
                             fotograflar = list(veri.fotograflar.all())
@@ -1090,7 +1092,7 @@ def gonullu_durum_raporu(request):
                                 fotograf_linkleri = f"1. {veri.get_fotograf_url()}"
                                 
                             fotograf_linkleri = fotograf_linkleri.strip()
-                            ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).value = fotograf_linkleri
+                            ws.cell(row=sabah_satir, column=4 + alan_idx).value = fotograf_linkleri
                             
                             # Fotoğraf hücresinin formatı
                             if fotograf_linkleri:
@@ -1099,13 +1101,13 @@ def gonullu_durum_raporu(request):
                                 for url in urls:
                                     link_match = re.search(r'\d+\.\s*(https?://\S+)', url)
                                     if link_match:
-                                        ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).hyperlink = link_match.group(1)
+                                        ws.cell(row=sabah_satir, column=4 + alan_idx).hyperlink = link_match.group(1)
                                         break
                                 
-                                ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).font = Font(color="0000FF")
+                                ws.cell(row=sabah_satir, column=4 + alan_idx).font = Font(color="0000FF")
                                 
-                            ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
-                            ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).border = thin_border
+                            ws.cell(row=sabah_satir, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+                            ws.cell(row=sabah_satir, column=4 + alan_idx).border = thin_border
                             
                             # Her alan için maksimum satır sayısını güncelle
                             alan_satir_sayisi = max(alan_satir_sayisi, veri_idx + 1)
@@ -1113,8 +1115,11 @@ def gonullu_durum_raporu(request):
                 # En çok satır ekleyen alana göre sabah verileri satır sayısını güncelle
                 sabah_verileri_satir_sayisi = max(sabah_verileri_satir_sayisi, alan_satir_sayisi)
             
-            # Dinamik olarak satır indeksini güncelle (alan verisi sayısına göre)
-            row_idx += sabah_verileri_satir_sayisi if sabah_verileri_satir_sayisi > 0 else 0
+            # Sabah verileri eklendi, şimdi 14.30 kontrolü için satır indeksini güncelle
+            if sabah_verileri_satir_sayisi > 0:
+                row_idx = sabah_verileri_baslangic_satir + sabah_verileri_satir_sayisi
+            else:
+                row_idx += 1
             
             # 14.30 kontrolü satırı ekle
             row = ["14.30 kontrolü"]
@@ -1223,8 +1228,9 @@ def gonullu_durum_raporu(request):
             
             row_idx += 1
             
-            # 14.30 sonrası tüm verileri ekle
+            # 14.30 kontrolü satırı eklendi, şimdi akşam verilerini ekleyelim
             aksam_verileri_satir_sayisi = 0
+            aksam_verileri_baslangic_satir = row_idx + 1  # Akşam verileri için başlangıç satırı
             
             for alan in alanlar:
                 # İlgili gün ve alan için tüm verileri al
@@ -1252,30 +1258,33 @@ def gonullu_durum_raporu(request):
                     if i == alanlar.index(alan) and aksam_verileri:
                         # Bu alan için veri ekle (tüm verileri)
                         for veri_idx, veri in enumerate(aksam_verileri):
+                            # Akşam verileri için doğru satır indeksini kullan
+                            aksam_satir = aksam_verileri_baslangic_satir + veri_idx
+                            
                             # Satır yoksa yeni satır ekle
-                            if row_idx + veri_idx >= len(ws._cells) or row_idx + veri_idx not in ws._cells:
+                            if aksam_satir >= len(ws._cells) or aksam_satir not in ws._cells:
                                 # Yeni satır ekle
                                 ws.append([""] * (len(alanlar) * 3 + 1))
                             
                             # Hücre değerlerini ekle
                             # Gelme durumu
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).value = "Geldi" if veri.catering_durum == 'var' else "Gelmedi"
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).fill = success_fill if veri.catering_durum == 'var' else danger_fill
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).font = beyaz_font
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
-                            ws.cell(row=row_idx + veri_idx, column=2 + alan_idx).border = thin_border
+                            ws.cell(row=aksam_satir, column=2 + alan_idx).value = "Geldi" if veri.catering_durum == 'var' else "Gelmedi"
+                            ws.cell(row=aksam_satir, column=2 + alan_idx).fill = success_fill if veri.catering_durum == 'var' else danger_fill
+                            ws.cell(row=aksam_satir, column=2 + alan_idx).font = beyaz_font
+                            ws.cell(row=aksam_satir, column=2 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
+                            ws.cell(row=aksam_satir, column=2 + alan_idx).border = thin_border
                             
                             # Gelme saati
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).value = veri.saat.strftime('%H.%M')
+                            ws.cell(row=aksam_satir, column=3 + alan_idx).value = veri.saat.strftime('%H.%M')
                             
                             # Saat kontrolü (15.30'dan önce mi sonra mı)
                             limit_saat = datetime.strptime(kontrol_zamanlari['14.30']['limit_saat'], '%H.%M').time()
                             saat_bg = success_fill if veri.saat < limit_saat else danger_fill
                             
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).fill = saat_bg
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).font = beyaz_font
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
-                            ws.cell(row=row_idx + veri_idx, column=3 + alan_idx).border = thin_border
+                            ws.cell(row=aksam_satir, column=3 + alan_idx).fill = saat_bg
+                            ws.cell(row=aksam_satir, column=3 + alan_idx).font = beyaz_font
+                            ws.cell(row=aksam_satir, column=3 + alan_idx).alignment = Alignment(horizontal='center', vertical='center')
+                            ws.cell(row=aksam_satir, column=3 + alan_idx).border = thin_border
                             
                             # Fotoğraf linkleri
                             fotograflar = list(veri.fotograflar.all())
@@ -1288,7 +1297,7 @@ def gonullu_durum_raporu(request):
                                 fotograf_linkleri = f"1. {veri.get_fotograf_url()}"
                                 
                             fotograf_linkleri = fotograf_linkleri.strip()
-                            ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).value = fotograf_linkleri
+                            ws.cell(row=aksam_satir, column=4 + alan_idx).value = fotograf_linkleri
                             
                             # Fotoğraf hücresinin formatı
                             if fotograf_linkleri:
@@ -1297,19 +1306,25 @@ def gonullu_durum_raporu(request):
                                 for url in urls:
                                     link_match = re.search(r'\d+\.\s*(https?://\S+)', url)
                                     if link_match:
-                                        ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).hyperlink = link_match.group(1)
+                                        ws.cell(row=aksam_satir, column=4 + alan_idx).hyperlink = link_match.group(1)
                                         break
                                 
-                                ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).font = Font(color="0000FF")
+                                ws.cell(row=aksam_satir, column=4 + alan_idx).font = Font(color="0000FF")
                                 
-                            ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
-                            ws.cell(row=row_idx + veri_idx, column=4 + alan_idx).border = thin_border
+                            ws.cell(row=aksam_satir, column=4 + alan_idx).alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+                            ws.cell(row=aksam_satir, column=4 + alan_idx).border = thin_border
                             
                             # Her alan için maksimum satır sayısını güncelle
                             alan_satir_sayisi = max(alan_satir_sayisi, veri_idx + 1)
                 
                 # En çok satır ekleyen alana göre akşam verileri satır sayısını güncelle
                 aksam_verileri_satir_sayisi = max(aksam_verileri_satir_sayisi, alan_satir_sayisi)
+            
+            # Akşam verileri eklendi, şimdi sayfa düzenini tamamlayalım
+            if aksam_verileri_satir_sayisi > 0:
+                row_idx = aksam_verileri_baslangic_satir + aksam_verileri_satir_sayisi
+            else:
+                row_idx += 1
             
             # Bu sayfa için tüm sütunların genişliğini ayarla - Daha iyi düzenlenmiş görünüm için
             for i in range(1, (len(alanlar) * 3) + 2):  # Tüm sütunlar (+1 for A sütunu)
