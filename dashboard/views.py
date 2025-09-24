@@ -1585,17 +1585,26 @@ def z_raporu(request):
     return render(request, 'dashboard/z_raporu.html', context)
 
 @login_required
-@role_required(['izleyici', 'admin', 't3personel', 'gonullu', 'sorumlu'])
+@role_required(['admin'])
 def yeni_kelime_sayfasi(request):
     """Yeni öğrenilen İngilizce kelimeler sayfası"""
     log_user_action(request, 'Yeni Kelime Sayfası Görüntülendi', 'Yeni Kelime Sayfası')
     
-    # Kullanıcı seçimi için tüm kullanıcıları getir
-    kullanicilar = User.objects.all().order_by('first_name', 'last_name')
+    # Kullanıcı seçimi için sadece Berkay ve Gökay'ı getir
+    kullanicilar = User.objects.filter(
+        first_name__in=['Berkay', 'Gökay']
+    ).order_by('first_name', 'last_name')
     
-    # Seçilen kullanıcı (varsayılan olarak mevcut kullanıcı)
-    secilen_kullanici_id = request.GET.get('kullanici', request.user.id)
-    secilen_kullanici = get_object_or_404(User, id=secilen_kullanici_id)
+    # Seçilen kullanıcı (varsayılan olarak ilk kullanıcı - Berkay)
+    secilen_kullanici_id = request.GET.get('kullanici')
+    if secilen_kullanici_id:
+        # Eğer seçilen kullanıcı Berkay veya Gökay değilse, ilk kullanıcıyı seç
+        try:
+            secilen_kullanici = kullanicilar.get(id=secilen_kullanici_id)
+        except User.DoesNotExist:
+            secilen_kullanici = kullanicilar.first()
+    else:
+        secilen_kullanici = kullanicilar.first()
     
     # Seçilen kullanıcının kelimelerini getir
     kelimeler = YeniKelime.objects.filter(kullanici=secilen_kullanici).order_by('-ogrenme_tarihi')
