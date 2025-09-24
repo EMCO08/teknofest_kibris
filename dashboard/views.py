@@ -15,7 +15,8 @@ from forms.models import (
     GonulluSorunVeriler, 
     SorumluVeriler,
     SistemAyarlari,
-    T3PersonelAtama
+    T3PersonelAtama,
+    YeniKelime
 )
 from forms.views import role_required
 from accounts.views import log_user_action
@@ -1582,3 +1583,71 @@ def z_raporu(request):
     }
     
     return render(request, 'dashboard/z_raporu.html', context)
+
+@login_required
+@role_required(['izleyici', 'admin', 't3personel', 'gonullu', 'sorumlu'])
+def yeni_kelime_sayfasi(request):
+    """Yeni öğrenilen İngilizce kelimeler sayfası"""
+    log_user_action(request, 'Yeni Kelime Sayfası Görüntülendi', 'Yeni Kelime Sayfası')
+    
+    # Kullanıcı seçimi için tüm kullanıcıları getir
+    kullanicilar = User.objects.all().order_by('first_name', 'last_name')
+    
+    # Seçilen kullanıcı (varsayılan olarak mevcut kullanıcı)
+    secilen_kullanici_id = request.GET.get('kullanici', request.user.id)
+    secilen_kullanici = get_object_or_404(User, id=secilen_kullanici_id)
+    
+    # Seçilen kullanıcının kelimelerini getir
+    kelimeler = YeniKelime.objects.filter(kullanici=secilen_kullanici).order_by('-ogrenme_tarihi')
+    
+    # Toplam kelime sayısı
+    toplam_kelime_sayisi = kelimeler.count()
+    
+    # AJAX isteği ile kelime ekleme
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            kelime = request.POST.get('kelime', '').strip()
+            anlam = request.POST.get('anlam', '').strip()
+            cumle = request.POST.get('cumle', '').strip()
+            
+            if not kelime:
+                return JsonResponse({'success': False, 'message': 'Kelime alanı boş olamaz.'})
+            
+            # Yeni kelime oluştur
+            yeni_kelime = YeniKelime.objects.create(
+                kullanici=secilen_kullanici,
+                kelime=kelime,
+                anlam=anlam if anlam else None,
+                cumle=cumle if cumle else None
+            )
+            
+            return JsonResponse({
+                'success': True, 
+                'message': f'"{kelime}" kelimesi başarıyla eklendi.',
+                'kelime_id': yeni_kelime.id
+            })
+            
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Hata oluştu: {str(e)}'})
+    
+    # Kelime silme işlemi
+    if request.method == 'DELETE' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            kelime_id = request.GET.get('kelime_id')
+            if kelime_id:
+                kelime = get_object_or_404(YeniKelime, id=kelime_id, kullanici=secilen_kullanici)
+                kelime.delete()
+                return JsonResponse({'success': True, 'message': 'Kelime başarıyla silindi.'})
+            else:
+                return JsonResponse({'success': False, 'message': 'Kelime ID bulunamadı.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Hata oluştu: {str(e)}'})
+    
+    context = {
+        'kullanicilar': kullanicilar,
+        'secilen_kullanici': secilen_kullanici,
+        'kelimeler': kelimeler,
+        'toplam_kelime_sayisi': toplam_kelime_sayisi,
+    }
+    
+    return render(request, 'dashboard/yeni_kelime.html', context)

@@ -265,3 +265,20 @@ class SistemAyarlari(models.Model):
     class Meta:
         verbose_name = "Sistem Ayarı"
         verbose_name_plural = "Sistem Ayarları"
+
+class YeniKelime(models.Model):
+    """Yeni öğrenilen İngilizce kelimeler"""
+    kullanici = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='yeni_kelimeler')
+    kelime = models.CharField(max_length=100, verbose_name="İngilizce Kelime")
+    anlam = models.CharField(max_length=200, verbose_name="Türkçe Anlamı", blank=True, null=True)
+    cumle = models.TextField(verbose_name="Örnek Cümle", blank=True, null=True)
+    ogrenme_tarihi = models.DateTimeField(auto_now_add=True, verbose_name="Öğrenme Tarihi")
+    
+    def __str__(self):
+        return f"{self.kelime} - {self.kullanici.get_full_name()}"
+    
+    class Meta:
+        verbose_name = "Yeni Kelime"
+        verbose_name_plural = "Yeni Kelimeler"
+        db_table = 'yeni_kelimeler'
+        ordering = ['-ogrenme_tarihi']

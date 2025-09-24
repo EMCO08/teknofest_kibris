@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}Yeni Kelime - Yemek Otomasyonu{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-lg fade-in">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0"><i class="fas fa-book me-2"></i>Yeni Öğrenilen İngilizce Kelimeler</h3>
+            </div>
+            <div class="card-body">
+                <p>Bu sayfada yeni öğrenilen İngilizce kelimeleri kaydedebilir ve takip edebilirsiniz.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kullanıcı Seçimi -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-user me-2"></i>Kullanıcı Seçimi</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" class="d-flex align-items-center">
+                    <div class="me-3">
+                        <label for="kullanici" class="form-label">Kullanıcı Seçin:</label>
+                    </div>
+                    <div class="flex-grow-1 me-3">
+                        <select class="form-select" id="kullanici" name="kullanici" onchange="this.form.submit()">
+                            {% for kullanici in kullanicilar %}
+                                <option value="{{ kullanici.id }}" {% if kullanici.id == secilen_kullanici.id %}selected{% endif %}>
+                                    {{ kullanici.get_full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary fs-6">
+                            <i class="fas fa-book me-1"></i>Toplam: {{ toplam_kelime_sayisi }} kelime
+                        </span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kelime Ekleme Formu -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Yeni Kelime Ekle</h5>
+            </div>
+            <div class="card-body">
+                <form id="kelime-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="kelime" class="form-label">İngilizce Kelime *</label>
+                                <input type="text" class="form-control" id="kelime" name="kelime" placeholder="Örn: beautiful" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="anlam" class="form-label">Türkçe Anlamı</label>
+                                <input type="text" class="form-control" id="anlam" name="anlam" placeholder="Örn: güzel">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="cumle" class="form-label">Örnek Cümle</label>
+                                <input type="text" class="form-control" id="cumle" name="cumle" placeholder="Örn: She is beautiful">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>Kelime Ekle
+                            </button>
+                            <button type="reset" class="btn btn-secondary ms-2">
+                                <i class="fas fa-undo me-1"></i>Temizle
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kelime Listesi -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>{{ secilen_kullanici.get_full_name }}'nin Kelimeleri
+                    <span class="badge bg-light text-dark ms-2">{{ toplam_kelime_sayisi }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if kelimeler %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>İngilizce Kelime</th>
+                                    <th>Türkçe Anlamı</th>
+                                    <th>Örnek Cümle</th>
+                                    <th>Öğrenme Tarihi</th>
+                                    <th>İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for kelime in kelimeler %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><strong>{{ kelime.kelime }}</strong></td>
+                                    <td>{{ kelime.anlam|default:"-" }}</td>
+                                    <td>{{ kelime.cumle|default:"-" }}</td>
+                                    <td>{{ kelime.ogrenme_tarihi|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-sm" onclick="kelimeSil({{ kelime.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Henüz kelime eklenmemiş</h5>
+                        <p class="text-muted">Yukarıdaki formu kullanarak ilk kelimenizi ekleyebilirsiniz.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Bildirimleri -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            <strong class="me-auto">Bildirim</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toast-message">
+            <!-- Mesaj buraya gelecek -->
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('kelime-form');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    
+    // Form gönderimi
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        formData.append('X-Requested-With', 'XMLHttpRequest');
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                form.reset();
+                // Sayfayı yenile
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showToast('Bir hata oluştu: ' + error.message, 'error');
+        });
+    });
+    
+    // Enter tuşu ile form gönderimi
+    document.getElementById('kelime').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            form.dispatchEvent(new Event('submit'));
+        }
+    });
+});
+
+// Kelime silme fonksiyonu
+function kelimeSil(kelimeId) {
+    if (confirm('Bu kelimeyi silmek istediğinizden emin misiniz?')) {
+        fetch(window.location.href + '?kelime_id=' + kelimeId, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showToast('Bir hata oluştu: ' + error.message, 'error');
+        });
+    }
+}
+
+// Toast bildirimi gösterme
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastHeader = toast.querySelector('.toast-header');
+    const icon = toastHeader.querySelector('i');
+    
+    toastMessage.textContent = message;
+    
+    if (type === 'success') {
+        icon.className = 'fas fa-check-circle text-success me-2';
+        toastHeader.className = 'toast-header bg-success text-white';
+    } else if (type === 'error') {
+        icon.className = 'fas fa-exclamation-circle text-danger me-2';
+        toastHeader.className = 'toast-header bg-danger text-white';
+    } else {
+        icon.className = 'fas fa-info-circle text-primary me-2';
+        toastHeader.className = 'toast-header bg-primary text-white';
+    }
+    
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+}
+</script>
+
+<style>
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.table th {
+    border-top: none;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+.badge {
+    font-size: 0.875rem;
+}
+
+.toast {
+    min-width: 300px;
+}
+</style>
+{% endblock %}

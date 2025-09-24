@@ -135,7 +135,7 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-body text-center">
                 <i class="fas fa-table fa-3x mb-3 text-danger"></i>
@@ -143,6 +143,18 @@
                 <p class="card-text">Gönüllü durum bilgilerini tablo formatında görüntüle</p>
                 <a href="{% url 'dashboard:gonullu_durum_raporu' %}" class="btn btn-danger">
                     <i class="fas fa-table me-1"></i>Durumu Görüntüle
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-3x mb-3 text-success"></i>
+                <h5 class="card-title">Yeni Kelime</h5>
+                <p class="card-text">Yeni öğrenilen İngilizce kelimeleri kaydet ve takip et</p>
+                <a href="{% url 'dashboard:yeni_kelime' %}" class="btn btn-success">
+                    <i class="fas fa-book me-1"></i>Kelimeleri Görüntüle
                 </a>
             </div>
         </div>

@@ -6,7 +6,8 @@ from .models import (
     GonulluSorunVeriler, 
     SorumluVeriler,
     GonulluDurumFotograf,
-    GonulluSorunFotograf
+    GonulluSorunFotograf,
+    YeniKelime
 )
 
 @admin.register(T3PersonelAtama)
@@ -80,6 +81,14 @@ class SorumluVerilerAdmin(admin.ModelAdmin):
     list_display = ('kisi', 'gun', 'personel_yemek_siparis', 'taseron_yemek_siparis', 'submitteddate')
     list_filter = ('gun', 'submitteddate')
     search_fields = ('kisi__first_name', 'kisi__last_name')
+
+@admin.register(YeniKelime)
+class YeniKelimeAdmin(admin.ModelAdmin):
+    list_display = ('kullanici', 'kelime', 'anlam', 'ogrenme_tarihi')
+    list_filter = ('kullanici', 'ogrenme_tarihi')
+    search_fields = ('kullanici__first_name', 'kullanici__last_name', 'kelime', 'anlam')
+    readonly_fields = ('ogrenme_tarihi',)
+    ordering = ('-ogrenme_tarihi',)
 
 admin.site.register(GonulluDurumVeriler, GonulluDurumVerilerAdmin)
 admin.site.register(GonulluSorunVeriler, GonulluSorunVerilerAdmin)
