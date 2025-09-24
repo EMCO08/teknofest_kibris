@@ -1592,8 +1592,8 @@ def yeni_kelime_sayfasi(request):
     
     # Kullanıcı seçimi için sadece Berkay ve Gökay'ı getir
     kullanicilar = User.objects.filter(
-        first_name__in=['Berkay', 'Gökay']
-    ).order_by('first_name', 'last_name')
+        isim__in=['Berkay', 'Gökay']
+    ).order_by('isim', 'soyisim')
     
     # Seçilen kullanıcı (varsayılan olarak ilk kullanıcı - Berkay)
     secilen_kullanici_id = request.GET.get('kullanici')
