@@ -30,17 +30,27 @@
                     </div>
                     <div class="flex-grow-1 me-3">
                         <select class="form-select" id="kullanici" name="kullanici" onchange="this.form.submit()">
-                            {% for kullanici in kullanicilar %}
-                                <option value="{{ kullanici.id }}" {% if kullanici.id == secilen_kullanici.id %}selected{% endif %}>
-                                    {{ kullanici.isim }} {{ kullanici.soyisim }}
-                                </option>
-                            {% endfor %}
+                            {% if kullanicilar %}
+                                {% for kullanici in kullanicilar %}
+                                    <option value="{{ kullanici.id }}" {% if secilen_kullanici and kullanici.id == secilen_kullanici.id %}selected{% endif %}>
+                                        {{ kullanici.isim }} {{ kullanici.soyisim }}
+                                    </option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="">Kullanıcı bulunamadı</option>
+                            {% endif %}
                         </select>
                     </div>
                     <div>
-                        <span class="badge bg-primary fs-6">
-                            <i class="fas fa-book me-1"></i>{{ secilen_kullanici.isim }}'nin Kelimeleri: {{ toplam_kelime_sayisi }}
-                        </span>
+                        {% if secilen_kullanici %}
+                            <span class="badge bg-primary fs-6">
+                                <i class="fas fa-book me-1"></i>{{ secilen_kullanici.isim }}'nin Kelimeleri: {{ toplam_kelime_sayisi }}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger fs-6">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Kullanıcı seçilmedi
+                            </span>
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -100,7 +110,7 @@
         <div class="card shadow">
             <div class="card-header bg-secondary text-white">
                 <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>{{ secilen_kullanici.isim }}'nin Kelimeleri
+                    <i class="fas fa-list me-2"></i>{% if secilen_kullanici %}{{ secilen_kullanici.isim }}'nin Kelimeleri{% else %}Kelimeler{% endif %}
                     <span class="badge bg-light text-dark ms-2">{{ toplam_kelime_sayisi }}</span>
                 </h5>
             </div>

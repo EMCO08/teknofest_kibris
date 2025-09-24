@@ -1601,10 +1601,20 @@ def yeni_kelime_sayfasi(request):
         # Eğer seçilen kullanıcı Berkay veya Gökay değilse, ilk kullanıcıyı seç
         try:
             secilen_kullanici = kullanicilar.get(id=secilen_kullanici_id)
-        except User.DoesNotExist:
+        except (User.DoesNotExist, ValueError):
             secilen_kullanici = kullanicilar.first()
     else:
         secilen_kullanici = kullanicilar.first()
+    
+    # Eğer hiç kullanıcı yoksa hata ver
+    if not kullanicilar.exists():
+        messages.error(request, 'Berkay veya Gökay kullanıcıları bulunamadı. Lütfen admin ile iletişime geçin.')
+        return render(request, 'dashboard/yeni_kelime.html', {
+            'kullanicilar': [],
+            'secilen_kullanici': None,
+            'kelimeler': [],
+            'toplam_kelime_sayisi': 0,
+        })
     
     # Seçilen kullanıcının kelimelerini getir
     kelimeler = YeniKelime.objects.filter(kullanici=secilen_kullanici).order_by('-ogrenme_tarihi')
