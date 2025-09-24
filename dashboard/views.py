@@ -1629,6 +1629,9 @@ def yeni_kelime_sayfasi(request):
             anlam = request.POST.get('anlam', '').strip()
             cumle = request.POST.get('cumle', '').strip()
             
+            print(f"DEBUG: Kelime ekleme isteği - Kelime: {kelime}, Anlam: {anlam}, Cümle: {cumle}")
+            print(f"DEBUG: Seçilen kullanıcı: {secilen_kullanici}")
+            
             if not kelime:
                 return JsonResponse({'success': False, 'message': 'Kelime alanı boş olamaz.'})
             
@@ -1640,6 +1643,8 @@ def yeni_kelime_sayfasi(request):
                 cumle=cumle if cumle else None
             )
             
+            print(f"DEBUG: Kelime başarıyla oluşturuldu - ID: {yeni_kelime.id}")
+            
             return JsonResponse({
                 'success': True, 
                 'message': f'"{kelime}" kelimesi başarıyla eklendi.',
@@ -1647,6 +1652,7 @@ def yeni_kelime_sayfasi(request):
             })
             
         except Exception as e:
+            print(f"DEBUG: Hata oluştu: {str(e)}")
             return JsonResponse({'success': False, 'message': f'Hata oluştu: {str(e)}'})
     
     # Kelime silme işlemi

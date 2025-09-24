@@ -185,6 +185,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData(form);
         formData.append('X-Requested-With', 'XMLHttpRequest');
         
+        console.log('DEBUG: Form gönderiliyor...');
+        console.log('DEBUG: FormData:', Object.fromEntries(formData));
+        
         fetch(window.location.href, {
             method: 'POST',
             body: formData,
@@ -192,8 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('DEBUG: Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('DEBUG: Response data:', data);
             if (data.success) {
                 showToast(data.message, 'success');
                 form.reset();
@@ -206,6 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
+            console.log('DEBUG: Error:', error);
             showToast('Bir hata oluştu: ' + error.message, 'error');
         });
     });
